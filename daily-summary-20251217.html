@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>December 17, 2025 - Daily Summary | Daily Tutes</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #2c3e50;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .date {
+            color: #7f8c8d;
+            font-size: 1.2em;
+        }
+
+        .topics {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0;
+            justify-content: center;
+        }
+
+        .topic-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+
+        .section {
+            margin: 30px 0;
+        }
+
+        h2 {
+            color: #2c3e50;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+
+        h3 {
+            color: #34495e;
+            font-size: 1.4em;
+            margin: 25px 0 15px 0;
+        }
+
+        .key-points {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            margin: 20px 0;
+        }
+
+        .key-points ul {
+            margin-left: 20px;
+        }
+
+        .key-points li {
+            margin: 10px 0;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .comparison-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+
+        .comparison-table td {
+            padding: 12px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        .comparison-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .deepdive-link {
+            display: inline-block;
+            margin: 20px 10px 20px 0;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #ee0979 0%, #ff6a00 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: 600;
+            transition: transform 0.3s;
+        }
+
+        .deepdive-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(238, 9, 121, 0.4);
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: transform 0.3s;
+        }
+
+        .back-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .arrow {
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>December 17, 2025</h1>
+            <p class="date">Tuesday - Day 2 of Daily Tutes</p>
+        </div>
+
+        <div class="topics">
+            <span class="topic-badge">Hathora Platform</span>
+            <span class="topic-badge">Game Server Hosting</span>
+            <span class="topic-badge">Hathora Models</span>
+            <span class="topic-badge">Voice AI Infrastructure</span>
+            <span class="topic-badge">Multimodal AI</span>
+            <span class="topic-badge">AI Agents</span>
+            <span class="topic-badge">LLM Orchestration</span>
+            <span class="topic-badge">Context Engineering</span>
+        </div>
+
+        <div class="section">
+            <h2>🎯 Today's Focus: Infrastructure, Multimodal AI & Agent Architecture</h2>
+            <p>Deep dive into Hathora's dual platforms (game servers + voice AI), understanding multimodal models, and comprehensive introduction to AI agent architecture.</p>
+        </div>
+
+        <div class="section">
+            <h2>🎮 Hathora Cloud Platform</h2>
+            
+            <h3>Core Platform Components</h3>
+            <div class="key-points">
+                <ul>
+                    <li><strong>Applications:</strong> Top-level namespace for dev/staging/prod environments</li>
+                    <li><strong>Builds:</strong> Packaged game server artifacts stored in registry</li>
+                    <li><strong>Fleets:</strong> Shared pool of compute resources across 14 global regions</li>
+                    <li><strong>Deployments:</strong> Configuration connecting builds to applications</li>
+                    <li><strong>Processes:</strong> Running container instances (actual game servers)</li>
+                    <li><strong>Rooms:</strong> Individual game sessions (match/lobby)</li>
+                </ul>
+            </div>
+
+            <h3>Hathora's Hybrid Infrastructure</h3>
+            <table class="comparison-table">
+                <tr>
+                    <th>Type</th>
+                    <th>Bare Metal</th>
+                    <th>Cloud</th>
+                </tr>
+                <tr>
+                    <td><strong>Priority</strong></td>
+                    <td>Used first (always on)</td>
+                    <td>Overflow only (on-demand)</td>
+                </tr>
+                <tr>
+                    <td><strong>Cost</strong></td>
+                    <td>70% cheaper</td>
+                    <td>More expensive</td>
+                </tr>
+                <tr>
+                    <td><strong>Scaling</strong></td>
+                    <td>Fixed capacity</td>
+                    <td>2-minute spin-up time</td>
+                </tr>
+                <tr>
+                    <td><strong>Use Case</strong></td>
+                    <td>Normal traffic (70-80%)</td>
+                    <td>Traffic spikes (20-30%)</td>
+                </tr>
+            </table>
+
+            <h3>Auto-Scaling Strategy</h3>
+            <div class="key-points">
+                <ul>
+                    <li><strong>Target Utilization:</strong> 75-85% (sweet spot for cost + capacity)</li>
+                    <li><strong>Scale Up:</strong> When utilization > 85%, add cloud capacity</li>
+                    <li><strong>Scale Down:</strong> When utilization < 75%, remove cloud capacity</li>
+                    <li><strong>Regional Independence:</strong> Each region scales separately</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🎙️ Hathora Models (Voice AI Platform)</h2>
+            
+            <h3>What It Is</h3>
+            <p><strong>Launch:</strong> November 2025 | <strong>Status:</strong> Beta with Product Hunt promo code</p>
+            <p>Inference platform for deploying ASR (speech-to-text), LLM (reasoning), and TTS (text-to-speech) models globally for voice AI applications.</p>
+
+            <h3>The Three Pillars of Voice AI</h3>
+            <table class="comparison-table">
+                <tr>
+                    <th>Component</th>
+                    <th>Function</th>
+                    <th>Example Models</th>
+                </tr>
+                <tr>
+                    <td><strong>ASR</strong></td>
+                    <td>Speech → Text</td>
+                    <td>Whisper, NVIDIA Canary, AssemblyAI</td>
+                </tr>
+                <tr>
+                    <td><strong>LLM</strong></td>
+                    <td>Text → Understanding/Response</td>
+                    <td>Llama 3.1, Qwen 2.5, GPT-4</td>
+                </tr>
+                <tr>
+                    <td><strong>TTS</strong></td>
+                    <td>Text → Speech</td>
+                    <td>Piper, ElevenLabs, Cartesia</td>
+                </tr>
+            </table>
+
+            <h3>Key Advantages</h3>
+            <div class="key-points">
+                <ul>
+                    <li><strong>7x Cheaper:</strong> Open source models vs. closed APIs (OpenAI, ElevenLabs)</li>
+                    <li><strong>32ms Latency:</strong> Models colocated in same datacenter</li>
+                    <li><strong>Auto-Scaling:</strong> Scale from 0 to peak automatically</li>
+                    <li><strong>Pay-As-You-Go:</strong> No idle GPU costs</li>
+                    <li><strong>14 Global Regions:</strong> Ultra-low latency worldwide</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🎨 Multimodal Models</h2>
+            
+            <h3>Core Concept</h3>
+            <p>AI models that can understand and process <strong>multiple types of data</strong> (modalities) simultaneously: text, images, audio, video.</p>
+
+            <h3>Key Models Comparison</h3>
+            <table class="comparison-table">
+                <tr>
+                    <th>Model</th>
+                    <th>Modalities</th>
+                    <th>Best For</th>
+                </tr>
+                <tr>
+                    <td><strong>GPT-4o</strong></td>
+                    <td>Text + Image + Audio</td>
+                    <td>General purpose, real-time voice</td>
+                </tr>
+                <tr>
+                    <td><strong>Claude 3.5 Sonnet</strong></td>
+                    <td>Text + Image</td>
+                    <td>Accurate image analysis, OCR</td>
+                </tr>
+                <tr>
+                    <td><strong>Gemini 1.5 Pro</strong></td>
+                    <td>Text + Image + Audio + Video</td>
+                    <td>Long videos (1M token context)</td>
+                </tr>
+                <tr>
+                    <td><strong>LLaVA</strong></td>
+                    <td>Text + Image</td>
+                    <td>Open source alternative</td>
+                </tr>
+            </table>
+
+            <h3>Why It Matters</h3>
+            <div class="key-points">
+                <ul>
+                    <li><strong>Richer Understanding:</strong> Context from multiple data types</li>
+                    <li><strong>Natural Interaction:</strong> Matches human communication (we use all senses)</li>
+                    <li><strong>Broader Applications:</strong> Accessibility, medical diagnosis, autonomous vehicles</li>
+                    <li><strong>Better Context:</strong> Image + text = more accurate understanding than text alone</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🤖 Introduction to AI Agents</h2>
+            
+            <h3>The Four Components</h3>
+            <div class="key-points">
+                <ul>
+                    <li><strong>The Model (Brain 🧠):</strong> LLM for reasoning and decision-making</li>
+                    <li><strong>Tools (Hands 🤲):</strong> APIs, functions, databases to interact with world</li>
+                    <li><strong>Orchestration Layer (Nervous System 🧬):</strong> Planning, memory, loop control</li>
+                    <li><strong>Deployment (Body/Legs 🦿):</strong> Server infrastructure, monitoring, APIs</li>
+                </ul>
+            </div>
+
+            <h3>Paradigm Shift: Bricklayer → Director</h3>
+            <table class="comparison-table">
+                <tr>
+                    <th>Aspect</th>
+                    <th>Traditional (Bricklayer)</th>
+                    <th>Agent-Based (Director)</th>
+                </tr>
+                <tr>
+                    <td><strong>Approach</strong></td>
+                    <td>Write explicit code for every step</td>
+                    <td>Guide AI with prompts and tools</td>
+                </tr>
+                <tr>
+                    <td><strong>Flexibility</strong></td>
+                    <td>Fixed, predetermined paths</td>
+                    <td>Adaptive, handles edge cases naturally</td>
+                </tr>
+                <tr>
+                    <td><strong>Development</strong></td>
+                    <td>Precise logic for each action</td>
+                    <td>Set scene, provide tools, guide performance</td>
+                </tr>
+                <tr>
+                    <td><strong>Debugging</strong></td>
+                    <td>Clear stack traces</td>
+                    <td>Logging, prompt iteration</td>
+                </tr>
+            </table>
+
+            <h3>Context Engineering</h3>
+            <p>Formerly "prompt engineering" - now about curating the entire context window:</p>
+            <div class="key-points">
+                <ul>
+                    <li><strong>System Prompt:</strong> Identity, personality, instructions</li>
+                    <li><strong>Domain Expertise:</strong> Relevant knowledge and facts</li>
+                    <li><strong>Tools:</strong> Available actions with clear descriptions</li>
+                    <li><strong>Examples:</strong> Few-shot learning samples</li>
+                    <li><strong>Memory:</strong> Session history and user profile</li>
+                    <li><strong>Current Request:</strong> User's goal or question</li>
+                </ul>
+            </div>
+
+            <h3>The Agentic Loop</h3>
+            <p><strong>Definition:</strong> "LMs in a loop with tools to accomplish an objective"</p>
+            <div class="key-points">
+                <ol style="margin-left: 20px;">
+                    <li>Receive goal from user</li>
+                    <li>Construct context window with all relevant info</li>
+                    <li>Model reasons about next action</li>
+                    <li>Execute action (use tool, ask question, or provide answer)</li>
+                    <li>Observe results</li>
+                    <li>Update state/memory</li>
+                    <li>Loop back until goal achieved</li>
+                </ol>
+            </div>
+
+            <a href="daily-tutes-deepdive-ai-agents-intro-20251217.html" class="deepdive-link">📖 Read Full AI Agents Deep Dive</a>
+        </div>
+
+        <div class="section">
+            <h2>🎓 Key Learnings</h2>
+            <div class="key-points">
+                <ul>
+                    <li>Hathora combines game server hosting with voice AI inference on same proven infrastructure</li>
+                    <li>Hybrid bare-metal + cloud model achieves 70% cost savings while maintaining scalability</li>
+                    <li>Voice AI requires three components working together: ASR, LLM, TTS</li>
+                    <li>Multimodal models enable richer understanding by processing multiple data types simultaneously</li>
+                    <li>AI agents represent a paradigm shift from explicit programming to guided autonomy</li>
+                    <li>Context engineering is the art of curating what goes into the LM's context window</li>
+                    <li>The agentic loop enables complex, multi-step behaviors through iteration</li>
+                </ul>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 40px;">
+            <a href="index.html" class="back-link"><span class="arrow">←</span> Back to Daily Tutes Index</a>
+        </div>
+    </div>
+</body>
+</html>

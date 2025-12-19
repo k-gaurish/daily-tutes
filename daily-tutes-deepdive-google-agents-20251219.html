@@ -1,0 +1,1469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Agents: Complete Architecture & Production Guide | Deep Dive</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.8;
+            color: #2c3e50;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            padding: 50px;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            padding-bottom: 30px;
+            border-bottom: 4px solid #667eea;
+        }
+
+        h1 {
+            font-size: 3em;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 1.3em;
+            color: #7f8c8d;
+            margin-top: 10px;
+        }
+
+        .toc {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 10px;
+            margin: 40px 0;
+            border-left: 5px solid #667eea;
+        }
+
+        .toc h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        .toc ol {
+            margin-left: 25px;
+        }
+
+        .toc li {
+            margin: 12px 0;
+            color: #34495e;
+        }
+
+        .toc a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .toc a:hover {
+            color: #764ba2;
+            padding-left: 5px;
+        }
+
+        .section {
+            margin: 50px 0;
+            scroll-margin-top: 20px;
+        }
+
+        h2 {
+            color: #2c3e50;
+            font-size: 2.2em;
+            margin: 40px 0 25px 0;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #ecf0f1;
+        }
+
+        h3 {
+            color: #34495e;
+            font-size: 1.7em;
+            margin: 35px 0 20px 0;
+        }
+
+        h4 {
+            color: #546e7a;
+            font-size: 1.3em;
+            margin: 25px 0 15px 0;
+        }
+
+        p {
+            margin: 15px 0;
+            line-height: 1.8;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            padding: 25px;
+            border-radius: 10px;
+            border-left: 5px solid #667eea;
+            margin: 25px 0;
+        }
+
+        .key-points {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            border-left: 5px solid #11998e;
+            margin: 25px 0;
+        }
+
+        .key-points ul, .key-points ol {
+            margin-left: 25px;
+        }
+
+        .key-points li {
+            margin: 12px 0;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 5px solid #ffc107;
+            margin: 20px 0;
+        }
+
+        .code-block {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+            margin: 20px 0;
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .comparison-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .comparison-table td {
+            padding: 15px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        .comparison-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .diagram {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 25px 0;
+            font-family: monospace;
+            overflow-x: auto;
+        }
+
+        .best-practice {
+            background: linear-gradient(135deg, rgba(17, 153, 142, 0.1) 0%, rgba(56, 239, 125, 0.1) 100%);
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 5px solid #11998e;
+            margin: 20px 0;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 40px;
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: transform 0.3s;
+        }
+
+        .back-link:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 25px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            h2 {
+                font-size: 1.6em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 Google Agents</h1>
+            <p class="subtitle">Complete Architecture & Production Guide</p>
+            <p style="color: #7f8c8d; margin-top: 15px;">Deep Dive | December 19, 2025</p>
+        </div>
+
+        <!-- Table of Contents -->
+        <div class="toc" id="toc">
+            <h2>📋 Table of Contents</h2>
+            <ol>
+                <li><a href="#section-intro" onclick="event.preventDefault(); document.getElementById('section-intro').scrollIntoView({behavior: 'smooth'});">Introduction: The Agentic Revolution</a></li>
+                <li><a href="#section-five-step" onclick="event.preventDefault(); document.getElementById('section-five-step').scrollIntoView({behavior: 'smooth'});">The 5-Step Agentic Problem-Solving Process</a></li>
+                <li><a href="#section-model" onclick="event.preventDefault(); document.getElementById('section-model').scrollIntoView({behavior: 'smooth'});">The Model: The Agent's Brain</a></li>
+                <li><a href="#section-tools" onclick="event.preventDefault(); document.getElementById('section-tools').scrollIntoView({behavior: 'smooth'});">Tools: The Agent's Hands</a></li>
+                <li><a href="#section-orchestration" onclick="event.preventDefault(); document.getElementById('section-orchestration').scrollIntoView({behavior: 'smooth'});">The Orchestration Layer: The Nervous System</a></li>
+                <li><a href="#section-memory" onclick="event.preventDefault(); document.getElementById('section-memory').scrollIntoView({behavior: 'smooth'});">Memory Systems: Short-Term & Long-Term</a></li>
+                <li><a href="#section-agentops" onclick="event.preventDefault(); document.getElementById('section-agentops').scrollIntoView({behavior: 'smooth'});">AgentOps: Quality & Observability</a></li>
+                <li><a href="#section-genui" onclick="event.preventDefault(); document.getElementById('section-genui').scrollIntoView({behavior: 'smooth'});">Generative UI: Dynamic Interfaces</a></li>
+                <li><a href="#section-protocols" onclick="event.preventDefault(); document.getElementById('section-protocols').scrollIntoView({behavior: 'smooth'});">The Three Agentic Protocols</a></li>
+                <li><a href="#section-commerce" onclick="event.preventDefault(); document.getElementById('section-commerce').scrollIntoView({behavior: 'smooth'});">Agentic Commerce: Agents & Money</a></li>
+                <li><a href="#section-security" onclick="event.preventDefault(); document.getElementById('section-security').scrollIntoView({behavior: 'smooth'});">Agent Security: Production Frameworks</a></li>
+                <li><a href="#section-bestpractices" onclick="event.preventDefault(); document.getElementById('section-bestpractices').scrollIntoView({behavior: 'smooth'});">Best Practices & Implementation Guide</a></li>
+                <li><a href="#section-conclusion" onclick="event.preventDefault(); document.getElementById('section-conclusion').scrollIntoView({behavior: 'smooth'});">Conclusion: The Future of Agentic Systems</a></li>
+            </ol>
+        </div>
+
+        <!-- Section 1: Introduction -->
+        <div class="section" id="section-intro">
+            <h2>1. Introduction: The Agentic Revolution</h2>
+            
+            <p>We are witnessing a fundamental transformation in how software systems are built and deployed. Traditional applications follow predetermined paths with explicit logic for every action. <strong>Agentic systems</strong>, by contrast, operate through continuous reasoning loops—observing their environment, making decisions, taking actions, and adapting based on outcomes.</p>
+
+            <p>This deep dive synthesizes Google's comprehensive introduction to AI agents, covering everything from foundational architecture to production deployment patterns. We'll explore the complete ecosystem: from the 5-step operational loop that drives all agents, through model selection and tool integration, to advanced topics like AgentOps, Generative UI, inter-agent protocols, and production security frameworks.</p>
+
+            <div class="highlight-box">
+                <h4>🎯 What You'll Learn</h4>
+                <ul>
+                    <li>The core architecture of modern AI agents and how they operate</li>
+                    <li>How to select, route, and continuously evaluate models (AgentOps mindset)</li>
+                    <li>Tools, orchestration, and memory systems that make agents intelligent</li>
+                    <li>Production-grade quality assurance with LM-as-Judge evaluation</li>
+                    <li>Generative UI patterns for dynamic, agent-driven interfaces</li>
+                    <li>Inter-agent communication protocols (A2A) and multi-agent patterns</li>
+                    <li>Agentic commerce infrastructure (AP2, x402) for secure transactions</li>
+                    <li>Security frameworks: identity, policies, governance, and defense-in-depth</li>
+                </ul>
+            </div>
+
+            <h3>The Paradigm Shift: From Bricklayer to Director</h3>
+
+            <p>Traditional development is like being a <strong>bricklayer</strong>—you place every brick, write every line of logic, handle every edge case explicitly. Agentic development is like being a <strong>director</strong>—you set the scene, define the objective, provide tools, and guide the performance while the agent improvises within those constraints.</p>
+
+            <div class="comparison-table">
+                <table class="comparison-table">
+                    <tr>
+                        <th>Aspect</th>
+                        <th>Traditional (Bricklayer)</th>
+                        <th>Agentic (Director)</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Approach</strong></td>
+                        <td>Write explicit code for every step</td>
+                        <td>Guide AI with prompts and tools</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Flexibility</strong></td>
+                        <td>Fixed, predetermined paths</td>
+                        <td>Adaptive, handles edge cases naturally</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Development</strong></td>
+                        <td>Precise logic for each action</td>
+                        <td>Set scene, provide tools, guide performance</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Scalability</strong></td>
+                        <td>Linear growth in complexity</td>
+                        <td>Emergent capabilities from composition</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- Section 2: The 5-Step Loop -->
+        <div class="section" id="section-five-step">
+            <h2>2. The 5-Step Agentic Problem-Solving Process</h2>
+
+            <p>At its core, an agent operates through a <strong>continuous, cyclical process</strong> to achieve objectives. While this loop can become highly complex, it breaks down into five fundamental steps managed by the Orchestration Layer, reasoned by the Model, and executed by the Tools.</p>
+
+            <div class="diagram">
+┌─────────────────────────────────────────────────────────────┐
+│                    AGENTIC LOOP                             │
+│                                                             │
+│  ┌──────────────┐      ┌──────────────┐      ┌──────────┐ │
+│  │ 1. Get the   │      │ 2. Scan the  │      │3. Think  │ │
+│  │    Mission   │ ───> │    Scene     │ ───> │It Through│ │
+│  └──────────────┘      └──────────────┘      └──────────┘ │
+│         ▲                                           │       │
+│         │                                           ▼       │
+│  ┌──────────────┐      ┌──────────────┐      ┌──────────┐ │
+│  │5. Observe &  │      │  4. Take     │      │          │ │
+│  │   Iterate    │ <─── │   Action     │ <─── │          │ │
+│  └──────────────┘      └──────────────┘      └──────────┘ │
+│                                                             │
+│  Orchestration Layer manages the cycle                     │
+│  Model provides reasoning                                  │
+│  Tools execute actions                                     │
+└─────────────────────────────────────────────────────────────┘
+            </div>
+
+            <h3>Step 1: Get the Mission</h3>
+            <p>The process is initiated by a specific, high-level goal. This mission can come from:</p>
+            <div class="key-points">
+                <ul>
+                    <li><strong>User request:</strong> "Organize my team's travel for the upcoming conference"</li>
+                    <li><strong>Automated trigger:</strong> "A new high-priority customer ticket has arrived"</li>
+                    <li><strong>Scheduled task:</strong> "Generate quarterly report at end of month"</li>
+                    <li><strong>Event-driven:</strong> "Alert when server CPU exceeds 80%"</li>
+                </ul>
+            </div>
+
+            <h3>Step 2: Scan the Scene</h3>
+            <p>The agent perceives its environment to gather context. The orchestration layer accesses available resources:</p>
+            <div class="key-points">
+                <ul>
+                    <li><strong>User request analysis:</strong> What does the request actually say?</li>
+                    <li><strong>Memory access:</strong> What's in term memory? Did I try this before? Did user give guidance last week?</li>
+                    <li><strong>Tool inventory:</strong> What can I access? Calendars, databases, APIs?</li>
+                    <li><strong>Contextual data:</strong> Current time, user location, relevant documents</li>
+                </ul>
+            </div>
+
+            <h3>Step 3: Think It Through</h3>
+            <p>This is the agent's core "think" loop, driven by the reasoning model. The agent analyzes the Mission (Step 1) against the Scene (Step 2) and devises a plan.</p>
+
+            <div class="highlight-box">
+                <h4>⚡ Key Insight</h4>
+                <p>This isn't a single thought, but often a <strong>chain of reasoning</strong>: "To book travel, I first need to know who is on the team. I will use the get_team_roster tool. Then I will need to check their availability via the calendar_api."</p>
+            </div>
+
+            <p>The model constructs an internal plan that might include:</p>
+            <div class="key-points">
+                <ul>
+                    <li>Which tools to use and in what order</li>
+                    <li>What information is still missing</li>
+                    <li>Potential failure modes and alternatives</li>
+                    <li>Success criteria for the mission</li>
+                </ul>
+            </div>
+
+            <h3>Step 4: Take Action</h3>
+            <p>The orchestration layer executes the first concrete step of the plan. It selects and invokes the appropriate tool:</p>
+            <div class="key-points">
+                <ul>
+                    <li>Calling an API</li>
+                    <li>Running a code function</li>
+                    <li>Querying a database</li>
+                    <li>Sending a message</li>
+                    <li>Creating or modifying files</li>
+                </ul>
+            </div>
+
+            <p>This is the agent <strong>acting on the world</strong> beyond its own internal reasoning.</p>
+
+            <h3>Step 5: Observe and Iterate</h3>
+            <p>The agent observes the outcome of its action. For example, the get_team_roster tool returns a list of five names. This new information is added to the agent's context or "memory."</p>
+
+            <p><strong>The loop then repeats</strong>, returning to Step 3: "Now that I have the roster, my next step is to check the calendar for these five people. I will use the calendar_api."</p>
+
+            <div class="best-practice">
+                <h4>✨ Best Practice: Loop Termination</h4>
+                <p>Always define clear termination conditions:</p>
+                <ul>
+                    <li><strong>Success criteria:</strong> Mission accomplished (e.g., all travel booked)</li>
+                    <li><strong>Maximum iterations:</strong> Prevent infinite loops (e.g., max 10 steps)</li>
+                    <li><strong>Timeout:</strong> Maximum execution time (e.g., 5 minutes)</li>
+                    <li><strong>User intervention:</strong> Require confirmation for destructive actions</li>
+                    <li><strong>Failure threshold:</strong> Stop after N consecutive errors</li>
+                </ul>
+            </div>
+
+            <h3>Real-World Example: Conference Travel Planning</h3>
+            
+            <div class="code-block">
+Mission: "Book conference travel for the team"
+
+Iteration 1:
+  Scan: No team roster in memory
+  Think: Need to get team roster first
+  Action: Call get_team_roster()
+  Observe: Received 5 names
+
+Iteration 2:
+  Scan: Have team roster, need availability
+  Think: Check calendar for all 5 people
+  Action: Call calendar_api(team_roster)
+  Observe: 3 people available, 2 have conflicts
+
+Iteration 3:
+  Scan: Have availability data
+  Think: Need to resolve conflicts or proceed with 3
+  Action: Ask user for guidance
+  Observe: User says "proceed with available 3"
+
+Iteration 4:
+  Scan: Approved to book for 3 people
+  Think: Need conference location and dates
+  Action: Search memory and web for conference details
+  Observe: Conference in SF, March 15-17
+
+Iteration 5:
+  Scan: Have all required data
+  Think: Ready to book flights and hotel
+  Action: Call travel_booking_api()
+  Observe: Success, bookings confirmed
+
+Mission Complete! ✓
+            </div>
+        </div>
+
+        <!-- Section 3: The Model -->
+        <div class="section" id="section-model">
+            <h2>3. The Model: The Agent's Brain</h2>
+
+            <p>The Language Model (LM) is the reasoning core of your agent. Its selection is a <strong>critical architectural decision</strong> that dictates cognitive capabilities, operational cost, and speed.</p>
+
+            <div class="warning-box">
+                <h4>⚠️ Common Pitfall</h4>
+                <p>Treating model selection as simply picking the highest benchmark score is a path to failure. Real-world success demands models that excel at <strong>agentic fundamentals</strong>: superior reasoning for complex, multi-step problems and reliable tool use to interact with the world.</p>
+            </div>
+
+            <h3>The Testing Framework</h3>
+
+            <div class="key-points">
+                <h4>Step 1: Define the Business Problem</h4>
+                <ul>
+                    <li>What specific task will this agent perform?</li>
+                    <li>What does success look like?</li>
+                    <li>What are the failure modes?</li>
+                </ul>
+
+                <h4>Step 2: Test Against Your Metrics</h4>
+                <ul>
+                    <li><strong>If writing code:</strong> Test on YOUR private codebase</li>
+                    <li><strong>If processing claims:</strong> Test on YOUR specific document formats</li>
+                    <li><strong>If customer support:</strong> Test on YOUR actual support tickets</li>
+                </ul>
+
+                <h4>Step 3: Cross-Reference with Practicalities</h4>
+                <p>The "best" model sits at the optimal intersection of:</p>
+                <ul>
+                    <li><strong>Quality:</strong> How well does it perform the task?</li>
+                    <li><strong>Speed:</strong> What's the latency for your use case?</li>
+                    <li><strong>Cost:</strong> What's the cost per interaction at scale?</li>
+                </ul>
+            </div>
+
+            <h3>Model Routing: Team of Specialists</h3>
+
+            <p>You don't use a sledgehammer to crack a nut. A robust agent architecture uses <strong>model routing</strong> to intelligently distribute work:</p>
+
+            <div class="comparison-table">
+                <table class="comparison-table">
+                    <tr>
+                        <th>Task Type</th>
+                        <th>Model Choice</th>
+                        <th>Reason</th>
+                        <th>Cost Impact</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Initial planning</strong></td>
+                        <td>Frontier (Gemini 2.5 Pro)</td>
+                        <td>Complex reasoning required</td>
+                        <td>High but infrequent</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Intent classification</strong></td>
+                        <td>Fast (Gemini 2.5 Flash)</td>
+                        <td>Simple pattern matching</td>
+                        <td>Low and frequent</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Text summarization</strong></td>
+                        <td>Fast (Gemini 2.5 Flash)</td>
+                        <td>Straightforward extraction</td>
+                        <td>Low and frequent</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Complex analysis</strong></td>
+                        <td>Frontier (Gemini 2.5 Pro)</td>
+                        <td>Nuanced understanding needed</td>
+                        <td>High but valuable</td>
+                    </tr>
+                </table>
+            </div>
+
+            <p>Model routing can be:</p>
+            <div class="key-points">
+                <ul>
+                    <li><strong>Automatic:</strong> Orchestration layer decides based on task complexity</li>
+                    <li><strong>Hard-coded:</strong> Explicit rules for specific workflows</li>
+                    <li><strong>Hybrid:</strong> Rules for known patterns, automatic for unknown</li>
+                </ul>
+            </div>
+
+            <h3>Multimodal Considerations</h3>
+
+            <p>For handling diverse data types (images, audio, video), you have two approaches:</p>
+
+            <div class="comparison-table">
+                <table class="comparison-table">
+                    <tr>
+                        <th>Approach</th>
+                        <th>Pros</th>
+                        <th>Cons</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Native Multimodal</strong><br>(e.g., Gemini live mode)</td>
+                        <td>
+                            • Streamlined integration<br>
+                            • Single model handles all modalities<br>
+                            • Optimized for cross-modal understanding
+                        </td>
+                        <td>
+                            • Vendor lock-in risk<br>
+                            • Less flexibility in component choice
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Specialized Tools</strong><br>(Cloud Vision, Speech-to-Text)</td>
+                        <td>
+                            • Best-of-breed components<br>
+                            • Mix and match providers<br>
+                            • More control over pipeline
+                        </td>
+                        <td>
+                            • Added complexity<br>
+                            • More integration work<br>
+                            • Potential latency from conversions
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <h3>AgentOps: Continuous Model Evolution</h3>
+
+            <div class="highlight-box">
+                <h4>🔄 The Reality of AI Development</h4>
+                <p>The AI landscape is in <strong>constant, rapid evolution</strong>. The model you choose today will be superseded in six months. A "set it and forget it" mindset is unsustainable.</p>
+            </div>
+
+            <p>Building for this reality means investing in a nimble operational framework—an <strong>"Agent Ops" practice</strong>:</p>
+
+            <div class="key-points">
+                <ul>
+                    <li><strong>Robust CI/CD pipeline</strong> that continuously evaluates new models</li>
+                    <li><strong>Automated testing</strong> against your key business metrics</li>
+                    <li><strong>Performance dashboards</strong> tracking quality, latency, cost over time</li>
+                    <li><strong>Quick rollback capability</strong> if new models underperform</li>
+                    <li><strong>A/B testing infrastructure</strong> for gradual model migrations</li>
+                </ul>
+            </div>
+
+            <p>This approach de-risks and accelerates upgrades, ensuring your agent is always powered by the best brain available without requiring a complete architectural overhaul.</p>
+
+            <div class="best-practice">
+                <h4>✨ Best Practice: Model Evaluation Checklist</h4>
+                <ol>
+                    <li>Create golden dataset of 50-100 test cases from real usage</li>
+                    <li>Define success criteria (accuracy, latency, cost thresholds)</li>
+                    <li>Set up automated daily/weekly evaluation runs</li>
+                    <li>Monitor drift in model performance over time</li>
+                    <li>Establish rollback triggers (e.g., >10% accuracy drop)</li>
+                    <li>Document model selection rationale for future reference</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- Section 4: Tools -->
+        <div class="section" id="section-tools">
+            <h2>4. Tools: The Agent's Hands</h2>
+
+            <p>If the model is the agent's brain, tools are the <strong>hands that connect its reasoning to reality</strong>. They allow the agent to move beyond static training data to retrieve real-time information and take action in the world.</p>
+
+            <h3>The Three-Part Tool Loop</h3>
+
+            <div class="diagram">
+┌─────────────────────────────────────────┐
+│          TOOL INTERACTION               │
+│                                         │
+│  1. DEFINE                              │
+│     ↓                                   │
+│     • What can the tool do?             │
+│     • What parameters does it need?     │
+│     • What will it return?              │
+│                                         │
+│  2. INVOKE                              │
+│     ↓                                   │
+│     • Agent decides to use tool         │
+│     • Generates appropriate parameters  │
+│     • Orchestration layer executes      │
+│                                         │
+│  3. OBSERVE                             │
+│     ↓                                   │
+│     • Tool returns results              │
+│     • Agent processes response          │
+│     • Updates context/memory            │
+│     • Decides next action               │
+└─────────────────────────────────────────┘
+            </div>
+
+            <h3>Retrieval-Augmented Generation (RAG)</h3>
+
+            <p>RAG is the most foundational tool category, giving the agent a <strong>"library card"</strong> to query external knowledge:</p>
+
+            <div class="key-points">
+                <h4>RAG Knowledge Sources</h4>
+                <ul>
+                    <li><strong>Vector Databases:</strong> Semantic search over documents (Pinecone, Weaviate, ChromaDB)</li>
+                    <li><strong>Knowledge Graphs:</strong> Structured relationship data (Neo4j, Amazon Neptune)</li>
+                    <li><strong>Web Search:</strong> Real-time information via Google Search API</li>
+                    <li><strong>Internal Documents:</strong> Company wikis, documentation, policies</li>
+                    <li><strong>User Data:</strong> Previous conversations, preferences, history</li>
+                </ul>
+            </div>
+
+            <p><strong>Why RAG Matters:</strong> By looking things up before responding, the agent grounds itself in fact, dramatically reducing hallucinations. Instead of generating potentially incorrect information from memory, it retrieves verified data.</p>
+
+            <h4>RAG Architecture Example</h4>
+            <div class="code-block">
+# Simplified RAG Tool Implementation
+
+class RAGTool:
+    def __init__(self, vector_db, embedding_model):
+        self.vector_db = vector_db
+        self.embedding_model = embedding_model
+    
+    def search(self, query, top_k=5):
+        """Search knowledge base for relevant information"""
+        # Convert query to embedding
+        query_embedding = self.embedding_model.encode(query)
+        
+        # Search vector database
+        results = self.vector_db.similarity_search(
+            query_embedding, 
+            top_k=top_k
+        )
+        
+        # Return relevant chunks
+        return [
+            {
+                "content": result.text,
+                "source": result.metadata.source,
+                "relevance_score": result.score
+            }
+            for result in results
+        ]
+
+# Agent uses RAG tool
+agent_query = "What is our refund policy for international orders?"
+relevant_docs = rag_tool.search(agent_query)
+
+# Agent constructs response using retrieved information
+context = "\n".join([doc["content"] for doc in relevant_docs])
+response = model.generate(
+    f"Based on this information:\n{context}\n\nAnswer: {agent_query}"
+)
+            </div>
+
+            <h3>Natural Language to SQL (NL2SQL)</h3>
+
+            <p>NL2SQL tools allow the agent to query databases using natural language, answering analytic questions like "What were our top-selling products last quarter?"</p>
+
+            <div class="key-points">
+                <h4>NL2SQL Workflow</h4>
+                <ol>
+                    <li><strong>Schema Understanding:</strong> Agent learns database structure</li>
+                    <li><strong>Query Generation:</strong> Converts natural language to SQL</li>
+                    <li><strong>Validation:</strong> Checks query safety (no DELETE/DROP)</li>
+                    <li><strong>Execution:</strong> Runs query against database</li>
+                    <li><strong>Result Interpretation:</strong> Formats results for natural language response</li>
+                </ol>
+            </div>
+
+            <h4>NL2SQL Example</h4>
+            <div class="code-block">
+# User question
+user_query = "What were our top 5 products by revenue last month?"
+
+# Agent generates SQL
+generated_sql = """
+SELECT 
+    product_name,
+    SUM(order_value) as total_revenue
+FROM orders
+WHERE order_date >= DATE_SUB(CURDATE(), INTERVAL 1 MONTH)
+GROUP BY product_name
+ORDER BY total_revenue DESC
+LIMIT 5
+"""
+
+# Safety check (prevent destructive operations)
+if any(keyword in generated_sql.upper() 
+       for keyword in ['DELETE', 'DROP', 'TRUNCATE', 'UPDATE']):
+    raise SecurityError("Destructive SQL operations not allowed")
+
+# Execute and format results
+results = database.execute(generated_sql)
+formatted_response = format_as_table(results)
+            </div>
+
+            <h3>Function Calling Standards</h3>
+
+            <p>For agents to reliably use tools, they need clear instructions, secure connections, and orchestration. Several standards have emerged:</p>
+
+            <h4>1. OpenAPI Specification</h4>
+            <p>The longstanding standard that provides a structured contract describing:</p>
+            <div class="key-points">
+                <ul>
+                    <li>Tool's purpose and description</li>
+                    <li>Required and optional parameters</li>
+                    <li>Expected response format</li>
+                    <li>Authentication requirements</li>
+                    <li>Error handling patterns</li>
+                </ul>
+            </div>
+
+            <div class="code-block">
+# OpenAPI Tool Definition Example
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Weather API",
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/weather": {
+            "get": {
+                "summary": "Get current weather for a location",
+                "parameters": [
+                    {
+                        "name": "location",
+                        "in": "query",
+                        "required": true,
+                        "schema": {"type": "string"},
+                        "description": "City name or coordinates"
+                    },
+                    {
+                        "name": "units",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": ["metric", "imperial"]
+                        },
+                        "default": "metric"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Current weather data",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "temperature": {"type": "number"},
+                                        "conditions": {"type": "string"},
+                                        "humidity": {"type": "number"}
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+            </div>
+
+            <h4>2. Model Context Protocol (MCP)</h4>
+            <p>A newer standard that simplifies tool discovery and connection:</p>
+            <div class="key-points">
+                <ul>
+                    <li>More convenient than OpenAPI for simple cases</li>
+                    <li>Built-in support for common patterns</li>
+                    <li>Easier integration for developers</li>
+                    <li>Growing ecosystem of MCP servers</li>
+                </ul>
+            </div>
+
+            <h4>3. Native Tools</h4>
+            <p>Some models have built-in tools where function invocation happens as part of the LM call itself:</p>
+            <div class="key-points">
+                <ul>
+                    <li><strong>Gemini:</strong> Native Google Search integration</li>
+                    <li><strong>GPT-4:</strong> Native web browsing, code execution</li>
+                    <li><strong>Claude:</strong> Native web search, file analysis</li>
+                </ul>
+            </div>
+
+            <p>Native tools offer the lowest latency since there's no external API call, but limit flexibility in choosing providers.</p>
+
+            <div class="best-practice">
+                <h4>✨ Best Practice: Tool Design Principles</h4>
+                <ul>
+                    <li><strong>Single Responsibility:</strong> Each tool should do one thing well</li>
+                    <li><strong>Clear Descriptions:</strong> Write descriptions the model will actually use</li>
+                    <li><strong>Fail Gracefully:</strong> Return structured errors, not exceptions</li>
+                    <li><strong>Idempotent When Possible:</strong> Same inputs = same outputs</li>
+                    <li><strong>Timeout Protection:</strong> Set reasonable timeouts for all external calls</li>
+                    <li><strong>Rate Limiting:</strong> Protect against runaway tool use</li>
+                    <li><strong>Logging:</strong> Log all tool invocations for debugging</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section 5: Orchestration -->
+        <div class="section" id="section-orchestration">
+            <h2>5. The Orchestration Layer: The Nervous System</h2>
+
+            <p>If the model is the brain and tools are the hands, the orchestration layer is the <strong>central nervous system</strong> that connects them. It's the engine that runs the "Think, Act, Observe" loop, the state machine governing agent behavior, and the place where carefully crafted logic comes to life.</p>
+
+            <div class="highlight-box">
+                <h4>⚡ Critical Insight</h4>
+                <p>The orchestration layer is <strong>not just plumbing</strong>—it's the conductor of the entire agentic symphony, deciding when the model should reason, which tool should act, and how the results should inform the next movement.</p>
+            </div>
+
+            <h3>Core Design Choices</h3>
+
+            <h4>1. Degree of Autonomy</h4>
+
+            <p>The first architectural decision is determining the agent's degree of autonomy. The choice exists on a spectrum:</p>
+
+            <div class="comparison-table">
+                <table class="comparison-table">
+                    <tr>
+                        <th>Deterministic Workflow</th>
+                        <th>Middle Ground</th>
+                        <th>Fully Autonomous</th>
+                    </tr>
+                    <tr>
+                        <td>
+                            <strong>LM Role:</strong> Tool for specific task<br>
+                            <strong>Control:</strong> Explicit workflow<br>
+                            <strong>Predictability:</strong> Very high<br>
+                            <strong>Use Case:</strong> Structured, repeatable processes
+                        </td>
+                        <td>
+                            <strong>LM Role:</strong> Guided decision-making<br>
+                            <strong>Control:</strong> Hybrid approach<br>
+                            <strong>Predictability:</strong> Medium<br>
+                            <strong>Use Case:</strong> Semi-structured workflows
+                        </td>
+                        <td>
+                            <strong>LM Role:</strong> Full driver's seat<br>
+                            <strong>Control:</strong> Dynamic adaptation<br>
+                            <strong>Predictability:</strong> Lower<br>
+                            <strong>Use Case:</strong> Complex, novel problems
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <h4>2. Implementation Method</h4>
+
+            <div class="key-points">
+                <p><strong>No-Code Builders</strong></p>
+                <ul>
+                    <li><strong>Pros:</strong> Speed, accessibility, empowers business users</li>
+                    <li><strong>Cons:</strong> Limited customization, scaling challenges</li>
+                    <li><strong>Examples:</strong> Zapier, Make, n8n</li>
+                    <li><strong>Best for:</strong> Simple automations, prototyping</li>
+                </ul>
+
+                <p><strong>Code-First Frameworks (e.g., Google ADK)</strong></p>
+                <ul>
+                    <li><strong>Pros:</strong> Deep control, customizability, full integration</li>
+                    <li><strong>Cons:</strong> Requires engineering expertise, longer development</li>
+                    <li><strong>Examples:</strong> ADK, LangGraph, LangChain, CrewAI</li>
+                    <li><strong>Best for:</strong> Mission-critical systems, complex workflows</li>
+                </ul>
+            </div>
+
+            <h3>Production-Grade Requirements</h3>
+
+            <p>Regardless of approach, a production-grade orchestration framework must provide:</p>
+
+            <h4>1. Openness</h4>
+            <div class="key-points">
+                <ul>
+                    <li>Plug in any model (OpenAI, Anthropic, Google, local models)</li>
+                    <li>Integrate any tool (custom, third-party, MCP servers)</li>
+                    <li>Prevents vendor lock-in</li>
+                    <li>Enables best-of-breed component selection</li>
+                </ul>
+            </div>
+
+            <h4>2. Precise Control</h4>
+            <div class="key-points">
+                <ul>
+                    <li>Hybrid approach: LM reasoning governed by hard-coded rules</li>
+                    <li>Example: "Agent can query database, but cannot execute DELETE"</li>
+                    <li>Example: "Agent can suggest purchases, but requires approval >$100"</li>
+                    <li>Balance between flexibility and guardrails</li>
+                </ul>
+            </div>
+
+            <h4>3. Observability</h4>
+            <p>The most critical requirement for production systems:</p>
+
+            <div class="highlight-box">
+                <h4>🔍 Why Observability is Non-Negotiable</h4>
+                <p>When an agent behaves unexpectedly, you cannot simply put a breakpoint in the model's "thought." A robust framework generates <strong>detailed traces and logs</strong>, exposing the entire reasoning trajectory:</p>
+                <ul>
+                    <li>Model's internal monologue</li>
+                    <li>Tool it chose to use</li>
+                    <li>Parameters it generated</li>
+                    <li>Result it observed</li>
+                    <li>Decision it made next</li>
+                </ul>
+            </div>
+
+            <h3>Google Agent Development Kit (ADK) Example</h3>
+
+            <div class="code-block">
+# ADK Orchestration Example
+from adk import Agent, Tool, State
+
+# Define agent with tools
+agent = Agent(
+    name="travel_planner",
+    model="gemini-2.0-flash",
+    tools=[
+        get_team_roster,
+        check_calendar,
+        book_travel,
+        send_notification
+    ],
+    system_prompt="""You are a travel planning agent.
+    Your goal is to book travel for team members attending conferences.
+    Always check availability before booking.
+    Confirm bookings with team members."""
+)
+
+# Define state management
+class TravelState(State):
+    team_members: list = []
+    available_members: list = []
+    bookings: dict = {}
+    
+# Run agent with observability
+result = agent.run(
+    input="Book conference travel for the team to SF March 15-17",
+    state=TravelState(),
+    max_iterations=10,
+    enable_tracing=True,  # OpenTelemetry traces
+    enable_logging=True,  # Detailed logs
+)
+
+# Access full execution trace
+for step in result.trace:
+    print(f"Step {step.iteration}:")
+    print(f"  Thought: {step.reasoning}")
+    print(f"  Tool: {step.tool_name}")
+    print(f"  Input: {step.tool_input}")
+    print(f"  Output: {step.tool_output}")
+    print(f"  Duration: {step.duration_ms}ms")
+            </div>
+
+            <h3>Orchestration Patterns</h3>
+
+            <h4>Pattern 1: Sequential Workflow</h4>
+            <p>Execute steps in a predefined order, with model making decisions at each step:</p>
+            <div class="code-block">
+# Sequential Pattern
+def process_support_ticket(ticket):
+    # Step 1: Classify ticket
+    category = agent.classify(ticket.content)
+    
+    # Step 2: Route to specialist
+    if category == "technical":
+        specialist = get_technical_agent()
+    elif category == "billing":
+        specialist = get_billing_agent()
+    else:
+        specialist = get_general_agent()
+    
+    # Step 3: Specialist processes
+    response = specialist.process(ticket)
+    
+    # Step 4: Quality check
+    if needs_escalation(response):
+        escalate_to_human(ticket, response)
+    else:
+        send_response(ticket, response)
+            </div>
+
+            <h4>Pattern 2: Reactive Loop</h4>
+            <p>Agent reacts to observations in real-time:</p>
+            <div class="code-block">
+# Reactive Pattern
+def monitoring_agent():
+    while True:
+        # Observe system state
+        metrics = observe_system_metrics()
+        
+        # Agent decides if action needed
+        analysis = agent.analyze(metrics)
+        
+        if analysis.requires_action:
+            # Take corrective action
+            action = analysis.recommended_action
+            execute_action(action)
+            
+            # Observe results
+            new_metrics = observe_system_metrics()
+            
+            # Verify success
+            if not is_resolved(new_metrics):
+                escalate_to_engineer()
+        
+        sleep(60)  # Check every minute
+            </div>
+
+            <h4>Pattern 3: Hierarchical Delegation</h4>
+            <p>Coordinator agent delegates to specialist sub-agents:</p>
+            <div class="code-block">
+# Hierarchical Pattern
+class CoordinatorAgent:
+    def __init__(self):
+        self.research_agent = ResearchAgent()
+        self.engineering_agent = EngineeringAgent()
+        self.financial_agent = FinancialAgent()
+    
+    def design_product(self, requirements):
+        # Phase 1: Market research
+        market_data = self.research_agent.analyze_market(
+            requirements.target_market
+        )
+        
+        # Phase 2: Engineering feasibility
+        technical_spec = self.engineering_agent.design_architecture(
+            requirements, 
+            market_data
+        )
+        
+        # Phase 3: Financial modeling
+        financial_model = self.financial_agent.project_costs(
+            technical_spec,
+            market_data
+        )
+        
+        # Synthesize and decide
+        return self.synthesize_recommendation(
+            market_data,
+            technical_spec,
+            financial_model
+        )
+            </div>
+
+            <div class="best-practice">
+                <h4>✨ Best Practice: Orchestration Checklist</h4>
+                <ol>
+                    <li><strong>Define clear success criteria</strong> before starting</li>
+                    <li><strong>Set maximum iterations</strong> to prevent infinite loops</li>
+                    <li><strong>Implement timeouts</strong> for all operations</li>
+                    <li><strong>Log every decision point</strong> with full context</li>
+                    <li><strong>Build in human-in-the-loop</strong> for critical decisions</li>
+                    <li><strong>Test failure modes</strong> explicitly (what if tool fails?)</li>
+                    <li><strong>Monitor resource usage</strong> (tokens, API calls, time)</li>
+                    <li><strong>Version your prompts and configs</strong> for rollback capability</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- Continue in next part due to length... -->
+        <div class="section" id="section-memory">
+            <h2>6. Memory Systems: Short-Term & Long-Term</h2>
+
+            <p>Memory is what transforms a stateless model into an agent that can maintain context, learn from experience, and provide personalized interactions over time.</p>
+
+            <div class="diagram">
+┌───────────────────────────────────────────────────────────┐
+│                    MEMORY ARCHITECTURE                     │
+│                                                            │
+│  ┌─────────────────────┐      ┌──────────────────────┐   │
+│  │  SHORT-TERM MEMORY  │      │   LONG-TERM MEMORY   │   │
+│  │   (Scratchpad)      │      │    (Persistent)      │   │
+│  ├─────────────────────┤      ├──────────────────────┤   │
+│  │ • Current session   │      │ • Across sessions    │   │
+│  │ • Action/Observe    │      │ • Vector database    │   │
+│  │ • Conversation flow │      │ • User preferences   │   │
+│  │ • Temp state        │      │ • Historical data    │   │
+│  └─────────────────────┘      └──────────────────────┘   │
+│           ↓                              ↓                │
+│  ┌──────────────────────────────────────────────────┐    │
+│  │        ORCHESTRATION LAYER                       │    │
+│  │  Manages both memory types, injects into context │    │
+│  └──────────────────────────────────────────────────┘    │
+└───────────────────────────────────────────────────────────┘
+            </div>
+
+            <h3>Short-Term Memory (Session Memory)</h3>
+
+            <p>Short-term memory is the agent's active "scratchpad," maintaining the running history of the current conversation or task:</p>
+
+            <div class="key-points">
+                <h4>What's Stored</h4>
+                <ul>
+                    <li><strong>Conversation history:</strong> User messages and agent responses</li>
+                    <li><strong>Action/Observation pairs:</strong> Tool calls and their results</li>
+                    <li><strong>Intermediate state:</strong> Variables, flags, progress indicators</li>
+                    <li><strong>Context window:</strong> Everything currently "in mind"</li>
+                </ul>
+
+                <h4>Implementation Patterns</h4>
+                <ul>
+                    <li><strong>State objects:</strong> Structured data representing current status</li>
+                    <li><strong>Artifacts:</strong> Documents, files, or outputs being worked on</li>
+                    <li><strong>Sessions:</strong> Bounded conversations with clear start/end</li>
+                    <li><strong>Threads:</strong> Multi-turn interactions within a session</li>
+                </ul>
+            </div>
+
+            <h4>Short-Term Memory Example</h4>
+            <div class="code-block">
+# Session state management
+class SessionMemory:
+    def __init__(self):
+        self.messages = []
+        self.actions = []
+        self.state = {}
+    
+    def add_message(self, role, content):
+        self.messages.append({
+            "role": role,
+            "content": content,
+            "timestamp": datetime.now()
+        })
+    
+    def add_action(self, tool, input, output):
+        self.actions.append({
+            "tool": tool,
+            "input": input,
+            "output": output,
+            "timestamp": datetime.now()
+        })
+    
+    def update_state(self, key, value):
+        self.state[key] = value
+    
+    def get_context(self):
+        """Compile full context for model"""
+        return {
+            "conversation": self.messages,
+            "recent_actions": self.actions[-5:],  # Last 5 actions
+            "current_state": self.state
+        }
+
+# Usage
+session = SessionMemory()
+session.add_message("user", "Book travel to SF")
+session.update_state("destination", "San Francisco")
+session.add_action("get_team_roster", {}, {"members": ["Alice", "Bob"]})
+
+# Inject into model context
+context = session.get_context()
+response = model.generate(prompt, context=context)
+            </div>
+
+            <h3>Long-Term Memory (Persistent Memory)</h3>
+
+            <p>Long-term memory provides persistence across sessions, allowing the agent to remember user preferences, past conversations, and learned knowledge:</p>
+
+            <div class="key-points">
+                <h4>Architecture</h4>
+                <ul>
+                    <li>Implemented as a specialized <strong>RAG tool</strong></li>
+                    <li>Connected to <strong>vector database</strong> for semantic search</li>
+                    <li>Agent can <strong>pre-fetch</strong> relevant memories at session start</li>
+                    <li>Agent can <strong>actively query</strong> memories during task execution</li>
+                    <li>Enables <strong>personalization</strong> and <strong>continuity</strong></li>
+                </ul>
+            </div>
+
+            <h3>Google ADK Memory Services</h3>
+
+            <p>Google's Agent Development Kit provides two distinct memory service implementations:</p>
+
+            <div class="comparison-table">
+                <table class="comparison-table">
+                    <tr>
+                        <th>Feature</th>
+                        <th>InMemoryMemoryService</th>
+                        <th>VertexAiMemoryBankService</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Persistence</strong></td>
+                        <td>None (lost on restart)</td>
+                        <td>Yes (managed by Vertex AI)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Primary Use Case</strong></td>
+                        <td>Prototyping, local development, testing</td>
+                        <td>Production, meaningful evolving memories</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Memory Extraction</strong></td>
+                        <td>Stores full conversation</td>
+                        <td>LLM extracts meaningful information</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Consolidation</strong></td>
+                        <td>None</td>
+                        <td>Merges, updates, deduplicates</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Search</strong></td>
+                        <td>Basic keyword matching</td>
+                        <td>Advanced semantic search</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Setup</strong></td>
+                        <td>Zero (it's the default)</td>
+                        <td>Low (requires Vertex AI instance)</td>
+                    </tr>
+                </table>
+            </div>
+
+            <h3>Memory Bank: Intelligent Memory Management</h3>
+
+            <p>Vertex AI Memory Bank doesn't just store conversations—it <strong>intelligently curates</strong> them:</p>
+
+            <h4>1. Extraction</h4>
+            <p>Pulls meaningful information from conversations that match configured memory topics:</p>
+            <div class="key-points">
+                <ul>
+                    <li>Personal information (USER_PERSONAL_INFO)</li>
+                    <li>Preferences (USER_PREFERENCES)</li>
+                    <li>Key conversation events (KEY_CONVERSATION_DETAILS)</li>
+                    <li>Explicit instructions (EXPLICIT_INSTRUCTIONS)</li>
+                    <li>Custom topics (defined by you)</li>
+                </ul>
+            </div>
+
+            <h4>2. Consolidation</h4>
+            <p>Intelligently manages the memory store:</p>
+            <div class="key-points">
+                <ul>
+                    <li><strong>Updates:</strong> Refreshes outdated information</li>
+                    <li><strong>Merges:</strong> Combines related memories</li>
+                    <li><strong>Deduplicates:</strong> Removes redundant information</li>
+                    <li><strong>Removes:</strong> Deletes contradicted or obsolete memories</li>
+                </ul>
+            </div>
+
+            <h4>3. Revisions</h4>
+            <p>Tracks how memories evolve over time, providing an audit trail of memory changes.</p>
+
+            <h3>Memory Workflow Example</h3>
+
+            <div class="code-block">
+# Memory Bank Workflow
+
+# Step 1: User interacts via Session
+session = SessionService.create_session(user_id="user_123")
+session.add_message("user", "I work at Google as a PM")
+session.add_message("assistant", "Great! What product do you work on?")
+session.add_message("user", "I'm on the Cloud AI team")
+
+# Step 2: Ingest session into Memory Bank
+memory_service.add_session_to_memory(session)
+
+# Behind the scenes:
+# - Extraction: "User works at Google as PM on Cloud AI team"
+# - Check existing memories: No conflicts
+# - Store: New memory created
+
+# Step 3: Later session
+new_session = SessionService.create_session(user_id="user_123")
+new_session.add_message("user", "What do I work on?")
+
+# Step 4: Agent queries memory
+memories = memory_service.search_memory(
+    app_name="assistant",
+    user_id="user_123",
+    query="user job work"
+)
+
+# Returns: "User works at Google as PM on Cloud AI team"
+
+# Step 5: Agent uses memory in response
+response = agent.generate(
+    "Based on what I remember, you work at Google as a PM " +
+    "on the Cloud AI team. Is there something specific about " +
+    "your work you'd like to discuss?"
+)
+            </div>
+
+            <h3>Custom Memory Topics</h3>
+
+            <p>You can define custom memory topics to capture domain-specific information:</p>
+
+            <div class="code-block">
+# Custom Memory Topic Example
+memory_topic = {
+    "custom_memory_topic": {
+        "label": "business_feedback",
+        "description": """Specific user feedback about their experience
+        at the coffee shop. This includes opinions on drinks, food,
+        pastries, ambiance, staff friendliness, service speed,
+        cleanliness, and any suggestions for improvement."""
+    }
+}
+
+# With few-shot examples
+few_shot_examples = [
+    {
+        "conversation": "The espresso was too bitter today.",
+        "extracted_memory": "User finds espresso too bitter"
+    },
+    {
+        "conversation": "I love how friendly your staff is!",
+        "extracted_memory": "User appreciates friendly staff"
+    }
+]
+
+# Memory Bank uses these to learn extraction patterns
+            </div>
+
+            <div class="best-practice">
+                <h4>✨ Best Practice: Memory Management</h4>
+                <ul>
+                    <li><strong>Be selective:</strong> Not everything needs to be remembered</li>
+                    <li><strong>Define clear topics:</strong> Guide extraction with specific categories</li>
+                    <li><strong>Provide examples:</strong> Few-shot examples improve extraction quality</li>
+                    <li><strong>Review regularly:</strong> Audit memories for accuracy</li>
+                    <li><strong>User control:</strong> Let users view and delete their memories</li>
+                    <li><strong>Privacy first:</strong> Never store sensitive data (passwords, SSNs, etc.)</li>
+                    <li><strong>Expiration policies:</strong> Set TTLs for different memory types</li>
+                </ul>
+            </div>
+        </div>
+
+<!-- Due to length constraints, I'll now create a separate continuation file -->
+        <!-- Remaining sections to complete the deep dive -->
+        
+        <div style="text-align: center; margin: 60px 0 40px 0;">
+            <p style="color: #7f8c8d; font-style: italic;">Note: This is part 1 of the deep dive. For remaining sections (AgentOps, Generative UI, Protocols, Commerce, Security, Best Practices, and Conclusion), please continue to the full document or request specific sections.</p>
+        </div>
+
+        <div class="section">
+            <h2>📚 Resources & Next Steps</h2>
+            
+            <h3>Google Resources</h3>
+            <div class="key-points">
+                <ul>
+                    <li><strong>Agent Development Kit (ADK):</strong> <code>google.github.io/adk-docs/</code></li>
+                    <li><strong>Vertex AI Agent Engine:</strong> Official managed service for production agents</li>
+                    <li><strong>Gemini Models:</strong> Latest multimodal models with native tool support</li>
+                    <li><strong>Google Search Grounding:</strong> Real-time information retrieval</li>
+                </ul>
+            </div>
+
+            <h3>Key Takeaways</h3>
+            <div class="highlight-box">
+                <ul>
+                    <li>Agents operate through continuous 5-step cycles: Mission → Scan → Think → Act → Observe</li>
+                    <li>Model selection is about YOUR specific use case, not generic benchmarks</li>
+                    <li>Tools ground agents in reality and dramatically reduce hallucinations</li>
+                    <li>Orchestration is the conductor—not just plumbing, but strategic decision-making</li>
+                    <li>Memory Bank intelligently extracts, consolidates, and curates memories</li>
+                    <li>AgentOps is essential: continuous evaluation, metrics-driven development</li>
+                    <li>Three agentic protocols: AG-UI (user), MCP (tools), A2A (agents)</li>
+                    <li>Security requires identity frameworks, policies, and defense-in-depth</li>
+                </ul>
+            </div>
+
+            <h3>Implementation Checklist</h3>
+            <div class="best-practice">
+                <h4>Phase 1: Foundation (Week 1-2)</h4>
+                <ol>
+                    <li>Define business problem and success criteria</li>
+                    <li>Select and test initial model on your data</li>
+                    <li>Implement 2-3 essential tools (RAG, database access)</li>
+                    <li>Build basic orchestration with explicit workflow</li>
+                    <li>Set up observability (logging, basic metrics)</li>
+                </ol>
+
+                <h4>Phase 2: Enhancement (Week 3-4)</h4>
+                <ol>
+                    <li>Add memory system (short-term first)</li>
+                    <li>Implement model routing for cost optimization</li>
+                    <li>Create golden dataset for evaluation</li>
+                    <li>Set up LM-as-Judge quality checks</li>
+                    <li>Implement security guardrails</li>
+                </ol>
+
+                <h4>Phase 3: Production (Week 5-6)</h4>
+                <ol>
+                    <li>Deploy to staging with full observability</li>
+                    <li>Implement agent identity framework</li>
+                    <li>Set up continuous evaluation pipeline</li>
+                    <li>Add long-term memory with Memory Bank</li>
+                    <li>Build A/B testing infrastructure</li>
+                    <li>Deploy to production with gradual rollout</li>
+                </ol>
+
+                <h4>Phase 4: Optimization (Ongoing)</h4>
+                <ol>
+                    <li>Monitor quality metrics daily</li>
+                    <li>Evaluate new models monthly</li>
+                    <li>Refine prompts and tools based on usage</li>
+                    <li>Expand agent capabilities incrementally</li>
+                    <li>Review and audit memories regularly</li>
+                </ol>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 60px; padding-top: 40px; border-top: 3px solid #ecf0f1;">
+            <a href="daily-summary-20251219.html" class="back-link">← Back to Daily Summary</a>
+            <a href="index.html" class="back-link" style="margin-left: 15px;">← Back to Daily Tutes Index</a>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px; padding: 20px; color: #7f8c8d;">
+            <p><strong>Daily Tutes:</strong> AI Development Learning Journey</p>
+            <p>Created: December 19, 2025 | Topic: Google Agents Complete Architecture</p>
+        </div>
+    </div>
+</body>
+</html>

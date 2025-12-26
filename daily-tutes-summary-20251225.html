@@ -1,0 +1,1623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Tutes - December 25, 2025 | AI Agent Projects Deep Dive</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            line-height: 1.6;
+            color: #2c3e50;
+            background: #f8f9fa;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header .date {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .header .subtitle {
+            font-size: 1rem;
+            opacity: 0.8;
+            margin-top: 0.5rem;
+        }
+        
+        .nav-back {
+            background: white;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .nav-back a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .nav-back a:hover {
+            text-decoration: underline;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .topics-covered {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .topic-tag {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .section h2 {
+            color: #667eea;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #667eea;
+            font-size: 1.5rem;
+        }
+        
+        .section h3 {
+            color: #2c3e50;
+            margin: 1.5rem 0 1rem 0;
+            font-size: 1.2rem;
+        }
+        
+        .section h4 {
+            color: #555;
+            margin: 1rem 0 0.5rem 0;
+            font-size: 1rem;
+        }
+        
+        .key-point {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 0.8rem;
+            padding: 0.5rem 0;
+        }
+        
+        .key-point::before {
+            content: "→";
+            color: #667eea;
+            font-weight: bold;
+            margin-right: 0.75rem;
+            flex-shrink: 0;
+        }
+        
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.95rem;
+        }
+        
+        .comparison-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0.75rem;
+            text-align: left;
+        }
+        
+        .comparison-table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .comparison-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        
+        .code-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 1.25rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Fira Code', 'Monaco', 'Consolas', monospace;
+            font-size: 0.85rem;
+            margin: 1rem 0;
+            line-height: 1.5;
+        }
+        
+        .code-block .comment {
+            color: #6a9955;
+        }
+        
+        .code-block .keyword {
+            color: #569cd6;
+        }
+        
+        .code-block .string {
+            color: #ce9178;
+        }
+        
+        .code-block .function {
+            color: #dcdcaa;
+        }
+        
+        .architecture-diagram {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 1.5rem;
+            font-family: 'Fira Code', 'Monaco', monospace;
+            font-size: 0.8rem;
+            overflow-x: auto;
+            white-space: pre;
+            line-height: 1.4;
+        }
+        
+        .highlight-box {
+            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+            border-left: 4px solid #667eea;
+            padding: 1rem 1.5rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 1rem 1.5rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .success-box {
+            background: linear-gradient(135deg, #11998e15 0%, #38ef7d15 100%);
+            border-left: 4px solid #11998e;
+            padding: 1rem 1.5rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+        
+        @media (max-width: 768px) {
+            .two-column {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+        }
+        
+        .quick-ref {
+            background: #2c3e50;
+            color: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+        
+        .quick-ref h4 {
+            color: #667eea;
+            margin-bottom: 0.75rem;
+        }
+        
+        .quick-ref code {
+            background: #1e1e1e;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+        
+        .stats-row {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+        
+        .stat-item {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            min-width: 120px;
+        }
+        
+        .stat-item .number {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+        
+        .stat-item .label {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+        
+        .toc {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .toc h3 {
+            margin-bottom: 1rem;
+            color: #667eea;
+        }
+        
+        .toc ul {
+            list-style: none;
+            columns: 2;
+        }
+        
+        .toc li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .toc a {
+            color: #2c3e50;
+            text-decoration: none;
+        }
+        
+        .toc a:hover {
+            color: #667eea;
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 600px) {
+            .toc ul {
+                columns: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📚 Daily Tutes</h1>
+        <div class="date">December 25, 2025</div>
+        <div class="subtitle">AI Agent Projects - Comprehensive Deep Dive</div>
+    </div>
+    
+    <div class="nav-back">
+        <a href="index.html">← Back to Timeline</a>
+    </div>
+    
+    <div class="container">
+        <!-- Stats Row -->
+        <div class="stats-row">
+            <div class="stat-item">
+                <div class="number">2</div>
+                <div class="label">Projects</div>
+            </div>
+            <div class="stat-item">
+                <div class="number">10</div>
+                <div class="label">Technologies</div>
+            </div>
+            <div class="stat-item">
+                <div class="number">2</div>
+                <div class="label">Observability Tools</div>
+            </div>
+            <div class="stat-item">
+                <div class="number">4</div>
+                <div class="label">Issues Solved</div>
+            </div>
+        </div>
+        
+        <!-- Topics Covered -->
+        <div class="topics-covered">
+            <span class="topic-tag">Agno Framework</span>
+            <span class="topic-tag">Multi-Agent Patterns</span>
+            <span class="topic-tag">Phoenix Tracing</span>
+            <span class="topic-tag">Helicone Caching</span>
+            <span class="topic-tag">DuckDB</span>
+            <span class="topic-tag">Streamlit</span>
+            <span class="topic-tag">SerpAPI</span>
+            <span class="topic-tag">Pandas</span>
+            <span class="topic-tag">Structlog</span>
+            <span class="topic-tag">OpenAI GPT-4o</span>
+            <span class="topic-tag">iCalendar</span>
+        </div>
+        
+        <!-- Table of Contents -->
+        <div class="toc">
+            <h3>📑 Table of Contents</h3>
+            <ul>
+                <li><a href="#projects" onclick="event.preventDefault(); document.getElementById('projects').scrollIntoView({behavior: 'smooth'});">1. Projects Overview</a></li>
+                <li><a href="#agno" onclick="event.preventDefault(); document.getElementById('agno').scrollIntoView({behavior: 'smooth'});">2. Agno Framework</a></li>
+                <li><a href="#streamlit" onclick="event.preventDefault(); document.getElementById('streamlit').scrollIntoView({behavior: 'smooth'});">3. Streamlit UI Deep Dive</a></li>
+                <li><a href="#serpapi" onclick="event.preventDefault(); document.getElementById('serpapi').scrollIntoView({behavior: 'smooth'});">4. SerpAPI Deep Dive</a></li>
+                <li><a href="#pandas" onclick="event.preventDefault(); document.getElementById('pandas').scrollIntoView({behavior: 'smooth'});">5. Pandas Deep Dive</a></li>
+                <li><a href="#duckdb" onclick="event.preventDefault(); document.getElementById('duckdb').scrollIntoView({behavior: 'smooth'});">6. DuckDB for Analytics</a></li>
+                <li><a href="#observability" onclick="event.preventDefault(); document.getElementById('observability').scrollIntoView({behavior: 'smooth'});">7. Observability Stack</a></li>
+                <li><a href="#issues" onclick="event.preventDefault(); document.getElementById('issues').scrollIntoView({behavior: 'smooth'});">8. Common Issues & Solutions</a></li>
+                <li><a href="#quickref" onclick="event.preventDefault(); document.getElementById('quickref').scrollIntoView({behavior: 'smooth'});">9. Quick Reference</a></li>
+                <li><a href="#next" onclick="event.preventDefault(); document.getElementById('next').scrollIntoView({behavior: 'smooth'});">10. What's Next</a></li>
+            </ul>
+        </div>
+
+        <!-- Section 1: Projects Overview -->
+        <div class="section" id="projects">
+            <h2>🚀 1. Projects Overview</h2>
+            
+            <h3>Project 01: AI Data Analysis Agent</h3>
+            <div class="highlight-box">
+                <strong>Purpose:</strong> Natural language interface for data analysis using SQL generation
+            </div>
+            
+            <p class="key-point">Load CSV/Excel files and understand data structure automatically</p>
+            <p class="key-point">Answer natural language questions about data</p>
+            <p class="key-point">Generate and execute SQL queries using DuckDB</p>
+            <p class="key-point">Create visualizations and provide statistical insights</p>
+            
+            <h4>Architecture</h4>
+            <div class="architecture-diagram">┌─────────────────────────────────────────────────────────┐
+│                    Streamlit UI                         │
+│  (File upload, chat interface, visualization display)   │
+└─────────────────────────┬───────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────┐
+│                   Data Analysis Agent                    │
+│                      (Agno + GPT-4o)                     │
+│                                                          │
+│  System Prompt: "You are a data analyst..."             │
+│  Capabilities: SQL generation, data interpretation       │
+└─────────────────────────┬───────────────────────────────┘
+                          │
+              ┌───────────┴───────────┐
+              ▼                       ▼
+┌─────────────────────┐   ┌─────────────────────┐
+│    DuckDB Tool      │   │   Pandas Tool       │
+│  (SQL execution)    │   │  (Data manipulation)│
+└─────────────────────┘   └─────────────────────┘
+              │                       │
+              └───────────┬───────────┘
+                          ▼
+                    ┌───────────┐
+                    │  CSV/Excel │
+                    │   Files    │
+                    └───────────┘</div>
+            
+            <h4>Key Files</h4>
+            <table class="comparison-table">
+                <tr>
+                    <th>File</th>
+                    <th>Purpose</th>
+                </tr>
+                <tr>
+                    <td><code>app.py</code></td>
+                    <td>Streamlit UI entry point</td>
+                </tr>
+                <tr>
+                    <td><code>ai_data_analyst.py</code></td>
+                    <td>Agent definition and tools</td>
+                </tr>
+                <tr>
+                    <td><code>src/observability/</code></td>
+                    <td>Phoenix + Helicone setup</td>
+                </tr>
+            </table>
+            
+            <h3>Project 02: AI Travel Agent</h3>
+            <div class="highlight-box">
+                <strong>Purpose:</strong> Multi-agent travel planner with web research and calendar export
+            </div>
+            
+            <p class="key-point">Takes destination and trip duration as input</p>
+            <p class="key-point">Researcher Agent → searches web for activities, hotels, restaurants</p>
+            <p class="key-point">Planner Agent → creates detailed day-by-day itinerary</p>
+            <p class="key-point">Exports plan as downloadable .ics calendar file</p>
+            
+            <h4>Architecture</h4>
+            <div class="architecture-diagram">┌─────────────────────────────────────────────────────────┐
+│                    Streamlit UI                         │
+│  (Destination input, trip display, ICS download)        │
+└─────────────────────────┬───────────────────────────────┘
+                          │
+          ┌───────────────┴───────────────┐
+          ▼                               ▼
+┌─────────────────────┐       ┌─────────────────────┐
+│  Researcher Agent   │       │   Planner Agent     │
+│    (Agno + GPT-4o)  │       │   (Agno + GPT-4o)   │
+│                     │       │                     │
+│ "You are a travel   │       │ "You are a senior   │
+│  researcher..."     │       │  travel planner..." │
+└──────────┬──────────┘       └──────────┬──────────┘
+           │                             │
+           ▼                             │
+┌─────────────────────┐                  │
+│   SerpAPI Tool      │                  │
+│  (Google Search)    │                  │
+└──────────┬──────────┘                  │
+           │                             │
+           │      Research Results       │
+           └──────────────┬──────────────┘
+                          │
+                          ▼
+                 ┌─────────────────┐
+                 │  ICS Generator  │
+                 │  (icalendar)    │
+                 └─────────────────┘</div>
+            
+            <h4>Multi-Agent Handoff Pattern</h4>
+            <div class="code-block"><span class="comment"># Simplified flow - Agent orchestration</span>
+research_results = researcher_agent.run(f<span class="string">"Research {destination}"</span>)
+itinerary = planner_agent.run(f<span class="string">"Create itinerary using: {research_results}"</span>)</div>
+        </div>
+
+        <!-- Section 2: Agno Framework -->
+        <div class="section" id="agno">
+            <h2>🤖 2. Agno Framework Deep Dive</h2>
+            
+            <div class="highlight-box">
+                <strong>What is Agno?</strong> A lightweight, async-first Python framework for building AI agents. Simpler alternative to LangChain.
+            </div>
+            
+            <h3>Agno vs LangChain Comparison</h3>
+            <table class="comparison-table">
+                <tr>
+                    <th>Feature</th>
+                    <th>Agno</th>
+                    <th>LangChain</th>
+                </tr>
+                <tr>
+                    <td>Learning Curve</td>
+                    <td>✅ Low</td>
+                    <td>❌ High</td>
+                </tr>
+                <tr>
+                    <td>Boilerplate</td>
+                    <td>✅ Minimal</td>
+                    <td>❌ Heavy</td>
+                </tr>
+                <tr>
+                    <td>Async Support</td>
+                    <td>✅ Native</td>
+                    <td>⚠️ Added later</td>
+                </tr>
+                <tr>
+                    <td>Flexibility</td>
+                    <td>✅ High</td>
+                    <td>⚠️ Opinionated</td>
+                </tr>
+                <tr>
+                    <td>Community</td>
+                    <td>⚠️ Growing</td>
+                    <td>✅ Large</td>
+                </tr>
+            </table>
+            
+            <h3>Installation</h3>
+            <div class="code-block">pip install agno</div>
+            
+            <h3>Basic Agent Setup</h3>
+            <div class="code-block"><span class="keyword">from</span> agno.agent <span class="keyword">import</span> Agent
+<span class="keyword">from</span> agno.models.openai <span class="keyword">import</span> OpenAIChat
+
+<span class="comment"># Create agent</span>
+agent = Agent(
+    name=<span class="string">"MyAgent"</span>,
+    model=OpenAIChat(id=<span class="string">"gpt-4o"</span>),
+    instructions=<span class="string">"You are a helpful assistant..."</span>,
+    tools=[my_tool_function],
+    markdown=<span class="keyword">True</span>
+)
+
+<span class="comment"># Run agent</span>
+response = agent.run(<span class="string">"What is the weather today?"</span>)
+<span class="function">print</span>(response.content)</div>
+            
+            <h3>Key Concepts</h3>
+            <table class="comparison-table">
+                <tr>
+                    <th>Concept</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td><code>Agent</code></td>
+                    <td>Main class - holds model, instructions, tools</td>
+                </tr>
+                <tr>
+                    <td><code>model</code></td>
+                    <td>LLM to use (OpenAI, Anthropic, etc.)</td>
+                </tr>
+                <tr>
+                    <td><code>instructions</code></td>
+                    <td>System prompt defining agent behavior</td>
+                </tr>
+                <tr>
+                    <td><code>tools</code></td>
+                    <td>Python functions agent can call</td>
+                </tr>
+                <tr>
+                    <td><code>run()</code></td>
+                    <td>Execute agent with user input</td>
+                </tr>
+            </table>
+            
+            <h3>Adding Custom Tools</h3>
+            <div class="code-block"><span class="keyword">def</span> <span class="function">search_web</span>(query: str) -> str:
+    <span class="string">"""Search the web for information."""</span>
+    <span class="comment"># Tool implementation</span>
+    <span class="keyword">return</span> results
+
+agent = Agent(
+    model=OpenAIChat(id=<span class="string">"gpt-4o"</span>),
+    tools=[search_web]  <span class="comment"># Agent can now call this</span>
+)</div>
+            
+            <h3>Multi-Agent Pattern (Used in Travel Agent)</h3>
+            <div class="code-block"><span class="comment"># Agent 1: Researcher</span>
+researcher = Agent(
+    name=<span class="string">"Researcher"</span>,
+    model=OpenAIChat(id=<span class="string">"gpt-4o"</span>),
+    instructions=<span class="string">"You research topics thoroughly..."</span>,
+    tools=[serpapi_search]
+)
+
+<span class="comment"># Agent 2: Writer</span>
+writer = Agent(
+    name=<span class="string">"Writer"</span>,
+    model=OpenAIChat(id=<span class="string">"gpt-4o"</span>),
+    instructions=<span class="string">"You write engaging content..."</span>
+)
+
+<span class="comment"># Orchestration - Handoff Pattern</span>
+research = researcher.run(<span class="string">"Research AI trends"</span>)
+article = writer.run(f<span class="string">"Write article based on: {research.content}"</span>)</div>
+            
+            <div class="success-box">
+                <strong>📚 Agno Resources:</strong><br>
+                Website: <a href="https://agno.com">https://agno.com</a><br>
+                Docs: <a href="https://docs.agno.com">https://docs.agno.com</a><br>
+                GitHub: <a href="https://github.com/agno-ai/agno">https://github.com/agno-ai/agno</a>
+            </div>
+        </div>
+
+        <!-- Section 3: Streamlit UI Deep Dive -->
+        <div class="section" id="streamlit">
+            <h2>🎨 3. Streamlit UI Deep Dive</h2>
+            
+            <div class="highlight-box">
+                <strong>What is Streamlit?</strong> A Python framework for building interactive web apps with minimal code. No HTML/CSS/JS knowledge required - write Python, get a web app!
+            </div>
+            
+            <h3>Why Streamlit for AI Agents?</h3>
+            <table class="comparison-table">
+                <tr>
+                    <th>Feature</th>
+                    <th>Benefit for AI Apps</th>
+                </tr>
+                <tr>
+                    <td>Rapid Prototyping</td>
+                    <td>Build UI in minutes, not hours</td>
+                </tr>
+                <tr>
+                    <td>Python Native</td>
+                    <td>No context switching - same language as your agent</td>
+                </tr>
+                <tr>
+                    <td>Built-in Widgets</td>
+                    <td>File upload, chat interface, charts ready to use</td>
+                </tr>
+                <tr>
+                    <td>Hot Reload</td>
+                    <td>See changes instantly during development</td>
+                </tr>
+                <tr>
+                    <td>Free Hosting</td>
+                    <td>Streamlit Cloud offers free deployment</td>
+                </tr>
+            </table>
+            
+            <h3>Installation & Running</h3>
+            <div class="code-block"><span class="comment"># Install</span>
+pip install streamlit
+
+<span class="comment"># Run your app</span>
+streamlit run app.py
+
+<span class="comment"># Opens at http://localhost:8501</span></div>
+            
+            <h3>Basic App Structure</h3>
+            <div class="code-block"><span class="comment"># app.py</span>
+<span class="keyword">import</span> streamlit <span class="keyword">as</span> st
+
+<span class="comment"># Page config (must be first Streamlit command)</span>
+st.set_page_config(
+    page_title=<span class="string">"AI Data Analyst"</span>,
+    page_icon=<span class="string">"🤖"</span>,
+    layout=<span class="string">"wide"</span>
+)
+
+<span class="comment"># Title and description</span>
+st.title(<span class="string">"🤖 AI Data Analyst"</span>)
+st.markdown(<span class="string">"Upload your data and ask questions in natural language!"</span>)
+
+<span class="comment"># Sidebar for settings</span>
+<span class="keyword">with</span> st.sidebar:
+    st.header(<span class="string">"Settings"</span>)
+    api_key = st.text_input(<span class="string">"OpenAI API Key"</span>, type=<span class="string">"password"</span>)
+    
+<span class="comment"># Main content</span>
+uploaded_file = st.file_uploader(<span class="string">"Upload CSV"</span>, type=[<span class="string">"csv"</span>, <span class="string">"xlsx"</span>])
+
+<span class="keyword">if</span> uploaded_file:
+    st.success(<span class="string">"File uploaded successfully!"</span>)</div>
+            
+            <h3>Essential Components Reference</h3>
+            <table class="comparison-table">
+                <tr>
+                    <th>Component</th>
+                    <th>Purpose</th>
+                    <th>Example Code</th>
+                </tr>
+                <tr>
+                    <td><code>st.title()</code></td>
+                    <td>Large page title</td>
+                    <td><code>st.title("My App")</code></td>
+                </tr>
+                <tr>
+                    <td><code>st.header()</code></td>
+                    <td>Section header</td>
+                    <td><code>st.header("Section 1")</code></td>
+                </tr>
+                <tr>
+                    <td><code>st.text_input()</code></td>
+                    <td>Single line input</td>
+                    <td><code>name = st.text_input("Name:")</code></td>
+                </tr>
+                <tr>
+                    <td><code>st.text_area()</code></td>
+                    <td>Multi-line input</td>
+                    <td><code>text = st.text_area("Paste:")</code></td>
+                </tr>
+                <tr>
+                    <td><code>st.button()</code></td>
+                    <td>Clickable button</td>
+                    <td><code>if st.button("Run"):</code></td>
+                </tr>
+                <tr>
+                    <td><code>st.file_uploader()</code></td>
+                    <td>File upload widget</td>
+                    <td><code>file = st.file_uploader("CSV")</code></td>
+                </tr>
+                <tr>
+                    <td><code>st.download_button()</code></td>
+                    <td>File download</td>
+                    <td><code>st.download_button("Get", data)</code></td>
+                </tr>
+                <tr>
+                    <td><code>st.dataframe()</code></td>
+                    <td>Display DataFrame</td>
+                    <td><code>st.dataframe(df)</code></td>
+                </tr>
+                <tr>
+                    <td><code>st.spinner()</code></td>
+                    <td>Loading indicator</td>
+                    <td><code>with st.spinner("..."):</code></td>
+                </tr>
+                <tr>
+                    <td><code>st.success()</code></td>
+                    <td>Success message</td>
+                    <td><code>st.success("Done!")</code></td>
+                </tr>
+                <tr>
+                    <td><code>st.error()</code></td>
+                    <td>Error message</td>
+                    <td><code>st.error("Failed!")</code></td>
+                </tr>
+            </table>
+            
+            <h3>Session State - Persisting Data Across Reruns</h3>
+            <div class="warning-box">
+                <strong>⚠️ Critical Concept:</strong> Streamlit reruns your entire script on every interaction. Use session_state to persist data!
+            </div>
+            
+            <div class="code-block"><span class="comment"># Initialize session state (runs only once)</span>
+<span class="keyword">if</span> <span class="string">"messages"</span> <span class="keyword">not in</span> st.session_state:
+    st.session_state.messages = []
+    
+<span class="keyword">if</span> <span class="string">"agent"</span> <span class="keyword">not in</span> st.session_state:
+    st.session_state.agent = create_agent()
+
+<span class="comment"># Add to session state</span>
+st.session_state.messages.append({
+    <span class="string">"role"</span>: <span class="string">"user"</span>, 
+    <span class="string">"content"</span>: user_input
+})
+
+<span class="comment"># Read from session state</span>
+<span class="keyword">for</span> msg <span class="keyword">in</span> st.session_state.messages:
+    st.chat_message(msg[<span class="string">"role"</span>]).write(msg[<span class="string">"content"</span>])</div>
+            
+            <h3>Caching - Critical for Performance</h3>
+            <div class="code-block"><span class="comment"># @st.cache_resource - For objects that shouldn't be recreated</span>
+<span class="comment"># Use for: database connections, ML models, Phoenix sessions</span>
+<span class="keyword">@st.cache_resource</span>
+<span class="keyword">def</span> <span class="function">setup_phoenix</span>():
+    <span class="string">"""Setup Phoenix once, not on every rerun."""</span>
+    session = px.launch_app()
+    register(project_name=<span class="string">"my-project"</span>, auto_instrument=<span class="keyword">True</span>)
+    <span class="keyword">return</span> session
+
+<span class="comment"># @st.cache_data - For data that can be serialized</span>
+<span class="comment"># Use for: DataFrames, API responses, computation results</span>
+<span class="keyword">@st.cache_data</span>
+<span class="keyword">def</span> <span class="function">load_data</span>(file):
+    <span class="string">"""Cache loaded data to avoid re-reading."""</span>
+    <span class="keyword">return</span> pd.read_csv(file)
+
+<span class="comment"># @st.cache_data with TTL (time-to-live)</span>
+<span class="keyword">@st.cache_data</span>(ttl=3600)  <span class="comment"># Cache for 1 hour</span>
+<span class="keyword">def</span> <span class="function">fetch_api_data</span>(endpoint):
+    <span class="keyword">return</span> requests.get(endpoint).json()</div>
+            
+            <h3>Building a Chat Interface (Used in Both Projects)</h3>
+            <div class="code-block"><span class="keyword">import</span> streamlit <span class="keyword">as</span> st
+
+<span class="comment"># Initialize chat history</span>
+<span class="keyword">if</span> <span class="string">"messages"</span> <span class="keyword">not in</span> st.session_state:
+    st.session_state.messages = []
+
+<span class="comment"># Display chat history</span>
+<span class="keyword">for</span> message <span class="keyword">in</span> st.session_state.messages:
+    <span class="keyword">with</span> st.chat_message(message[<span class="string">"role"</span>]):
+        st.markdown(message[<span class="string">"content"</span>])
+
+<span class="comment"># Chat input</span>
+<span class="keyword">if</span> prompt := st.chat_input(<span class="string">"Ask about your data..."</span>):
+    <span class="comment"># Add user message to history</span>
+    st.session_state.messages.append({<span class="string">"role"</span>: <span class="string">"user"</span>, <span class="string">"content"</span>: prompt})
+    
+    <span class="comment"># Display user message</span>
+    <span class="keyword">with</span> st.chat_message(<span class="string">"user"</span>):
+        st.markdown(prompt)
+    
+    <span class="comment"># Generate response</span>
+    <span class="keyword">with</span> st.chat_message(<span class="string">"assistant"</span>):
+        <span class="keyword">with</span> st.spinner(<span class="string">"Thinking..."</span>):
+            response = agent.run(prompt)
+            st.markdown(response.content)
+    
+    <span class="comment"># Add assistant message to history</span>
+    st.session_state.messages.append({<span class="string">"role"</span>: <span class="string">"assistant"</span>, <span class="string">"content"</span>: response.content})</div>
+            
+            <h3>Layout Options</h3>
+            <div class="code-block"><span class="comment"># Columns - side by side layout</span>
+col1, col2 = st.columns(2)
+<span class="keyword">with</span> col1:
+    st.header(<span class="string">"Left Side"</span>)
+<span class="keyword">with</span> col2:
+    st.header(<span class="string">"Right Side"</span>)
+
+<span class="comment"># Tabs - tabbed interface</span>
+tab1, tab2 = st.tabs([<span class="string">"Upload"</span>, <span class="string">"Analysis"</span>])
+<span class="keyword">with</span> tab1:
+    st.file_uploader(<span class="string">"Upload file"</span>)
+<span class="keyword">with</span> tab2:
+    st.write(<span class="string">"Analysis results here"</span>)
+
+<span class="comment"># Expander - collapsible section</span>
+<span class="keyword">with</span> st.expander(<span class="string">"See details"</span>):
+    st.write(<span class="string">"Hidden content here"</span>)
+
+<span class="comment"># Sidebar - persistent side panel</span>
+<span class="keyword">with</span> st.sidebar:
+    st.title(<span class="string">"Settings"</span>)
+    option = st.selectbox(<span class="string">"Model"</span>, [<span class="string">"gpt-4o"</span>, <span class="string">"gpt-4o-mini"</span>])</div>
+            
+            <div class="success-box">
+                <strong>📚 Streamlit Resources:</strong><br>
+                Website: <a href="https://streamlit.io">https://streamlit.io</a><br>
+                Docs: <a href="https://docs.streamlit.io">https://docs.streamlit.io</a><br>
+                Components Gallery: <a href="https://streamlit.io/components">https://streamlit.io/components</a><br>
+                Cheat Sheet: <a href="https://docs.streamlit.io/library/cheatsheet">https://docs.streamlit.io/library/cheatsheet</a>
+            </div>
+        </div>
+
+        <!-- Section 4: SerpAPI Deep Dive -->
+        <div class="section" id="serpapi">
+            <h2>🔍 4. SerpAPI Deep Dive</h2>
+            
+            <div class="highlight-box">
+                <strong>What is SerpAPI?</strong> A real-time API to scrape Google search results and return structured JSON. No need to handle CAPTCHAs, proxies, or parsing HTML - just get clean data!
+            </div>
+            
+            <h3>Why SerpAPI for AI Agents?</h3>
+            <table class="comparison-table">
+                <tr>
+                    <th>Challenge</th>
+                    <th>Without SerpAPI</th>
+                    <th>With SerpAPI</th>
+                </tr>
+                <tr>
+                    <td>Web Scraping</td>
+                    <td>Handle CAPTCHAs, blocks, proxies</td>
+                    <td>Just make API call</td>
+                </tr>
+                <tr>
+                    <td>Parsing Results</td>
+                    <td>Parse messy HTML</td>
+                    <td>Clean JSON structure</td>
+                </tr>
+                <tr>
+                    <td>Rate Limits</td>
+                    <td>Get blocked frequently</td>
+                    <td>Built-in handling</td>
+                </tr>
+                <tr>
+                    <td>Maintenance</td>
+                    <td>Update when Google changes</td>
+                    <td>SerpAPI handles it</td>
+                </tr>
+            </table>
+            
+            <h3>How It Works</h3>
+            <div class="architecture-diagram">Your Agent → SerpAPI → Google Search
+                                    ↓
+                              Clean JSON Response
+                                    ↓
+                           Agent Processes Results</div>
+            
+            <h3>Installation</h3>
+            <div class="code-block">pip install google-search-results</div>
+            
+            <h3>Basic Usage</h3>
+            <div class="code-block"><span class="keyword">from</span> serpapi <span class="keyword">import</span> GoogleSearch
+
+<span class="comment"># Setup search parameters</span>
+params = {
+    <span class="string">"q"</span>: <span class="string">"best restaurants in Tokyo"</span>,
+    <span class="string">"api_key"</span>: <span class="string">"your_serpapi_key"</span>,
+    <span class="string">"num"</span>: 10,  <span class="comment"># Number of results</span>
+    <span class="string">"hl"</span>: <span class="string">"en"</span>,  <span class="comment"># Language</span>
+    <span class="string">"gl"</span>: <span class="string">"us"</span>   <span class="comment"># Country</span>
+}
+
+<span class="comment"># Execute search</span>
+search = GoogleSearch(params)
+results = search.get_dict()
+
+<span class="comment"># Process organic results</span>
+<span class="keyword">for</span> result <span class="keyword">in</span> results.get(<span class="string">"organic_results"</span>, []):
+    <span class="function">print</span>(f<span class="string">"Title: {result['title']}"</span>)
+    <span class="function">print</span>(f<span class="string">"Link: {result['link']}"</span>)
+    <span class="function">print</span>(f<span class="string">"Snippet: {result['snippet']}"</span>)
+    <span class="function">print</span>(<span class="string">"---"</span>)</div>
+            
+            <h3>Response Structure</h3>
+            <div class="code-block"><span class="comment"># Example SerpAPI Response</span>
+{
+    <span class="string">"search_metadata"</span>: {
+        <span class="string">"status"</span>: <span class="string">"Success"</span>,
+        <span class="string">"total_time_taken"</span>: 1.23
+    },
+    <span class="string">"organic_results"</span>: [
+        {
+            <span class="string">"position"</span>: 1,
+            <span class="string">"title"</span>: <span class="string">"Top 10 Restaurants in Tokyo"</span>,
+            <span class="string">"link"</span>: <span class="string">"https://example.com/tokyo-restaurants"</span>,
+            <span class="string">"snippet"</span>: <span class="string">"Discover the best dining..."</span>,
+            <span class="string">"displayed_link"</span>: <span class="string">"example.com › tokyo"</span>
+        },
+        ...
+    ],
+    <span class="string">"related_searches"</span>: [...],
+    <span class="string">"knowledge_graph"</span>: {...}
+}</div>
+            
+            <h3>Using with Agno (Built-in Integration)</h3>
+            <div class="code-block"><span class="keyword">from</span> agno.agent <span class="keyword">import</span> Agent
+<span class="keyword">from</span> agno.models.openai <span class="keyword">import</span> OpenAIChat
+<span class="keyword">from</span> agno.tools.serpapi <span class="keyword">import</span> SerpApiTools
+
+<span class="comment"># Agno provides built-in SerpAPI tool</span>
+researcher = Agent(
+    name=<span class="string">"Researcher"</span>,
+    model=OpenAIChat(id=<span class="string">"gpt-4o"</span>),
+    tools=[SerpApiTools()],  <span class="comment"># Pre-built tool!</span>
+    instructions=<span class="string">"""You are a travel researcher. 
+    Search the web for information about destinations, 
+    hotels, restaurants, and activities."""</span>
+)
+
+<span class="comment"># Agent can now search the web</span>
+response = researcher.run(<span class="string">"Find the top 5 hotels in Paris"</span>)</div>
+            
+            <h3>Custom SerpAPI Tool (Manual Integration)</h3>
+            <div class="code-block"><span class="keyword">import</span> os
+<span class="keyword">from</span> serpapi <span class="keyword">import</span> GoogleSearch
+
+<span class="keyword">def</span> <span class="function">search_web</span>(query: str, num_results: int = 5) -> str:
+    <span class="string">"""
+    Search Google and return formatted results.
+    
+    Args:
+        query: Search query string
+        num_results: Number of results to return
+    
+    Returns:
+        Formatted string with search results
+    """</span>
+    params = {
+        <span class="string">"q"</span>: query,
+        <span class="string">"api_key"</span>: os.getenv(<span class="string">"SERPAPI_API_KEY"</span>),
+        <span class="string">"num"</span>: num_results
+    }
+    
+    search = GoogleSearch(params)
+    results = search.get_dict()
+    
+    <span class="comment"># Format results for LLM consumption</span>
+    formatted = []
+    <span class="keyword">for</span> r <span class="keyword">in</span> results.get(<span class="string">"organic_results"</span>, []):
+        formatted.append(f<span class="string">"""
+Title: {r.get('title', 'N/A')}
+URL: {r.get('link', 'N/A')}
+Summary: {r.get('snippet', 'N/A')}
+"""</span>)
+    
+    <span class="keyword">return</span> <span class="string">"\n---\n"</span>.join(formatted)
+
+<span class="comment"># Use as agent tool</span>
+agent = Agent(
+    model=OpenAIChat(id=<span class="string">"gpt-4o"</span>),
+    tools=[search_web]
+)</div>
+            
+            <h3>Pricing</h3>
+            <table class="comparison-table">
+                <tr>
+                    <th>Plan</th>
+                    <th>Searches/Month</th>
+                    <th>Cost</th>
+                </tr>
+                <tr>
+                    <td>Free</td>
+                    <td>100</td>
+                    <td>$0</td>
+                </tr>
+                <tr>
+                    <td>Developer</td>
+                    <td>5,000</td>
+                    <td>$75/month</td>
+                </tr>
+                <tr>
+                    <td>Business</td>
+                    <td>15,000</td>
+                    <td>$150/month</td>
+                </tr>
+                <tr>
+                    <td>Enterprise</td>
+                    <td>Custom</td>
+                    <td>Contact sales</td>
+                </tr>
+            </table>
+            
+            <h3>Other Search Types Available</h3>
+            <table class="comparison-table">
+                <tr>
+                    <th>Search Type</th>
+                    <th>Use Case</th>
+                </tr>
+                <tr>
+                    <td>Google Search</td>
+                    <td>General web search</td>
+                </tr>
+                <tr>
+                    <td>Google Maps</td>
+                    <td>Local businesses, directions</td>
+                </tr>
+                <tr>
+                    <td>Google Images</td>
+                    <td>Image search</td>
+                </tr>
+                <tr>
+                    <td>Google News</td>
+                    <td>News articles</td>
+                </tr>
+                <tr>
+                    <td>Google Shopping</td>
+                    <td>Product search</td>
+                </tr>
+                <tr>
+                    <td>YouTube</td>
+                    <td>Video search</td>
+                </tr>
+            </table>
+            
+            <div class="success-box">
+                <strong>📚 SerpAPI Resources:</strong><br>
+                Website: <a href="https://serpapi.com">https://serpapi.com</a><br>
+                Docs: <a href="https://serpapi.com/search-api">https://serpapi.com/search-api</a><br>
+                Playground: <a href="https://serpapi.com/playground">https://serpapi.com/playground</a><br>
+                Dashboard: <a href="https://serpapi.com/dashboard">https://serpapi.com/dashboard</a>
+            </div>
+        </div>
+
+        <!-- Section 5: Pandas Deep Dive -->
+        <div class="section" id="pandas">
+            <h2>🐼 5. Pandas Deep Dive</h2>
+            
+            <div class="highlight-box">
+                <strong>What is Pandas?</strong> The essential Python library for data manipulation and analysis. It provides DataFrames - think Excel spreadsheets but programmable and infinitely more powerful.
+            </div>
+            
+            <h3>Why Pandas for AI Data Agents?</h3>
+            <table class="comparison-table">
+                <tr>
+                    <th>Task</th>
+                    <th>Pandas Solution</th>
+                </tr>
+                <tr>
+                    <td>Load data from any format</td>
+                    <td><code>pd.read_csv()</code>, <code>pd.read_excel()</code>, <code>pd.read_json()</code></td>
+                </tr>
+                <tr>
+                    <td>Understand data structure</td>
+                    <td><code>df.info()</code>, <code>df.describe()</code>, <code>df.head()</code></td>
+                </tr>
+                <tr>
+                    <td>Clean and transform</td>
+                    <td><code>df.fillna()</code>, <code>df.drop_duplicates()</code>, <code>df.apply()</code></td>
+                </tr>
+                <tr>
+                    <td>Aggregate and analyze</td>
+                    <td><code>df.groupby()</code>, <code>df.pivot_table()</code></td>
+                </tr>
+                <tr>
+                    <td>Export results</td>
+                    <td><code>df.to_csv()</code>, <code>df.to_markdown()</code></td>
+                </tr>
+            </table>
+            
+            <h3>Installation</h3>
+            <div class="code-block">pip install pandas</div>
+            
+            <h3>Loading Data</h3>
+            <div class="code-block"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd
+
+<span class="comment"># Load from different sources</span>
+df = pd.read_csv(<span class="string">"sales.csv"</span>)
+df = pd.read_excel(<span class="string">"report.xlsx"</span>, sheet_name=<span class="string">"Sheet1"</span>)
+df = pd.read_json(<span class="string">"data.json"</span>)
+
+<span class="comment"># Load from Streamlit file uploader</span>
+uploaded_file = st.file_uploader(<span class="string">"Upload CSV"</span>)
+<span class="keyword">if</span> uploaded_file:
+    df = pd.read_csv(uploaded_file)</div>
+            
+            <h3>Understanding Your Data</h3>
+            <div class="code-block"><span class="comment"># First few rows</span>
+df.head()
+<span class="comment">#    product    revenue  quantity
+# 0  Widget A   1000     50
+# 1  Widget B   2500     100
+# ...</span>
+
+<span class="comment"># Data types and memory</span>
+df.info()
+<span class="comment"># <class 'pandas.core.frame.DataFrame'>
+# Columns: product (object), revenue (int64), quantity (int64)
+# Memory usage: 1.2 KB</span>
+
+<span class="comment"># Statistical summary</span>
+df.describe()
+<span class="comment">#        revenue    quantity
+# count  100        100
+# mean   1500       75
+# std    500        25
+# min    100        10
+# max    5000       200</span>
+
+<span class="comment"># Column names</span>
+df.columns.tolist()
+<span class="comment"># ['product', 'revenue', 'quantity']</span>
+
+<span class="comment"># Shape (rows, columns)</span>
+df.shape
+<span class="comment"># (100, 3)</span></div>
+            
+            <h3>Selecting Data</h3>
+            <div class="code-block"><span class="comment"># Select single column</span>
+df[<span class="string">"revenue"</span>]
+
+<span class="comment"># Select multiple columns</span>
+df[[<span class="string">"product"</span>, <span class="string">"revenue"</span>]]
+
+<span class="comment"># Filter rows</span>
+df[df[<span class="string">"revenue"</span>] > 1000]
+
+<span class="comment"># Multiple conditions</span>
+df[(df[<span class="string">"revenue"</span>] > 1000) & (df[<span class="string">"quantity"</span>] < 50)]
+
+<span class="comment"># Select by position</span>
+df.iloc[0:5]  <span class="comment"># First 5 rows</span>
+
+<span class="comment"># Select by label</span>
+df.loc[df[<span class="string">"product"</span>] == <span class="string">"Widget A"</span>]</div>
+            
+            <h3>Transforming Data</h3>
+            <div class="code-block"><span class="comment"># Add new column</span>
+df[<span class="string">"unit_price"</span>] = df[<span class="string">"revenue"</span>] / df[<span class="string">"quantity"</span>]
+
+<span class="comment"># Apply function to column</span>
+df[<span class="string">"product_upper"</span>] = df[<span class="string">"product"</span>].apply(<span class="keyword">lambda</span> x: x.upper())
+
+<span class="comment"># Fill missing values</span>
+df[<span class="string">"revenue"</span>].fillna(0, inplace=<span class="keyword">True</span>)
+
+<span class="comment"># Drop duplicates</span>
+df.drop_duplicates(subset=[<span class="string">"product"</span>], inplace=<span class="keyword">True</span>)
+
+<span class="comment"># Rename columns</span>
+df.rename(columns={<span class="string">"revenue"</span>: <span class="string">"total_revenue"</span>}, inplace=<span class="keyword">True</span>)
+
+<span class="comment"># Sort values</span>
+df.sort_values(<span class="string">"revenue"</span>, ascending=<span class="keyword">False</span>)</div>
+            
+            <h3>Aggregation & Analysis</h3>
+            <div class="code-block"><span class="comment"># Group by and aggregate</span>
+df.groupby(<span class="string">"product"</span>)[<span class="string">"revenue"</span>].sum()
+
+<span class="comment"># Multiple aggregations</span>
+df.groupby(<span class="string">"product"</span>).agg({
+    <span class="string">"revenue"</span>: [<span class="string">"sum"</span>, <span class="string">"mean"</span>, <span class="string">"count"</span>],
+    <span class="string">"quantity"</span>: <span class="string">"sum"</span>
+})
+
+<span class="comment"># Pivot table</span>
+pd.pivot_table(
+    df, 
+    values=<span class="string">"revenue"</span>, 
+    index=<span class="string">"product"</span>, 
+    columns=<span class="string">"region"</span>,
+    aggfunc=<span class="string">"sum"</span>
+)
+
+<span class="comment"># Value counts</span>
+df[<span class="string">"product"</span>].value_counts()
+
+<span class="comment"># Correlation matrix</span>
+df[[<span class="string">"revenue"</span>, <span class="string">"quantity"</span>]].corr()</div>
+            
+            <h3>Pandas as Agent Tool</h3>
+            <div class="code-block"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd
+
+<span class="keyword">def</span> <span class="function">analyze_dataframe</span>(df: pd.DataFrame, operation: str) -> str:
+    <span class="string">"""
+    Perform analysis operations on a DataFrame.
+    
+    Args:
+        df: The DataFrame to analyze
+        operation: One of 'summary', 'columns', 'stats', 'sample'
+    
+    Returns:
+        Formatted string with analysis results
+    """</span>
+    <span class="keyword">if</span> operation == <span class="string">"summary"</span>:
+        <span class="keyword">return</span> f<span class="string">"""
+Rows: {len(df)}
+Columns: {len(df.columns)}
+Column Names: {', '.join(df.columns.tolist())}
+Memory Usage: {df.memory_usage(deep=True).sum() / 1024:.2f} KB
+"""</span>
+    <span class="keyword">elif</span> operation == <span class="string">"stats"</span>:
+        <span class="keyword">return</span> df.describe().to_markdown()
+    <span class="keyword">elif</span> operation == <span class="string">"sample"</span>:
+        <span class="keyword">return</span> df.head(10).to_markdown()
+    <span class="keyword">else</span>:
+        <span class="keyword">return</span> <span class="string">"Unknown operation"</span>
+
+<span class="comment"># Use in agent</span>
+agent = Agent(
+    model=OpenAIChat(id=<span class="string">"gpt-4o"</span>),
+    tools=[analyze_dataframe]
+)</div>
+            
+            <h3>Pandas vs DuckDB - When to Use Which?</h3>
+            <table class="comparison-table">
+                <tr>
+                    <th>Scenario</th>
+                    <th>Best Choice</th>
+                    <th>Reason</th>
+                </tr>
+                <tr>
+                    <td>Small data (&lt;100MB)</td>
+                    <td>Pandas</td>
+                    <td>Faster for small operations</td>
+                </tr>
+                <tr>
+                    <td>Large data (&gt;1GB)</td>
+                    <td>DuckDB</td>
+                    <td>Memory efficient, columnar</td>
+                </tr>
+                <tr>
+                    <td>Complex transformations</td>
+                    <td>Pandas</td>
+                    <td>More flexible API</td>
+                </tr>
+                <tr>
+                    <td>SQL-style queries</td>
+                    <td>DuckDB</td>
+                    <td>Native SQL support</td>
+                </tr>
+                <tr>
+                    <td>LLM-generated queries</td>
+                    <td>DuckDB</td>
+                    <td>LLMs are better at SQL</td>
+                </tr>
+                <tr>
+                    <td>Data cleaning</td>
+                    <td>Pandas</td>
+                    <td>Better string/date handling</td>
+                </tr>
+            </table>
+            
+            <h3>Combining Pandas + DuckDB</h3>
+            <div class="code-block"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd
+<span class="keyword">import</span> duckdb
+
+<span class="comment"># Load with Pandas (good for initial exploration)</span>
+df = pd.read_csv(<span class="string">"sales.csv"</span>)
+
+<span class="comment"># Clean with Pandas</span>
+df[<span class="string">"date"</span>] = pd.to_datetime(df[<span class="string">"date"</span>])
+df = df.dropna()
+
+<span class="comment"># Query with DuckDB (fast for analytics)</span>
+result = duckdb.query(<span class="string">"""
+    SELECT product, SUM(revenue) as total
+    FROM df
+    GROUP BY product
+    ORDER BY total DESC
+    LIMIT 10
+"""</span>).df()  <span class="comment"># Returns Pandas DataFrame!</span>
+
+<span class="comment"># Display in Streamlit</span>
+st.dataframe(result)</div>
+            
+            <div class="success-box">
+                <strong>📚 Pandas Resources:</strong><br>
+                Docs: <a href="https://pandas.pydata.org/docs/">https://pandas.pydata.org/docs/</a><br>
+                Cheat Sheet: <a href="https://pandas.pydata.org/Pandas_Cheat_Sheet.pdf">Pandas Cheat Sheet PDF</a><br>
+                User Guide: <a href="https://pandas.pydata.org/docs/user_guide/index.html">https://pandas.pydata.org/docs/user_guide/</a>
+            </div>
+        </div>
+
+        <!-- Section 6: DuckDB -->
+        <div class="section" id="duckdb">
+            <h2>🦆 6. DuckDB for Analytics</h2>
+            
+            <div class="highlight-box">
+                <strong>What is DuckDB?</strong> In-process SQL database optimized for analytics. Like SQLite but for OLAP workloads. Perfect for AI agents that need to run SQL on data files!
+            </div>
+            
+            <h3>SQLite vs DuckDB</h3>
+            <table class="comparison-table">
+                <tr>
+                    <th>Feature</th>
+                    <th>SQLite</th>
+                    <th>DuckDB</th>
+                </tr>
+                <tr>
+                    <td>Optimized For</td>
+                    <td>Transactions (OLTP)</td>
+                    <td>Analytics (OLAP)</td>
+                </tr>
+                <tr>
+                    <td>Storage</td>
+                    <td>Row-based</td>
+                    <td>Column-based</td>
+                </tr>
+                <tr>
+                    <td>Best Use</td>
+                    <td>Apps (read/write records)</td>
+                    <td>Analysis (aggregate millions)</td>
+                </tr>
+                <tr>
+                    <td>File Query</td>
+                    <td>Must import first</td>
+                    <td>Query directly!</td>
+                </tr>
+            </table>
+            
+            <h3>Why DuckDB for AI Data Agents?</h3>
+            <p class="key-point"><strong>No Server Required</strong> → Runs in-process, zero setup</p>
+            <p class="key-point"><strong>Query Files Directly</strong> → No import step needed</p>
+            <p class="key-point"><strong>Blazing Fast</strong> → Columnar storage for fast aggregations</p>
+            <p class="key-point"><strong>LLM-Friendly</strong> → LLMs generate SQL well, DuckDB executes it</p>
+            
+            <h3>Installation</h3>
+            <div class="code-block">pip install duckdb</div>
+            
+            <h3>Query CSV Directly</h3>
+            <div class="code-block"><span class="keyword">import</span> duckdb
+
+<span class="comment"># Query CSV directly - no import needed!</span>
+result = duckdb.query(<span class="string">"""
+    SELECT product, SUM(revenue) as total
+    FROM 'sales.csv'
+    GROUP BY product
+    ORDER BY total DESC
+    LIMIT 5
+"""</span>).fetchall()
+
+<span class="comment"># Returns list of tuples</span>
+<span class="function">print</span>(result)
+<span class="comment"># [('Widget A', 50000), ('Widget B', 45000), ...]</span></div>
+            
+            <h3>Integration with Pandas</h3>
+            <div class="code-block"><span class="keyword">import</span> duckdb
+<span class="keyword">import</span> pandas <span class="keyword">as</span> pd
+
+<span class="comment"># Load DataFrame</span>
+df = pd.read_csv(<span class="string">"sales.csv"</span>)
+
+<span class="comment"># Query DataFrame with SQL!</span>
+result = duckdb.query(<span class="string">"""
+    SELECT * FROM df WHERE revenue > 1000
+"""</span>).df()  <span class="comment"># Returns Pandas DataFrame</span></div>
+            
+            <h3>As Agent Tool</h3>
+            <div class="code-block"><span class="keyword">def</span> <span class="function">execute_sql</span>(query: str) -> str:
+    <span class="string">"""Execute SQL query on the loaded data."""</span>
+    <span class="keyword">try</span>:
+        result = duckdb.query(query).df()
+        <span class="keyword">return</span> result.to_markdown()
+    <span class="keyword">except</span> Exception <span class="keyword">as</span> e:
+        <span class="keyword">return</span> f<span class="string">"Error: {e}"</span>
+
+agent = Agent(
+    model=OpenAIChat(id=<span class="string">"gpt-4o"</span>),
+    tools=[execute_sql],
+    instructions=<span class="string">"Generate SQL queries to analyze data..."</span>
+)</div>
+            
+            <div class="success-box">
+                <strong>📚 DuckDB Resources:</strong><br>
+                Website: <a href="https://duckdb.org">https://duckdb.org</a><br>
+                Docs: <a href="https://duckdb.org/docs/">https://duckdb.org/docs/</a><br>
+                Python API: <a href="https://duckdb.org/docs/api/python/overview">https://duckdb.org/docs/api/python/</a>
+            </div>
+        </div>
+
+        <!-- Section 7: Observability Stack -->
+        <div class="section" id="observability">
+            <h2>🔍 7. Observability Stack</h2>
+            
+            <div class="two-column">
+                <div>
+                    <h3>Phoenix (Arize) - LLM Tracing</h3>
+                    <div class="highlight-box">
+                        <strong>Purpose:</strong> Open-source LLM observability for traces, spans, and evaluation
+                    </div>
+                    
+                    <h4>What Phoenix Shows</h4>
+                    <table class="comparison-table">
+                        <tr><th>Feature</th><th>Description</th></tr>
+                        <tr><td>Traces</td><td>Full request lifecycle</td></tr>
+                        <tr><td>Spans</td><td>Individual LLM calls</td></tr>
+                        <tr><td>Latency</td><td>Time per operation</td></tr>
+                        <tr><td>Tokens</td><td>Input/output counts</td></tr>
+                        <tr><td>Cost</td><td>Estimated API cost</td></tr>
+                    </table>
+                </div>
+                
+                <div>
+                    <h3>Helicone - API Gateway</h3>
+                    <div class="highlight-box">
+                        <strong>Purpose:</strong> LLM API proxy for logging, caching, and cost tracking
+                    </div>
+                    
+                    <h4>What Helicone Shows</h4>
+                    <table class="comparison-table">
+                        <tr><th>Feature</th><th>Description</th></tr>
+                        <tr><td>All requests</td><td>Every API call logged</td></tr>
+                        <tr><td>Cost</td><td>Actual API spend</td></tr>
+                        <tr><td>Caching</td><td>Cache hits/misses</td></tr>
+                        <tr><td>Rate limits</td><td>Usage tracking</td></tr>
+                        <tr><td>Errors</td><td>Failed requests</td></tr>
+                    </table>
+                </div>
+            </div>
+            
+            <h3>Phoenix Setup for Streamlit</h3>
+            <div class="code-block"><span class="keyword">import</span> streamlit <span class="keyword">as</span> st
+<span class="keyword">import</span> phoenix <span class="keyword">as</span> px
+<span class="keyword">from</span> phoenix.otel <span class="keyword">import</span> register
+
+<span class="keyword">@st.cache_resource</span>  <span class="comment"># ← CRITICAL: Prevents reinit on every rerun</span>
+<span class="keyword">def</span> <span class="function">setup_phoenix</span>():
+    session = px.launch_app()
+    register(project_name=<span class="string">"my-project"</span>, auto_instrument=<span class="keyword">True</span>)
+    <span class="keyword">return</span> session
+
+phoenix_session = setup_phoenix()</div>
+            
+            <h3>Helicone Setup</h3>
+            <div class="code-block"><span class="keyword">def</span> <span class="function">get_helicone_headers</span>():
+    api_key = os.getenv(<span class="string">"HELICONE_API_KEY"</span>)
+    <span class="keyword">if not</span> api_key:
+        <span class="keyword">return</span> {}
+    <span class="keyword">return</span> {
+        <span class="string">"Helicone-Auth"</span>: f<span class="string">"Bearer {api_key}"</span>,
+        <span class="string">"Helicone-Cache-Enabled"</span>: <span class="string">"true"</span>,
+    }
+
+model_kwargs = {<span class="string">"id"</span>: <span class="string">"gpt-4o"</span>}
+<span class="keyword">if</span> os.getenv(<span class="string">"HELICONE_API_KEY"</span>):
+    model_kwargs[<span class="string">"base_url"</span>] = <span class="string">"https://oai.helicone.ai/v1"</span>
+    model_kwargs[<span class="string">"default_headers"</span>] = get_helicone_headers()
+
+model = OpenAIChat(**model_kwargs)</div>
+        </div>
+
+        <!-- Section 8: Common Issues -->
+        <div class="section" id="issues">
+            <h2>🔧 8. Common Issues & Solutions</h2>
+            
+            <h3>Issue 1: Async Event Loop Error</h3>
+            <div class="warning-box">
+                <strong>Error:</strong> <code>RuntimeError: There is no current event loop in thread 'ScriptRunner.scriptThread'</code>
+            </div>
+            <div class="code-block"><span class="comment"># Solution: Add at very top of main file</span>
+<span class="keyword">import</span> nest_asyncio
+<span class="keyword">import</span> asyncio
+
+<span class="keyword">try</span>:
+    asyncio.get_event_loop()
+<span class="keyword">except</span> RuntimeError:
+    asyncio.set_event_loop(asyncio.new_event_loop())
+
+nest_asyncio.apply()</div>
+            
+            <h3>Issue 2: Phoenix Traces Disappearing</h3>
+            <div class="warning-box">
+                <strong>Cause:</strong> <code>px.launch_app()</code> called on every Streamlit rerun.
+            </div>
+            <div class="code-block"><span class="comment"># Solution: Use @st.cache_resource</span>
+<span class="keyword">@st.cache_resource</span>
+<span class="keyword">def</span> <span class="function">setup_phoenix</span>():
+    session = px.launch_app()
+    register(project_name=<span class="string">"my-project"</span>, auto_instrument=<span class="keyword">True</span>)
+    <span class="keyword">return</span> session</div>
+            
+            <h3>Issue 3: Helicone Not Receiving Requests</h3>
+            <div class="warning-box">
+                <strong>Cause:</strong> Framework creates own OpenAI client, ignores global settings.
+            </div>
+            <div class="code-block"><span class="comment"># Solution: Pass config directly to model</span>
+model_kwargs = {<span class="string">"id"</span>: <span class="string">"gpt-4o"</span>}
+<span class="keyword">if</span> os.getenv(<span class="string">"HELICONE_API_KEY"</span>):
+    model_kwargs[<span class="string">"base_url"</span>] = <span class="string">"https://oai.helicone.ai/v1"</span>
+    model_kwargs[<span class="string">"default_headers"</span>] = get_helicone_headers()
+model = OpenAIChat(**model_kwargs)</div>
+            
+            <h3>Issue 4: Phoenix Port Already in Use</h3>
+            <div class="code-block"><span class="comment"># Solution: Kill processes on those ports</span>
+lsof -i :4317 | awk 'NR>1 {print $2}' | xargs kill -9 2>/dev/null
+lsof -i :6006 | awk 'NR>1 {print $2}' | xargs kill -9 2>/dev/null</div>
+        </div>
+
+        <!-- Section 9: Quick Reference -->
+        <div class="section" id="quickref">
+            <h2>📋 9. Quick Reference</h2>
+            
+            <h3>URLs</h3>
+            <table class="comparison-table">
+                <tr><th>Tool</th><th>URL</th></tr>
+                <tr><td>Phoenix UI</td><td><code>http://localhost:6006</code></td></tr>
+                <tr><td>Helicone Dashboard</td><td><code>https://us.helicone.ai</code></td></tr>
+                <tr><td>Streamlit App</td><td><code>http://localhost:8501</code></td></tr>
+            </table>
+            
+            <h3>Key Commands</h3>
+            <div class="quick-ref">
+                <h4>Run Streamlit App</h4>
+                <code>streamlit run app.py</code>
+                
+                <h4>Kill Phoenix Ports</h4>
+                <code>lsof -i :4317 -i :6006 | awk 'NR>1 {print $2}' | xargs kill -9</code>
+            </div>
+            
+            <h3>Import Patterns</h3>
+            <div class="code-block"><span class="comment"># Agno</span>
+<span class="keyword">from</span> agno.agent <span class="keyword">import</span> Agent
+<span class="keyword">from</span> agno.models.openai <span class="keyword">import</span> OpenAIChat
+<span class="keyword">from</span> agno.tools.serpapi <span class="keyword">import</span> SerpApiTools
+
+<span class="comment"># Phoenix</span>
+<span class="keyword">import</span> phoenix <span class="keyword">as</span> px
+<span class="keyword">from</span> phoenix.otel <span class="keyword">import</span> register
+
+<span class="comment"># Data</span>
+<span class="keyword">import</span> pandas <span class="keyword">as</span> pd
+<span class="keyword">import</span> duckdb
+
+<span class="comment"># Streamlit</span>
+<span class="keyword">import</span> streamlit <span class="keyword">as</span> st</div>
+            
+            <h3>.env Template</h3>
+            <div class="code-block">OPENAI_API_KEY=sk-proj-...
+SERPAPI_API_KEY=...
+HELICONE_API_KEY=sk-helicone-...
+ENABLE_PHOENIX=true
+PHOENIX_PROJECT_NAME=my-project</div>
+        </div>
+
+        <!-- Section 10: What's Next -->
+        <div class="section" id="next">
+            <h2>🎯 10. What's Next</h2>
+            
+            <h3>Learning Goals</h3>
+            <p class="key-point">RAG implementation with ChromaDB</p>
+            <p class="key-point">Local LLM with Ollama</p>
+            <p class="key-point">MCP Server development</p>
+            <p class="key-point">Fine-tuning basics</p>
+            <p class="key-point">LangGraph for complex orchestration</p>
+            
+            <h3>Backlog Projects</h3>
+            <table class="comparison-table">
+                <tr><th>ID</th><th>Project</th><th>Priority</th></tr>
+                <tr><td>IDEA-001</td><td>Issue Manager MCP Server</td><td>Medium</td></tr>
+                <tr><td>IDEA-002</td><td>Observability Troubleshooting Doc</td><td>Low</td></tr>
+                <tr><td>IDEA-003</td><td>Backlog Manager MCP Server</td><td>Medium</td></tr>
+            </table>
+            
+            <div class="success-box">
+                <strong>🎉 Today's Achievement:</strong> Documented 2 AI agent projects with full observability stack, Streamlit UI patterns, SerpAPI integration, and Pandas/DuckDB data handling!
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div style="text-align: center; padding: 2rem; color: #666; border-top: 1px solid #e0e0e0; margin-top: 2rem;">
+            <p>Daily Tutes - December 25, 2025</p>
+            <p><a href="index.html" style="color: #667eea;">← Back to Timeline</a></p>
+        </div>
+    </div>
+</body>
+</html>

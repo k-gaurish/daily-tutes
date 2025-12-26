@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Tutes - December 25, 2025 | AI Agent Projects Deep Dive</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            line-height: 1.6;
+            color: #2c3e50;
+            background: #f8f9fa;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header .date {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .header .subtitle {
+            font-size: 1rem;
+            opacity: 0.8;
+            margin-top: 0.5rem;
+        }
+        
+        .nav-back {
+            background: white;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .nav-back a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .nav-back a:hover {
+            text-decoration: underline;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .topics-covered {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .topic-tag {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .section h2 {
+            color: #667eea;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #667eea;
+            font-size: 1.5rem;
+        }
+        
+        .section h3 {
+            color: #2c3e50;
+            margin: 1.5rem 0 1rem 0;
+            font-size: 1.2rem;
+        }
+        
+        .section h4 {
+            color: #555;
+            margin: 1rem 0 0.5rem 0;
+            font-size: 1rem;
+        }
+        
+        .key-point {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 0.8rem;
+            padding: 0.5rem 0;
+        }
+        
+        .key-point::before {
+            content: "→";
+            color: #667eea;
+            font-weight: bold;
+            margin-right: 0.75rem;
+            flex-shrink: 0;
+        }
+        
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.95rem;
+        }
+        
+        .comparison-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0.75rem;
+            text-align: left;
+        }
+        
+        .comparison-table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .comparison-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        
+        .code-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 1.25rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Fira Code', 'Monaco', 'Consolas', monospace;
+            font-size: 0.85rem;
+            margin: 1rem 0;
+            line-height: 1.5;
+        }
+        
+        .code-block .comment {
+            color: #6a9955;
+        }
+        
+        .code-block .keyword {
+            color: #569cd6;
+        }
+        
+        .code-block .string {
+            color: #ce9178;
+        }
+        
+        .code-block .function {
+            color: #dcdcaa;
+        }
+        
+        .architecture-diagram {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 1.5rem;
+            font-family: 'Fira Code', 'Monaco', monospace;
+            font-size: 0.8rem;
+            overflow-x: auto;
+            white-space: pre;
+            line-height: 1.4;
+        }
+        
+        .highlight-box {
+            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+            border-left: 4px solid #667eea;
+            padding: 1rem 1.5rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 1rem 1.5rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .success-box {
+            background: linear-gradient(135deg, #11998e15 0%, #38ef7d15 100%);
+            border-left: 4px solid #11998e;
+            padding: 1rem 1.5rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+        
+        @media (max-width: 768px) {
+            .two-column {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+        }
+        
+        .quick-ref {
+            background: #2c3e50;
+            color: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+        
+        .quick-ref h4 {
+            color: #667eea;
+            margin-bottom: 0.75rem;
+        }
+        
+        .quick-ref code {
+            background: #1e1e1e;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+        
+        .stats-row {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+        
+        .stat-item {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            min-width: 120px;
+        }
+        
+        .stat-item .number {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+        
+        .stat-item .label {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+        
+        .toc {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .toc h3 {
+            margin-bottom: 1rem;
+            color: #667eea;
+        }
+        
+        .toc ul {
+            list-style: none;
+            columns: 2;
+        }
+        
+        .toc li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .toc a {
+            color: #2c3e50;
+            text-decoration: none;
+        }
+        
+        .toc a:hover {
+            color: #667eea;
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 600px) {
+            .toc ul {
+                columns: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📚 Daily Tutes</h1>
+        <div class="date">December 25, 2025</div>
+        <div class="subtitle">AI Agent Projects - Comprehensive Deep Dive</div>
+    </div>
+    
+    <div class="nav-back">
+        <a href="index.html">← Back to Timeline</a>
+    </div>
+    
+    <div class="container">
+        <!-- Stats Row -->
+        <div class="stats-row">
+            <div class="stat-item">
+                <div class="number">2</div>
+                <div class="label">Projects</div>
+            </div>
+            <div class="stat-item">
+                <div class="number">7</div>
+                <div class="label">Technologies</div>
+            </div>
+            <div class="stat-item">
+                <div class="number">2</div>
+                <div class="label">Observability Tools</div>
+            </div>
+            <div class="stat-item">
+                <div class="number">4</div>
+                <div class="label">Issues Solved</div>
+            </div>
+        </div>
+        
+        <!-- Topics Covered -->
+        <div class="topics-covered">
+            <span class="topic-tag">Agno Framework</span>
+            <span class="topic-tag">Multi-Agent Patterns</span>
+            <span class="topic-tag">Phoenix Tracing</span>
+            <span class="topic-tag">Helicone Caching</span>
+            <span class="topic-tag">DuckDB</span>
+            <span class="topic-tag">Streamlit</span>
+            <span class="topic-tag">SerpAPI</span>
+            <span class="topic-tag">Structlog</span>
+            <span class="topic-tag">OpenAI GPT-4o</span>
+            <span class="topic-tag">iCalendar</span>
+        </div>
+        
+        <!-- Table of Contents -->
+        <div class="toc">
+            <h3>📑 Table of Contents</h3>
+            <ul>
+                <li><a href="#projects" onclick="event.preventDefault(); document.getElementById('projects').scrollIntoView({behavior: 'smooth'});">1. Projects Overview</a></li>
+                <li><a href="#agno" onclick="event.preventDefault(); document.getElementById('agno').scrollIntoView({behavior: 'smooth'});">2. Agno Framework</a></li>
+                <li><a href="#observability" onclick="event.preventDefault(); document.getElementById('observability').scrollIntoView({behavior: 'smooth'});">3. Observability Stack</a></li>
+                <li><a href="#duckdb" onclick="event.preventDefault(); document.getElementById('duckdb').scrollIntoView({behavior: 'smooth'});">4. DuckDB for Analytics</a></li>
+                <li><a href="#streamlit" onclick="event.preventDefault(); document.getElementById('streamlit').scrollIntoView({behavior: 'smooth'});">5. Streamlit Patterns</a></li>
+                <li><a href="#issues" onclick="event.preventDefault(); document.getElementById('issues').scrollIntoView({behavior: 'smooth'});">6. Common Issues & Solutions</a></li>
+                <li><a href="#quickref" onclick="event.preventDefault(); document.getElementById('quickref').scrollIntoView({behavior: 'smooth'});">7. Quick Reference</a></li>
+                <li><a href="#next" onclick="event.preventDefault(); document.getElementById('next').scrollIntoView({behavior: 'smooth'});">8. What's Next</a></li>
+            </ul>
+        </div>
+
+        <!-- Section 1: Projects Overview -->
+        <div class="section" id="projects">
+            <h2>🚀 1. Projects Overview</h2>
+            
+            <h3>Project 01: AI Data Analysis Agent</h3>
+            <div class="highlight-box">
+                <strong>Purpose:</strong> Natural language interface for data analysis using SQL generation
+            </div>
+            
+            <p class="key-point">Load CSV/Excel files and understand data structure automatically</p>
+            <p class="key-point">Answer natural language questions about data</p>
+            <p class="key-point">Generate and execute SQL queries using DuckDB</p>
+            <p class="key-point">Create visualizations and provide statistical insights</p>
+            
+            <h4>Architecture</h4>
+            <div class="architecture-diagram">┌─────────────────────────────────────────────────────────┐
+│                    Streamlit UI                         │
+│  (File upload, chat interface, visualization display)   │
+└─────────────────────────┬───────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────┐
+│                   Data Analysis Agent                    │
+│                      (Agno + GPT-4o)                     │
+│                                                          │
+│  System Prompt: "You are a data analyst..."             │
+│  Capabilities: SQL generation, data interpretation       │
+└─────────────────────────┬───────────────────────────────┘
+                          │
+              ┌───────────┴───────────┐
+              ▼                       ▼
+┌─────────────────────┐   ┌─────────────────────┐
+│    DuckDB Tool      │   │   Pandas Tool       │
+│  (SQL execution)    │   │  (Data manipulation)│
+└─────────────────────┘   └─────────────────────┘
+              │                       │
+              └───────────┬───────────┘
+                          ▼
+                    ┌───────────┐
+                    │  CSV/Excel │
+                    │   Files    │
+                    └───────────┘</div>
+            
+            <h4>Key Files</h4>
+            <table class="comparison-table">
+                <tr>
+                    <th>File</th>
+                    <th>Purpose</th>
+                </tr>
+                <tr>
+                    <td><code>app.py</code></td>
+                    <td>Streamlit UI entry point</td>
+                </tr>
+                <tr>
+                    <td><code>ai_data_analyst.py</code></td>
+                    <td>Agent definition and tools</td>
+                </tr>
+                <tr>
+                    <td><code>src/observability/</code></td>
+                    <td>Phoenix + Helicone setup</td>
+                </tr>
+            </table>
+            
+            <h3>Project 02: AI Travel Agent</h3>
+            <div class="highlight-box">
+                <strong>Purpose:</strong> Multi-agent travel planner with web research and calendar export
+            </div>
+            
+            <p class="key-point">Takes destination and trip duration as input</p>
+            <p class="key-point">Researcher Agent → searches web for activities, hotels, restaurants</p>
+            <p class="key-point">Planner Agent → creates detailed day-by-day itinerary</p>
+            <p class="key-point">Exports plan as downloadable .ics calendar file</p>
+            
+            <h4>Architecture</h4>
+            <div class="architecture-diagram">┌─────────────────────────────────────────────────────────┐
+│                    Streamlit UI                         │
+│  (Destination input, trip display, ICS download)        │
+└─────────────────────────┬───────────────────────────────┘
+                          │
+          ┌───────────────┴───────────────┐
+          ▼                               ▼
+┌─────────────────────┐       ┌─────────────────────┐
+│  Researcher Agent   │       │   Planner Agent     │
+│    (Agno + GPT-4o)  │       │   (Agno + GPT-4o)   │
+│                     │       │                     │
+│ "You are a travel   │       │ "You are a senior   │
+│  researcher..."     │       │  travel planner..." │
+└──────────┬──────────┘       └──────────┬──────────┘
+           │                             │
+           ▼                             │
+┌─────────────────────┐                  │
+│   SerpAPI Tool      │                  │
+│  (Google Search)    │                  │
+└──────────┬──────────┘                  │
+           │                             │
+           │      Research Results       │
+           └──────────────┬──────────────┘
+                          │
+                          ▼
+                 ┌─────────────────┐
+                 │  ICS Generator  │
+                 │  (icalendar)    │
+                 └─────────────────┘</div>
+            
+            <h4>Multi-Agent Handoff Pattern</h4>
+            <div class="code-block"><span class="comment"># Simplified flow - Agent orchestration</span>
+research_results = researcher_agent.run(f<span class="string">"Research {destination}"</span>)
+itinerary = planner_agent.run(f<span class="string">"Create itinerary using: {research_results}"</span>)</div>
+        </div>
+
+        <!-- Section 2: Agno Framework -->
+        <div class="section" id="agno">
+            <h2>🤖 2. Agno Framework Deep Dive</h2>
+            
+            <div class="highlight-box">
+                <strong>What is Agno?</strong> A lightweight, async-first Python framework for building AI agents. Simpler alternative to LangChain.
+            </div>
+            
+            <h3>Agno vs LangChain Comparison</h3>
+            <table class="comparison-table">
+                <tr>
+                    <th>Feature</th>
+                    <th>Agno</th>
+                    <th>LangChain</th>
+                </tr>
+                <tr>
+                    <td>Learning Curve</td>
+                    <td>✅ Low</td>
+                    <td>❌ High</td>
+                </tr>
+                <tr>
+                    <td>Boilerplate</td>
+                    <td>✅ Minimal</td>
+                    <td>❌ Heavy</td>
+                </tr>
+                <tr>
+                    <td>Async Support</td>
+                    <td>✅ Native</td>
+                    <td>⚠️ Added later</td>
+                </tr>
+                <tr>
+                    <td>Flexibility</td>
+                    <td>✅ High</td>
+                    <td>⚠️ Opinionated</td>
+                </tr>
+                <tr>
+                    <td>Community</td>
+                    <td>⚠️ Growing</td>
+                    <td>✅ Large</td>
+                </tr>
+            </table>
+            
+            <h3>Installation</h3>
+            <div class="code-block">pip install agno</div>
+            
+            <h3>Basic Agent Setup</h3>
+            <div class="code-block"><span class="keyword">from</span> agno.agent <span class="keyword">import</span> Agent
+<span class="keyword">from</span> agno.models.openai <span class="keyword">import</span> OpenAIChat
+
+<span class="comment"># Create agent</span>
+agent = Agent(
+    name=<span class="string">"MyAgent"</span>,
+    model=OpenAIChat(id=<span class="string">"gpt-4o"</span>),
+    instructions=<span class="string">"You are a helpful assistant..."</span>,
+    tools=[my_tool_function],
+    markdown=<span class="keyword">True</span>
+)
+
+<span class="comment"># Run agent</span>
+response = agent.run(<span class="string">"What is the weather today?"</span>)
+<span class="function">print</span>(response.content)</div>
+            
+            <h3>Key Concepts</h3>
+            <table class="comparison-table">
+                <tr>
+                    <th>Concept</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td><code>Agent</code></td>
+                    <td>Main class - holds model, instructions, tools</td>
+                </tr>
+                <tr>
+                    <td><code>model</code></td>
+                    <td>LLM to use (OpenAI, Anthropic, etc.)</td>
+                </tr>
+                <tr>
+                    <td><code>instructions</code></td>
+                    <td>System prompt defining agent behavior</td>
+                </tr>
+                <tr>
+                    <td><code>tools</code></td>
+                    <td>Python functions agent can call</td>
+                </tr>
+                <tr>
+                    <td><code>run()</code></td>
+                    <td>Execute agent with user input</td>
+                </tr>
+            </table>
+            
+            <h3>Adding Custom Tools</h3>
+            <div class="code-block"><span class="keyword">def</span> <span class="function">search_web</span>(query: str) -> str:
+    <span class="string">"""Search the web for information."""</span>
+    <span class="comment"># Tool implementation</span>
+    <span class="keyword">return</span> results
+
+agent = Agent(
+    model=OpenAIChat(id=<span class="string">"gpt-4o"</span>),
+    tools=[search_web]  <span class="comment"># Agent can now call this</span>
+)</div>
+            
+            <h3>Multi-Agent Pattern (Used in Travel Agent)</h3>
+            <div class="code-block"><span class="comment"># Agent 1: Researcher</span>
+researcher = Agent(
+    name=<span class="string">"Researcher"</span>,
+    model=OpenAIChat(id=<span class="string">"gpt-4o"</span>),
+    instructions=<span class="string">"You research topics thoroughly..."</span>,
+    tools=[serpapi_search]
+)
+
+<span class="comment"># Agent 2: Writer</span>
+writer = Agent(
+    name=<span class="string">"Writer"</span>,
+    model=OpenAIChat(id=<span class="string">"gpt-4o"</span>),
+    instructions=<span class="string">"You write engaging content..."</span>
+)
+
+<span class="comment"># Orchestration - Handoff Pattern</span>
+research = researcher.run(<span class="string">"Research AI trends"</span>)
+article = writer.run(f<span class="string">"Write article based on: {research.content}"</span>)</div>
+            
+            <div class="success-box">
+                <strong>📚 Agno Resources:</strong><br>
+                Website: <a href="https://agno.com">https://agno.com</a><br>
+                Docs: <a href="https://docs.agno.com">https://docs.agno.com</a><br>
+                GitHub: <a href="https://github.com/agno-ai/agno">https://github.com/agno-ai/agno</a>
+            </div>
+        </div>
+
+        <!-- Section 3: Observability Stack -->
+        <div class="section" id="observability">
+            <h2>🔍 3. Observability Stack</h2>
+            
+            <div class="two-column">
+                <div>
+                    <h3>Phoenix (Arize) - LLM Tracing</h3>
+                    <div class="highlight-box">
+                        <strong>Purpose:</strong> Open-source LLM observability for traces, spans, and evaluation
+                    </div>
+                    
+                    <h4>What Phoenix Shows</h4>
+                    <table class="comparison-table">
+                        <tr>
+                            <th>Feature</th>
+                            <th>Description</th>
+                        </tr>
+                        <tr>
+                            <td>Traces</td>
+                            <td>Full request lifecycle</td>
+                        </tr>
+                        <tr>
+                            <td>Spans</td>
+                            <td>Individual LLM calls</td>
+                        </tr>
+                        <tr>
+                            <td>Latency</td>
+                            <td>Time per operation</td>
+                        </tr>
+                        <tr>
+                            <td>Tokens</td>
+                            <td>Input/output counts</td>
+                        </tr>
+                        <tr>
+                            <td>Cost</td>
+                            <td>Estimated API cost</td>
+                        </tr>
+                        <tr>
+                            <td>Prompts</td>
+                            <td>Full prompt/response text</td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <div>
+                    <h3>Helicone - API Gateway</h3>
+                    <div class="highlight-box">
+                        <strong>Purpose:</strong> LLM API proxy for logging, caching, and cost tracking
+                    </div>
+                    
+                    <h4>What Helicone Shows</h4>
+                    <table class="comparison-table">
+                        <tr>
+                            <th>Feature</th>
+                            <th>Description</th>
+                        </tr>
+                        <tr>
+                            <td>All requests</td>
+                            <td>Every API call logged</td>
+                        </tr>
+                        <tr>
+                            <td>Latency</td>
+                            <td>Response times</td>
+                        </tr>
+                        <tr>
+                            <td>Cost</td>
+                            <td>Actual API spend</td>
+                        </tr>
+                        <tr>
+                            <td>Caching</td>
+                            <td>Cache hits/misses</td>
+                        </tr>
+                        <tr>
+                            <td>Rate limits</td>
+                            <td>Usage tracking</td>
+                        </tr>
+                        <tr>
+                            <td>Errors</td>
+                            <td>Failed requests</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            
+            <h3>Phoenix Setup Code</h3>
+            <div class="code-block"><span class="keyword">import</span> phoenix <span class="keyword">as</span> px
+<span class="keyword">from</span> phoenix.otel <span class="keyword">import</span> register
+
+<span class="comment"># Launch local UI (runs at http://localhost:6006)</span>
+session = px.launch_app()
+
+<span class="comment"># Register with auto-instrumentation</span>
+tracer_provider = register(
+    project_name=<span class="string">"my-project-name"</span>,
+    auto_instrument=<span class="keyword">True</span>  <span class="comment"># Automatically traces Agno, OpenAI, etc.</span>
+)</div>
+            
+            <h3>Phoenix for Streamlit (Critical Pattern!)</h3>
+            <div class="code-block"><span class="keyword">import</span> streamlit <span class="keyword">as</span> st
+<span class="keyword">import</span> phoenix <span class="keyword">as</span> px
+<span class="keyword">from</span> phoenix.otel <span class="keyword">import</span> register
+
+<span class="keyword">@st.cache_resource</span>  <span class="comment"># ← CRITICAL: Prevents reinit on every rerun</span>
+<span class="keyword">def</span> <span class="function">setup_phoenix</span>():
+    <span class="string">"""Setup Phoenix once, not on every Streamlit rerun."""</span>
+    session = px.launch_app()
+    register(
+        project_name=<span class="string">"my-project"</span>,
+        auto_instrument=<span class="keyword">True</span>
+    )
+    <span class="keyword">return</span> session
+
+<span class="comment"># Call at app start</span>
+phoenix_session = setup_phoenix()</div>
+            
+            <h3>Helicone Setup Code</h3>
+            <div class="code-block"><span class="keyword">import</span> os
+<span class="keyword">from</span> dotenv <span class="keyword">import</span> load_dotenv
+
+load_dotenv()
+
+<span class="keyword">def</span> <span class="function">get_helicone_headers</span>():
+    <span class="string">"""Get Helicone headers for API requests."""</span>
+    api_key = os.getenv(<span class="string">"HELICONE_API_KEY"</span>)
+    <span class="keyword">if not</span> api_key:
+        <span class="keyword">return</span> {}
+    
+    <span class="keyword">return</span> {
+        <span class="string">"Helicone-Auth"</span>: f<span class="string">"Bearer {api_key}"</span>,
+        <span class="string">"Helicone-Cache-Enabled"</span>: <span class="string">"true"</span>,
+    }
+
+<span class="comment"># Use with Agno</span>
+model_kwargs = {<span class="string">"id"</span>: <span class="string">"gpt-4o"</span>}
+
+<span class="keyword">if</span> os.getenv(<span class="string">"HELICONE_API_KEY"</span>):
+    model_kwargs[<span class="string">"base_url"</span>] = <span class="string">"https://oai.helicone.ai/v1"</span>
+    model_kwargs[<span class="string">"default_headers"</span>] = get_helicone_headers()
+
+model = OpenAIChat(**model_kwargs)</div>
+            
+            <h3>Helicone Caching Deep Dive</h3>
+            <div class="warning-box">
+                <strong>⚠️ Why Agent Conversations Don't Cache:</strong><br>
+                Each request must be 100% identical (same model, messages, params) for cache hits.
+                Agent conversations include conversation history, making each request unique.
+            </div>
+            
+            <div class="code-block"><span class="comment"># Request 1: 282 tokens</span>
+{<span class="string">"messages"</span>: [{<span class="string">"role"</span>: <span class="string">"user"</span>, <span class="string">"content"</span>: <span class="string">"Research Tokyo"</span>}]}
+
+<span class="comment"># Request 2: 4,899 tokens (includes previous context)</span>
+{<span class="string">"messages"</span>: [
+    {<span class="string">"role"</span>: <span class="string">"user"</span>, <span class="string">"content"</span>: <span class="string">"Research Tokyo"</span>},
+    {<span class="string">"role"</span>: <span class="string">"assistant"</span>, <span class="string">"content"</span>: <span class="string">"...previous response..."</span>},
+    {<span class="string">"role"</span>: <span class="string">"user"</span>, <span class="string">"content"</span>: <span class="string">"Tell me more"</span>}
+]}
+
+<span class="comment"># These are DIFFERENT requests = no cache hit</span></div>
+            
+            <h3>Structlog for Structured Logging</h3>
+            <div class="code-block"><span class="keyword">import</span> structlog
+
+<span class="comment"># Good: Structured with context</span>
+logger.info(<span class="string">"phoenix_started"</span>, url=<span class="string">"http://localhost:6006"</span>)
+logger.info(<span class="string">"agent_response"</span>, tokens=150, latency_ms=1200)
+logger.error(<span class="string">"api_failed"</span>, error=<span class="string">"Rate limit exceeded"</span>, retry_in=60)
+
+<span class="comment"># Avoid: Unstructured</span>
+logger.info(f<span class="string">"Phoenix started at http://localhost:6006"</span>)  <span class="comment"># Don't do this</span></div>
+            
+            <div class="success-box">
+                <strong>📚 Observability Resources:</strong><br>
+                Phoenix: <a href="https://phoenix.arize.com">https://phoenix.arize.com</a><br>
+                Helicone: <a href="https://helicone.ai">https://helicone.ai</a><br>
+                Structlog: <a href="https://www.structlog.org">https://www.structlog.org</a>
+            </div>
+        </div>
+
+        <!-- Section 4: DuckDB -->
+        <div class="section" id="duckdb">
+            <h2>🦆 4. DuckDB for Analytics</h2>
+            
+            <div class="highlight-box">
+                <strong>What is DuckDB?</strong> In-process SQL database optimized for analytics. Like SQLite but for OLAP workloads.
+            </div>
+            
+            <h3>Why DuckDB for Data Agent?</h3>
+            <table class="comparison-table">
+                <tr>
+                    <th>Feature</th>
+                    <th>Benefit</th>
+                </tr>
+                <tr>
+                    <td>No server needed</td>
+                    <td>Runs in-process</td>
+                </tr>
+                <tr>
+                    <td>Fast analytics</td>
+                    <td>Columnar storage</td>
+                </tr>
+                <tr>
+                    <td>SQL interface</td>
+                    <td>LLM can generate queries</td>
+                </tr>
+                <tr>
+                    <td>Pandas integration</td>
+                    <td>Easy data exchange</td>
+                </tr>
+                <tr>
+                    <td>CSV/Parquet support</td>
+                    <td>Direct file queries</td>
+                </tr>
+            </table>
+            
+            <h3>Query CSV Directly (No Import!)</h3>
+            <div class="code-block"><span class="keyword">import</span> duckdb
+
+<span class="comment"># Query CSV directly - no import needed!</span>
+result = duckdb.query(<span class="string">"""
+    SELECT product, SUM(revenue) as total
+    FROM 'sales.csv'
+    GROUP BY product
+    ORDER BY total DESC
+    LIMIT 5
+"""</span>).fetchall()</div>
+            
+            <h3>As Agent Tool</h3>
+            <div class="code-block"><span class="keyword">def</span> <span class="function">execute_sql</span>(query: str) -> str:
+    <span class="string">"""Execute SQL query on the loaded data."""</span>
+    <span class="keyword">try</span>:
+        result = duckdb.query(query).df()
+        <span class="keyword">return</span> result.to_markdown()
+    <span class="keyword">except</span> Exception <span class="keyword">as</span> e:
+        <span class="keyword">return</span> f<span class="string">"Error: {e}"</span>
+
+agent = Agent(
+    model=OpenAIChat(id=<span class="string">"gpt-4o"</span>),
+    tools=[execute_sql],
+    instructions=<span class="string">"Generate SQL queries to analyze data..."</span>
+)</div>
+        </div>
+
+        <!-- Section 5: Streamlit Patterns -->
+        <div class="section" id="streamlit">
+            <h2>🎨 5. Streamlit Patterns</h2>
+            
+            <h3>Key Components Used</h3>
+            <table class="comparison-table">
+                <tr>
+                    <th>Component</th>
+                    <th>Purpose</th>
+                    <th>Code</th>
+                </tr>
+                <tr>
+                    <td><code>st.title()</code></td>
+                    <td>Page title</td>
+                    <td><code>st.title("AI Agent")</code></td>
+                </tr>
+                <tr>
+                    <td><code>st.text_input()</code></td>
+                    <td>Single line input</td>
+                    <td><code>query = st.text_input("Ask:")</code></td>
+                </tr>
+                <tr>
+                    <td><code>st.file_uploader()</code></td>
+                    <td>File upload</td>
+                    <td><code>file = st.file_uploader("CSV")</code></td>
+                </tr>
+                <tr>
+                    <td><code>st.download_button()</code></td>
+                    <td>File download</td>
+                    <td><code>st.download_button("Get", data)</code></td>
+                </tr>
+                <tr>
+                    <td><code>st.spinner()</code></td>
+                    <td>Loading indicator</td>
+                    <td><code>with st.spinner("..."):</code></td>
+                </tr>
+            </table>
+            
+            <h3>Session State (Persist Data)</h3>
+            <div class="code-block"><span class="comment"># Initialize</span>
+<span class="keyword">if</span> <span class="string">"messages"</span> <span class="keyword">not in</span> st.session_state:
+    st.session_state.messages = []
+
+<span class="comment"># Use</span>
+st.session_state.messages.append({<span class="string">"role"</span>: <span class="string">"user"</span>, <span class="string">"content"</span>: query})</div>
+            
+            <h3>Caching (Critical for Performance)</h3>
+            <div class="code-block"><span class="keyword">@st.cache_resource</span>  <span class="comment"># Cache across reruns (for objects)</span>
+<span class="keyword">def</span> <span class="function">setup_phoenix</span>():
+    <span class="keyword">return</span> px.launch_app()
+
+<span class="keyword">@st.cache_data</span>  <span class="comment"># Cache data (for DataFrames, etc.)</span>
+<span class="keyword">def</span> <span class="function">load_data</span>(file):
+    <span class="keyword">return</span> pd.read_csv(file)</div>
+            
+            <div class="warning-box">
+                <strong>⚠️ @st.cache_resource vs @st.cache_data:</strong><br>
+                • <code>@st.cache_resource</code> - For objects that shouldn't be recreated (connections, sessions)<br>
+                • <code>@st.cache_data</code> - For data that can be serialized (DataFrames, lists)
+            </div>
+        </div>
+
+        <!-- Section 6: Common Issues -->
+        <div class="section" id="issues">
+            <h2>🔧 6. Common Issues & Solutions</h2>
+            
+            <h3>Issue 1: Async Event Loop Error</h3>
+            <div class="warning-box">
+                <strong>Error:</strong> <code>RuntimeError: There is no current event loop in thread 'ScriptRunner.scriptThread'</code>
+            </div>
+            <p><strong>Cause:</strong> Streamlit runs in special thread, conflicts with async frameworks.</p>
+            <div class="code-block"><span class="comment"># Solution: Add at very top of main file</span>
+<span class="keyword">import</span> nest_asyncio
+<span class="keyword">import</span> asyncio
+
+<span class="keyword">try</span>:
+    asyncio.get_event_loop()
+<span class="keyword">except</span> RuntimeError:
+    asyncio.set_event_loop(asyncio.new_event_loop())
+
+nest_asyncio.apply()</div>
+            
+            <h3>Issue 2: Phoenix Traces Disappearing</h3>
+            <div class="warning-box">
+                <strong>Cause:</strong> <code>px.launch_app()</code> called on every Streamlit rerun.
+            </div>
+            <div class="code-block"><span class="comment"># Solution: Use @st.cache_resource</span>
+<span class="keyword">@st.cache_resource</span>
+<span class="keyword">def</span> <span class="function">setup_phoenix</span>():
+    session = px.launch_app()
+    register(project_name=<span class="string">"my-project"</span>, auto_instrument=<span class="keyword">True</span>)
+    <span class="keyword">return</span> session</div>
+            
+            <h3>Issue 3: Helicone Not Receiving Requests</h3>
+            <div class="warning-box">
+                <strong>Cause:</strong> Framework creates own OpenAI client, ignores global settings.
+            </div>
+            <div class="code-block"><span class="comment"># Solution: Pass config directly to model</span>
+model_kwargs = {<span class="string">"id"</span>: <span class="string">"gpt-4o"</span>}
+<span class="keyword">if</span> os.getenv(<span class="string">"HELICONE_API_KEY"</span>):
+    model_kwargs[<span class="string">"base_url"</span>] = <span class="string">"https://oai.helicone.ai/v1"</span>
+    model_kwargs[<span class="string">"default_headers"</span>] = get_helicone_headers()
+
+model = OpenAIChat(**model_kwargs)</div>
+            
+            <h3>Issue 4: Phoenix Port Already in Use</h3>
+            <div class="warning-box">
+                <strong>Error:</strong> Port 4317 or 6006 already in use
+            </div>
+            <div class="code-block"><span class="comment"># Solution: Kill processes on those ports</span>
+lsof -i :4317 | awk 'NR>1 {print $2}' | xargs kill -9 2>/dev/null
+lsof -i :6006 | awk 'NR>1 {print $2}' | xargs kill -9 2>/dev/null</div>
+        </div>
+
+        <!-- Section 7: Quick Reference -->
+        <div class="section" id="quickref">
+            <h2>📋 7. Quick Reference</h2>
+            
+            <h3>URLs</h3>
+            <table class="comparison-table">
+                <tr>
+                    <th>Tool</th>
+                    <th>URL</th>
+                </tr>
+                <tr>
+                    <td>Phoenix UI</td>
+                    <td><code>http://localhost:6006</code></td>
+                </tr>
+                <tr>
+                    <td>Helicone Dashboard</td>
+                    <td><code>https://us.helicone.ai</code></td>
+                </tr>
+                <tr>
+                    <td>Streamlit App</td>
+                    <td><code>http://localhost:8501</code></td>
+                </tr>
+            </table>
+            
+            <h3>Key Commands</h3>
+            <div class="quick-ref">
+                <h4>Run Streamlit App</h4>
+                <code>streamlit run app.py</code>
+                
+                <h4>Run with Venv</h4>
+                <code>./venv/bin/python -m streamlit run app.py</code>
+                
+                <h4>Kill Phoenix Ports</h4>
+                <code>lsof -i :4317 -i :6006 | awk 'NR>1 {print $2}' | xargs kill -9</code>
+                
+                <h4>Install Dependencies</h4>
+                <code>pip install -r requirements.txt</code>
+            </div>
+            
+            <h3>Import Patterns</h3>
+            <div class="code-block"><span class="comment"># Agno</span>
+<span class="keyword">from</span> agno.agent <span class="keyword">import</span> Agent
+<span class="keyword">from</span> agno.models.openai <span class="keyword">import</span> OpenAIChat
+<span class="keyword">from</span> agno.tools.serpapi <span class="keyword">import</span> SerpApiTools
+
+<span class="comment"># Phoenix</span>
+<span class="keyword">import</span> phoenix <span class="keyword">as</span> px
+<span class="keyword">from</span> phoenix.otel <span class="keyword">import</span> register
+
+<span class="comment"># Streamlit</span>
+<span class="keyword">import</span> streamlit <span class="keyword">as</span> st
+
+<span class="comment"># Environment</span>
+<span class="keyword">from</span> dotenv <span class="keyword">import</span> load_dotenv
+<span class="keyword">import</span> os</div>
+            
+            <h3>.env Template</h3>
+            <div class="code-block"><span class="comment"># LLM API Keys</span>
+OPENAI_API_KEY=sk-proj-...your-key-here...
+
+<span class="comment"># Search API</span>
+SERPAPI_API_KEY=...your-serpapi-key...
+
+<span class="comment"># Observability - Phoenix</span>
+ENABLE_PHOENIX=true
+PHOENIX_PROJECT_NAME=my-project-name
+
+<span class="comment"># Observability - Helicone</span>
+HELICONE_API_KEY=sk-helicone-...your-key...
+ENABLE_HELICONE_CACHE=true
+
+<span class="comment"># Logging</span>
+LOG_LEVEL=INFO</div>
+            
+            <h3>OpenAI Pricing Reference</h3>
+            <table class="comparison-table">
+                <tr>
+                    <th>Model</th>
+                    <th>Used For</th>
+                    <th>Cost (per 1M tokens)</th>
+                </tr>
+                <tr>
+                    <td><code>gpt-4o</code></td>
+                    <td>Primary agent reasoning</td>
+                    <td>~$5 input / $15 output</td>
+                </tr>
+                <tr>
+                    <td><code>gpt-4o-mini</code></td>
+                    <td>Testing, simple tasks</td>
+                    <td>~$0.15 input / $0.60 output</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Section 8: What's Next -->
+        <div class="section" id="next">
+            <h2>🎯 8. What's Next</h2>
+            
+            <h3>Learning Goals</h3>
+            <p class="key-point">RAG implementation with ChromaDB</p>
+            <p class="key-point">Local LLM with Ollama</p>
+            <p class="key-point">MCP Server development</p>
+            <p class="key-point">Fine-tuning basics</p>
+            <p class="key-point">LangGraph for complex orchestration</p>
+            
+            <h3>Backlog Projects</h3>
+            <table class="comparison-table">
+                <tr>
+                    <th>ID</th>
+                    <th>Project</th>
+                    <th>Priority</th>
+                </tr>
+                <tr>
+                    <td>IDEA-001</td>
+                    <td>Issue Manager MCP Server</td>
+                    <td>Medium</td>
+                </tr>
+                <tr>
+                    <td>IDEA-002</td>
+                    <td>Observability Troubleshooting Doc</td>
+                    <td>Low</td>
+                </tr>
+                <tr>
+                    <td>IDEA-003</td>
+                    <td>Backlog Manager MCP Server</td>
+                    <td>Medium</td>
+                </tr>
+            </table>
+            
+            <div class="success-box">
+                <strong>🎉 Today's Achievement:</strong> Completed comprehensive documentation of 2 AI agent projects with full observability stack integration!
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div style="text-align: center; padding: 2rem; color: #666; border-top: 1px solid #e0e0e0; margin-top: 2rem;">
+            <p>Daily Tutes - December 25, 2025</p>
+            <p><a href="index.html" style="color: #667eea;">← Back to Timeline</a></p>
+        </div>
+    </div>
+</body>
+</html>

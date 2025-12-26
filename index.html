@@ -103,11 +103,35 @@
             box-shadow: 0 0 0 3px #667eea;
         }
 
+        .timeline-item.new-entry:before {
+            background: #11998e;
+            box-shadow: 0 0 0 3px #11998e;
+        }
+
+        .timeline-item.new-entry {
+            border-left-color: #11998e;
+        }
+
+        .new-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            padding: 3px 10px;
+            border-radius: 10px;
+            font-size: 0.7em;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+
         .timeline-date {
             color: #667eea;
             font-weight: bold;
             font-size: 1.1em;
             margin-bottom: 10px;
+        }
+
+        .timeline-item.new-entry .timeline-date {
+            color: #11998e;
         }
 
         .timeline-topics {
@@ -198,21 +222,59 @@
 
         <div class="stats">
             <div class="stat-card">
-                <div class="stat-number">3</div>
+                <div class="stat-number">4</div>
                 <div class="stat-label">Days Documented</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number">27</div>
+                <div class="stat-number">37</div>
                 <div class="stat-label">Topics Covered</div>
             </div>
             <div class="stat-card">
                 <div class="stat-number">4</div>
                 <div class="stat-label">Deep Dives</div>
             </div>
+            <div class="stat-card">
+                <div class="stat-number">2</div>
+                <div class="stat-label">Projects Built</div>
+            </div>
         </div>
 
         <div class="timeline">
             <h2>📅 Learning Timeline</h2>
+
+            <!-- December 25, 2025 - NEW -->
+            <div class="timeline-item new-entry">
+                <div class="timeline-date">December 25, 2025 - Thursday <span class="new-badge">NEW</span></div>
+                
+                <div class="timeline-topics">
+                    <span class="topic-badge">Agno Framework</span>
+                    <span class="topic-badge">Multi-Agent Patterns</span>
+                    <span class="topic-badge">Phoenix Tracing</span>
+                    <span class="topic-badge">Helicone Caching</span>
+                    <span class="topic-badge">DuckDB</span>
+                    <span class="topic-badge">Streamlit</span>
+                    <span class="topic-badge">SerpAPI</span>
+                    <span class="topic-badge">Structlog</span>
+                    <span class="topic-badge">GPT-4o</span>
+                    <span class="topic-badge">iCalendar</span>
+                </div>
+
+                <p style="color: #555; margin-top: 15px; line-height: 1.6;">
+                    <strong>AI Agent Projects - G-AI-Lab:</strong> Documented two complete AI agent projects with full observability integration. Data Analysis Agent using Agno + GPT-4o + DuckDB for natural language SQL queries, and Travel Agent with multi-agent handoff pattern (Researcher → Planner) with SerpAPI for web research.
+                </p>
+
+                <p style="color: #555; margin-top: 10px; line-height: 1.6;">
+                    <strong>Observability Stack Integration:</strong> Practical implementation of Phoenix tracing with Streamlit caching patterns (@st.cache_resource), Helicone API proxy for cost tracking and caching, and Structlog for structured JSON logging. Documented common issues and solutions for async event loops, port conflicts, and framework-specific configurations.
+                </p>
+
+                <p style="color: #555; margin-top: 10px; line-height: 1.6;">
+                    <strong>Tech Stack Mastered:</strong> Agno framework (lightweight LangChain alternative), DuckDB for in-process analytics, Streamlit UI patterns, SerpAPI for web search, iCalendar for .ics export. Complete .env configuration and import patterns documented.
+                </p>
+
+                <div class="timeline-links">
+                    <a href="daily-summary-20251225.html" class="timeline-link">📄 View Full Summary</a>
+                </div>
+            </div>
 
             <!-- December 19, 2025 -->
             <div class="timeline-item">
@@ -331,7 +393,7 @@
         </div>
 
         <div class="footer">
-            <p>Last Updated: December 19, 2025</p>
+            <p>Last Updated: December 25, 2025</p>
             <p>Keep learning, keep building! 🚀</p>
         </div>
     </div>

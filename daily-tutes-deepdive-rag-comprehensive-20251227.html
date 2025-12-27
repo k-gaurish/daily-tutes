@@ -1,0 +1,2150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAG Deep Dive: From Scratch to Production | Daily Tutes</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Fraunces:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-tertiary: #1a1a25;
+            --bg-card: #16161f;
+            --text-primary: #f0f0f5;
+            --text-secondary: #a0a0b0;
+            --text-muted: #606070;
+            --accent-orange: #ff6b35;
+            --accent-blue: #4ecdc4;
+            --accent-purple: #a855f7;
+            --accent-pink: #ec4899;
+            --accent-green: #22c55e;
+            --accent-yellow: #fbbf24;
+            --gradient-1: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+            --gradient-2: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+            --gradient-3: linear-gradient(135deg, #a855f7 0%, #6366f1 100%);
+            --gradient-4: linear-gradient(135deg, #ec4899 0%, #f43f5e 100%);
+            --border-color: #2a2a35;
+            --code-bg: #1e1e2e;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            font-size: 17px;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            background: radial-gradient(ellipse at top, #1a1a2e 0%, var(--bg-primary) 70%);
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(255, 107, 53, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(78, 205, 196, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(168, 85, 247, 0.05) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .hero-content {
+            text-align: center;
+            z-index: 1;
+            padding: 2rem;
+            max-width: 900px;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 107, 53, 0.1);
+            border: 1px solid rgba(255, 107, 53, 0.3);
+            border-radius: 50px;
+            font-size: 0.85rem;
+            color: var(--accent-orange);
+            margin-bottom: 2rem;
+            font-weight: 500;
+        }
+
+        .hero-title {
+            font-family: 'Fraunces', serif;
+            font-size: clamp(3rem, 8vw, 6rem);
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #fff 0%, #a0a0b0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: 1.4rem;
+            color: var(--text-secondary);
+            margin-bottom: 3rem;
+            font-weight: 300;
+        }
+
+        .hero-meta {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 3rem;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .meta-icon {
+            width: 20px;
+            height: 20px;
+            opacity: 0.7;
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
+            40% { transform: translateX(-50%) translateY(-10px); }
+            60% { transform: translateX(-50%) translateY(-5px); }
+        }
+
+        /* Navigation */
+        .toc-nav {
+            position: fixed;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+            padding: 1rem;
+            display: none;
+        }
+
+        @media (min-width: 1400px) {
+            .toc-nav {
+                display: block;
+            }
+        }
+
+        .toc-nav a {
+            display: block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--border-color);
+            margin: 0.75rem 0;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .toc-nav a:hover {
+            background: var(--accent-orange);
+            transform: scale(1.3);
+        }
+
+        .toc-nav a::after {
+            content: attr(data-title);
+            position: absolute;
+            left: 25px;
+            top: 50%;
+            transform: translateY(-50%);
+            white-space: nowrap;
+            background: var(--bg-card);
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .toc-nav a:hover::after {
+            opacity: 1;
+        }
+
+        /* Main Content */
+        .content {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+
+        /* Table of Contents */
+        .toc-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2.5rem;
+            margin-bottom: 4rem;
+        }
+
+        .toc-title {
+            font-family: 'Fraunces', serif;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .toc-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .toc-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        .toc-item:hover {
+            background: var(--bg-secondary);
+            color: var(--accent-orange);
+            transform: translateX(5px);
+        }
+
+        .toc-number {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--accent-orange);
+            opacity: 0.7;
+        }
+
+        /* Section Styling */
+        .section {
+            margin-bottom: 5rem;
+            scroll-margin-top: 2rem;
+        }
+
+        .section-header {
+            margin-bottom: 2rem;
+        }
+
+        .section-number {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--accent-orange);
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .section-title {
+            font-family: 'Fraunces', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 1rem;
+        }
+
+        .section-subtitle {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+        }
+
+        h3 {
+            font-family: 'Fraunces', serif;
+            font-size: 1.6rem;
+            font-weight: 600;
+            margin: 2.5rem 0 1rem;
+            color: var(--text-primary);
+        }
+
+        h4 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 2rem 0 1rem;
+            color: var(--accent-blue);
+        }
+
+        p {
+            margin-bottom: 1.25rem;
+            color: var(--text-secondary);
+        }
+
+        /* Diagram Boxes */
+        .diagram-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 2rem 0;
+            overflow-x: auto;
+        }
+
+        .diagram-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--accent-purple);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .diagram-content {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            color: var(--text-primary);
+            white-space: pre;
+            overflow-x: auto;
+        }
+
+        /* Code Blocks */
+        .code-block {
+            background: var(--code-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            margin: 1.5rem 0;
+            overflow: hidden;
+        }
+
+        .code-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 1rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .code-lang {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--accent-green);
+        }
+
+        .code-content {
+            padding: 1.25rem;
+            overflow-x: auto;
+        }
+
+        .code-content pre {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        .code-content .comment { color: #6a9955; }
+        .code-content .keyword { color: #c586c0; }
+        .code-content .string { color: #ce9178; }
+        .code-content .function { color: #dcdcaa; }
+        .code-content .variable { color: #9cdcfe; }
+        .code-content .number { color: #b5cea8; }
+
+        /* Tables */
+        .table-container {
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+        }
+
+        th {
+            background: var(--bg-tertiary);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-primary);
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: rgba(255, 107, 53, 0.03);
+        }
+
+        /* Callout Boxes */
+        .callout {
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin: 1.5rem 0;
+            border-left: 4px solid;
+        }
+
+        .callout-analogy {
+            background: rgba(78, 205, 196, 0.1);
+            border-color: var(--accent-blue);
+        }
+
+        .callout-analogy .callout-title {
+            color: var(--accent-blue);
+        }
+
+        .callout-important {
+            background: rgba(255, 107, 53, 0.1);
+            border-color: var(--accent-orange);
+        }
+
+        .callout-important .callout-title {
+            color: var(--accent-orange);
+        }
+
+        .callout-tip {
+            background: rgba(34, 197, 94, 0.1);
+            border-color: var(--accent-green);
+        }
+
+        .callout-tip .callout-title {
+            color: var(--accent-green);
+        }
+
+        .callout-warning {
+            background: rgba(251, 191, 36, 0.1);
+            border-color: var(--accent-yellow);
+        }
+
+        .callout-warning .callout-title {
+            color: var(--accent-yellow);
+        }
+
+        .callout-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .callout p {
+            margin: 0;
+            color: var(--text-secondary);
+        }
+
+        /* Feature Cards */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .feature-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            border-color: var(--accent-orange);
+            transform: translateY(-2px);
+        }
+
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-card h4 {
+            margin: 0 0 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .feature-card p {
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        /* Flow Diagrams */
+        .flow-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .flow-title {
+            font-family: 'Fraunces', serif;
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+            text-align: center;
+        }
+
+        .flow-steps {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .flow-step {
+            background: var(--bg-tertiary);
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            min-width: 120px;
+        }
+
+        .flow-step-number {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--accent-orange);
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        .flow-step-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .flow-arrow {
+            color: var(--accent-purple);
+            font-size: 1.5rem;
+        }
+
+        /* Comparison Boxes */
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .comparison-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .comparison-box.highlight {
+            border-color: var(--accent-green);
+            background: rgba(34, 197, 94, 0.05);
+        }
+
+        .comparison-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .comparison-icon {
+            font-size: 1.5rem;
+        }
+
+        .comparison-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .comparison-list {
+            list-style: none;
+        }
+
+        .comparison-list li {
+            padding: 0.5rem 0;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .comparison-list li::before {
+            content: '→';
+            color: var(--accent-orange);
+            flex-shrink: 0;
+        }
+
+        /* Part Labels */
+        .part-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-bottom: 1rem;
+        }
+
+        .part-label.indexing { background: rgba(78, 205, 196, 0.2); color: var(--accent-blue); }
+        .part-label.translation { background: rgba(236, 72, 153, 0.2); color: var(--accent-pink); }
+        .part-label.routing { background: rgba(255, 107, 53, 0.2); color: var(--accent-orange); }
+        .part-label.construction { background: rgba(251, 191, 36, 0.2); color: var(--accent-yellow); }
+
+        /* Visual Architecture */
+        .architecture-box {
+            background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-tertiary) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2.5rem;
+            margin: 2rem 0;
+        }
+
+        .architecture-title {
+            font-family: 'Fraunces', serif;
+            font-size: 1.4rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-orange { background: rgba(255, 107, 53, 0.2); color: var(--accent-orange); }
+        .badge-blue { background: rgba(78, 205, 196, 0.2); color: var(--accent-blue); }
+        .badge-purple { background: rgba(168, 85, 247, 0.2); color: var(--accent-purple); }
+        .badge-green { background: rgba(34, 197, 94, 0.2); color: var(--accent-green); }
+
+        /* Decision Matrix */
+        .decision-box {
+            background: var(--bg-card);
+            border: 2px solid var(--accent-purple);
+            border-radius: 16px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .decision-title {
+            font-family: 'Fraunces', serif;
+            font-size: 1.3rem;
+            color: var(--accent-purple);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 4rem 2rem;
+            border-top: 1px solid var(--border-color);
+            margin-top: 4rem;
+        }
+
+        .footer-brand {
+            font-family: 'Fraunces', serif;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .footer-text {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .content {
+                padding: 2rem 1rem;
+            }
+
+            .diagram-content {
+                font-size: 0.7rem;
+            }
+        }
+
+        /* Animations */
+        .fade-in {
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-badge">
+                📚 Deep Dive Document
+            </div>
+            <h1 class="hero-title">RAG From Scratch</h1>
+            <p class="hero-subtitle">A comprehensive guide to Retrieval-Augmented Generation — from fundamentals to advanced techniques</p>
+            <div class="hero-meta">
+                <div class="meta-item">
+                    <span>📅</span>
+                    <span>December 27, 2025</span>
+                </div>
+                <div class="meta-item">
+                    <span>⏱️</span>
+                    <span>45 min read</span>
+                </div>
+                <div class="meta-item">
+                    <span>📖</span>
+                    <span>11 Parts Covered</span>
+                </div>
+            </div>
+        </div>
+        <div class="scroll-indicator">
+            <span>Scroll to explore</span>
+            <span>↓</span>
+        </div>
+    </section>
+
+    <!-- Side Navigation -->
+    <nav class="toc-nav">
+        <a href="#overview" data-title="Overview"></a>
+        <a href="#big-picture" data-title="Big Picture"></a>
+        <a href="#indexing" data-title="Indexing"></a>
+        <a href="#retrieval" data-title="Retrieval"></a>
+        <a href="#generation" data-title="Generation"></a>
+        <a href="#query-translation" data-title="Query Translation"></a>
+        <a href="#routing" data-title="Routing"></a>
+        <a href="#query-construction" data-title="Query Construction"></a>
+        <a href="#decision-guide" data-title="Decision Guide"></a>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="content">
+        <!-- Table of Contents -->
+        <div class="toc-section">
+            <h2 class="toc-title">📑 Table of Contents</h2>
+            <div class="toc-grid">
+                <a href="#overview" class="toc-item" onclick="event.preventDefault(); document.getElementById('overview').scrollIntoView({behavior: 'smooth'});">
+                    <span class="toc-number">01</span>
+                    <span>What is RAG?</span>
+                </a>
+                <a href="#big-picture" class="toc-item" onclick="event.preventDefault(); document.getElementById('big-picture').scrollIntoView({behavior: 'smooth'});">
+                    <span class="toc-number">02</span>
+                    <span>The Big Picture</span>
+                </a>
+                <a href="#indexing" class="toc-item" onclick="event.preventDefault(); document.getElementById('indexing').scrollIntoView({behavior: 'smooth'});">
+                    <span class="toc-number">03</span>
+                    <span>Indexing (Parts 1-2)</span>
+                </a>
+                <a href="#retrieval" class="toc-item" onclick="event.preventDefault(); document.getElementById('retrieval').scrollIntoView({behavior: 'smooth'});">
+                    <span class="toc-number">04</span>
+                    <span>Retrieval (Part 3)</span>
+                </a>
+                <a href="#generation" class="toc-item" onclick="event.preventDefault(); document.getElementById('generation').scrollIntoView({behavior: 'smooth'});">
+                    <span class="toc-number">05</span>
+                    <span>Generation (Part 4)</span>
+                </a>
+                <a href="#query-translation" class="toc-item" onclick="event.preventDefault(); document.getElementById('query-translation').scrollIntoView({behavior: 'smooth'});">
+                    <span class="toc-number">06</span>
+                    <span>Query Translation (Parts 5-9)</span>
+                </a>
+                <a href="#routing" class="toc-item" onclick="event.preventDefault(); document.getElementById('routing').scrollIntoView({behavior: 'smooth'});">
+                    <span class="toc-number">07</span>
+                    <span>Routing (Part 10)</span>
+                </a>
+                <a href="#query-construction" class="toc-item" onclick="event.preventDefault(); document.getElementById('query-construction').scrollIntoView({behavior: 'smooth'});">
+                    <span class="toc-number">08</span>
+                    <span>Query Construction (Part 11)</span>
+                </a>
+                <a href="#decision-guide" class="toc-item" onclick="event.preventDefault(); document.getElementById('decision-guide').scrollIntoView({behavior: 'smooth'});">
+                    <span class="toc-number">09</span>
+                    <span>Decision Guide</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Section 1: Overview -->
+        <section id="overview" class="section">
+            <div class="section-header">
+                <span class="section-number">SECTION 01</span>
+                <h2 class="section-title">What is RAG?</h2>
+                <p class="section-subtitle">Understanding the problem RAG solves and why it matters</p>
+            </div>
+
+            <h3>The Problem RAG Solves</h3>
+            
+            <p>Imagine you ask ChatGPT: <em>"What was discussed in our company's Q3 board meeting?"</em></p>
+            
+            <p>ChatGPT would respond: <em>"I don't have access to your company's internal documents. I can only answer based on my training data."</em></p>
+
+            <div class="callout callout-important">
+                <div class="callout-title">💡 The Core Limitation</div>
+                <p>LLMs are trained on public data up to a certain date. They don't know about your private documents, recent events, or proprietary information.</p>
+            </div>
+
+            <p><strong>RAG (Retrieval-Augmented Generation)</strong> solves this by letting the AI "read" your documents before answering. It combines the power of search engines with the intelligence of language models.</p>
+
+            <h3>The Library Analogy</h3>
+
+            <div class="callout callout-analogy">
+                <div class="callout-title">📚 Think of RAG as a Super-Smart Librarian</div>
+                <p>When you ask a question, instead of just answering from memory, the librarian first finds relevant books, reads the relevant pages, and then answers based on what they just read.</p>
+            </div>
+
+            <div class="comparison-grid">
+                <div class="comparison-box">
+                    <div class="comparison-header">
+                        <span class="comparison-icon">🚫</span>
+                        <span class="comparison-title">Without RAG</span>
+                    </div>
+                    <ul class="comparison-list">
+                        <li>You ask a question</li>
+                        <li>AI answers from memory only</li>
+                        <li>Limited to training data</li>
+                        <li>Can't access your documents</li>
+                        <li>May hallucinate facts</li>
+                    </ul>
+                </div>
+                <div class="comparison-box highlight">
+                    <div class="comparison-header">
+                        <span class="comparison-icon">✅</span>
+                        <span class="comparison-title">With RAG</span>
+                    </div>
+                    <ul class="comparison-list">
+                        <li>You ask a question</li>
+                        <li>System finds relevant documents</li>
+                        <li>AI reads the relevant pages</li>
+                        <li>Answers based on actual sources</li>
+                        <li>Grounded in real data</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Big Picture -->
+        <section id="big-picture" class="section">
+            <div class="section-header">
+                <span class="section-number">SECTION 02</span>
+                <h2 class="section-title">The Big Picture</h2>
+                <p class="section-subtitle">Understanding the complete RAG architecture from Lance Martin's course</p>
+            </div>
+
+            <div class="architecture-box">
+                <h3 class="architecture-title">🗺️ Complete RAG Architecture</h3>
+                <div class="diagram-content">
+┌─────────────────────────────────────────────────────────────────────────────────────────┐
+│                                    RAG PIPELINE                                         │
+├─────────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                         │
+│   ┌──────────────┐    ┌──────────────┐    ┌──────────────┐    ┌──────────────┐        │
+│   │    QUERY     │    │   ROUTING    │    │  DATA STORE  │    │  RETRIEVAL   │        │
+│   │ TRANSLATION  │───▶│              │───▶│              │───▶│              │        │
+│   │              │    │              │    │              │    │              │        │
+│   │ • Multi-Query│    │ • Logical    │    │ • Graph DB   │    │ • Ranking    │        │
+│   │ • RAG-Fusion │    │ • Semantic   │    │ • SQL DB     │    │ • Re-Rank    │        │
+│   │ • Decompose  │    │              │    │ • VectorDB   │    │ • CRAG       │        │
+│   │ • Step-Back  │    └──────────────┘    └──────────────┘    └──────────────┘        │
+│   │ • HyDE       │                                                    │               │
+│   └──────────────┘                                                    │               │
+│          ▲                                                            ▼               │
+│          │                                                   ┌──────────────┐        │
+│   ┌──────┴───────┐                                           │  GENERATION  │        │
+│   │   QUESTION   │                                           │              │───▶ 💬  │
+│   │              │                                           │ • Self-RAG   │  Answer │
+│   │  "What is    │                                           │ • RRR        │        │
+│   │   Task       │                                           └──────────────┘        │
+│   │   Decomp?"   │                                                                    │
+│   └──────────────┘                                                                    │
+│                                                                                         │
+├─────────────────────────────────────────────────────────────────────────────────────────┤
+│   ┌─────────────────────────────────────────────────────────────────────────────────┐  │
+│   │                              INDEXING (Offline)                                  │  │
+│   │   Documents → Split → Embed → Store in VectorDB                                 │  │
+│   │                                                                                   │  │
+│   │   • Chunk Optimization    • Multi-representation    • RAPTOR                    │  │
+│   │   • Semantic Splitter     • Parent Document         • ColBERT                   │  │
+│   └─────────────────────────────────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────────────────────────────────┘
+                </div>
+            </div>
+
+            <h3>The Six Core Components</h3>
+
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-icon" style="background: rgba(78, 205, 196, 0.2);">📥</div>
+                    <h4>1. Indexing</h4>
+                    <p>How documents are loaded, split into chunks, converted to vectors, and stored.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon" style="background: rgba(236, 72, 153, 0.2);">🔄</div>
+                    <h4>2. Query Translation</h4>
+                    <p>Transform user questions into forms better suited for retrieval.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon" style="background: rgba(255, 107, 53, 0.2);">🚦</div>
+                    <h4>3. Routing</h4>
+                    <p>Direct questions to the right data source (SQL, Graph, Vector).</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon" style="background: rgba(251, 191, 36, 0.2);">🔧</div>
+                    <h4>4. Query Construction</h4>
+                    <p>Convert natural language to structured queries with filters.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon" style="background: rgba(34, 197, 94, 0.2);">🔍</div>
+                    <h4>5. Retrieval</h4>
+                    <p>Find and rank the most relevant documents for the query.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon" style="background: rgba(168, 85, 247, 0.2);">✨</div>
+                    <h4>6. Generation</h4>
+                    <p>Use LLM to generate answers based on retrieved context.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Indexing -->
+        <section id="indexing" class="section">
+            <div class="section-header">
+                <span class="section-number">SECTION 03</span>
+                <h2 class="section-title">Indexing</h2>
+                <p class="section-subtitle">Parts 1-2: How documents are prepared for search</p>
+            </div>
+
+            <span class="part-label indexing">📥 Parts 1-2</span>
+
+            <h3>Why Do We Need Indexing?</h3>
+
+            <p>You can't search text directly for meaning. The sentence "I love cats" and "I adore kittens" mean almost the same thing, but they share only one word. We need to convert text into numbers that capture meaning.</p>
+
+            <div class="flow-container">
+                <h4 class="flow-title">The Indexing Pipeline</h4>
+                <div class="flow-steps">
+                    <div class="flow-step">
+                        <span class="flow-step-number">01</span>
+                        <span class="flow-step-name">Load</span>
+                    </div>
+                    <span class="flow-arrow">→</span>
+                    <div class="flow-step">
+                        <span class="flow-step-number">02</span>
+                        <span class="flow-step-name">Split</span>
+                    </div>
+                    <span class="flow-arrow">→</span>
+                    <div class="flow-step">
+                        <span class="flow-step-number">03</span>
+                        <span class="flow-step-name">Embed</span>
+                    </div>
+                    <span class="flow-arrow">→</span>
+                    <div class="flow-step">
+                        <span class="flow-step-number">04</span>
+                        <span class="flow-step-name">Store</span>
+                    </div>
+                </div>
+            </div>
+
+            <h3>Step 1: Load Documents</h3>
+
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-lang">Python</span>
+                </div>
+                <div class="code-content">
+<pre><span class="keyword">from</span> langchain_community.document_loaders <span class="keyword">import</span> WebBaseLoader
+
+<span class="comment"># Load a webpage</span>
+loader = WebBaseLoader(<span class="string">"https://lilianweng.github.io/posts/2023-06-23-agent/"</span>)
+docs = loader.load()</pre>
+                </div>
+            </div>
+
+            <div class="callout callout-analogy">
+                <div class="callout-title">📚 Analogy: Getting Books into the Library</div>
+                <p>This step is like a library receiving new books. You're importing raw content from various sources (web pages, PDFs, databases) into your system.</p>
+            </div>
+
+            <h3>Step 2: Split into Chunks</h3>
+
+            <p>Documents are too long to process at once. We need to cut them into smaller, manageable pieces.</p>
+
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-lang">Python</span>
+                </div>
+                <div class="code-content">
+<pre><span class="keyword">from</span> langchain.text_splitter <span class="keyword">import</span> RecursiveCharacterTextSplitter
+
+text_splitter = RecursiveCharacterTextSplitter(
+    chunk_size=<span class="number">300</span>,     <span class="comment"># 300 tokens per chunk</span>
+    chunk_overlap=<span class="number">50</span>    <span class="comment"># 50 token overlap</span>
+)
+splits = text_splitter.split_documents(docs)</pre>
+                </div>
+            </div>
+
+            <div class="callout callout-analogy">
+                <div class="callout-title">🗂️ Analogy: Creating Index Cards</div>
+                <p>Imagine cutting a recipe book into index cards. Each card has one recipe or part of a recipe. The overlap ensures you don't lose context at the edges — like having "...add salt to the boiling water" on one card and "Add salt to the boiling water. Then add pasta..." on the next.</p>
+            </div>
+
+            <div class="diagram-box">
+                <div class="diagram-title">📄 How Splitting Works</div>
+                <div class="diagram-content">
+Original Document:
+┌─────────────────────────────────────────────────────────────────┐
+│ To make pasta, boil water in a large pot. Use 4 cups of water   │
+│ per 100g of pasta. Add salt to the water. Cook pasta for 8-10   │
+│ minutes until al dente. Stir occasionally. Drain and serve.     │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+                     RecursiveCharacterTextSplitter
+                              ↓
+Split into Chunks with Overlap:
+┌───────────────────────────┐
+│ Card 1:                   │
+│ "To make pasta, boil      │
+│ water in a large pot.     │
+│ Use 4 cups of water       │
+│ per 100g of pasta..."     │
+└───────────────────────────┘
+        ↓ (overlap)
+┌───────────────────────────┐
+│ Card 2:                   │
+│ "...water per 100g of     │
+│ pasta. Add salt to the    │
+│ water. Cook pasta for     │
+│ 8-10 minutes..."          │
+└───────────────────────────┘
+        ↓ (overlap)
+┌───────────────────────────┐
+│ Card 3:                   │
+│ "...Cook pasta for 8-10   │
+│ minutes until al dente.   │
+│ Stir occasionally.        │
+│ Drain and serve."         │
+└───────────────────────────┘
+                </div>
+            </div>
+
+            <h3>Step 3: Convert to Embeddings</h3>
+
+            <p>This is where the magic happens. We convert text into numbers (vectors) that capture semantic meaning.</p>
+
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-lang">Python</span>
+                </div>
+                <div class="code-content">
+<pre><span class="keyword">from</span> langchain_openai <span class="keyword">import</span> OpenAIEmbeddings
+
+embeddings = OpenAIEmbeddings()
+vector = embeddings.embed_query(<span class="string">"I love cats"</span>)
+<span class="comment"># Returns: [0.001, -0.004, 0.023, ...] (1536 numbers!)</span></pre>
+                </div>
+            </div>
+
+            <div class="callout callout-analogy">
+                <div class="callout-title">🗺️ Analogy: GPS Coordinates for Meaning</div>
+                <p>Think of embeddings as GPS coordinates in "meaning space." Similar meanings get placed close together, different meanings are far apart. "I love cats" and "I adore kittens" would be very close, while "Python programming" would be far away.</p>
+            </div>
+
+            <div class="diagram-box">
+                <div class="diagram-title">🗺️ Embedding Space Visualization</div>
+                <div class="diagram-content">
+                              ANIMALS
+                                 ↑
+                     🐱 "cats"  •  • "dogs" 🐕
+                                •
+              🐹 "hamsters"     •     • "rabbits" 🐰
+                                •
+          ←─────────────────────•─────────────────────→
+          TECH                  •                  FOOD
+                                •
+                   💻 "coding"  •  • "pizza" 🍕
+                                •
+                     🤖 "AI"    •  • "pasta" 🍝
+                                ↓
+                             SPORTS
+
+Similar meanings = Close coordinates!
+"I love cats" → lands near 🐱
+"Python programming" → lands near 💻
+"I love my pet python" → somewhere between! (AI understands context)
+                </div>
+            </div>
+
+            <h3>Two Types of Representations</h3>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Approach</th>
+                            <th>Method</th>
+                            <th>Vector Type</th>
+                            <th>Search Algorithm</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Statistical</strong></td>
+                            <td>Bag of Words</td>
+                            <td>Sparse <code>[0,0,1,4,0...]</code></td>
+                            <td>BM25</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Machine Learned</strong></td>
+                            <td>Embeddings</td>
+                            <td>Dense <code>[0.001,-0.004...]</code></td>
+                            <td>kNN, HNSW</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="callout callout-tip">
+                <div class="callout-title">💡 Sparse vs Dense</div>
+                <p><strong>Sparse:</strong> Mostly zeros, one dimension per word in vocabulary (50,000+ dimensions)<br>
+                <strong>Dense:</strong> All values filled, compressed meaning (typically 384-1536 dimensions)</p>
+            </div>
+
+            <h3>Step 4: Store in Vector Database</h3>
+
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-lang">Python</span>
+                </div>
+                <div class="code-content">
+<pre><span class="keyword">from</span> langchain_community.vectorstores <span class="keyword">import</span> Chroma
+
+vectorstore = Chroma.from_documents(
+    documents=splits, 
+    embedding=OpenAIEmbeddings()
+)
+retriever = vectorstore.as_retriever()</pre>
+                </div>
+            </div>
+
+            <div class="callout callout-analogy">
+                <div class="callout-title">🗄️ Analogy: Smart Filing Cabinet</div>
+                <p>A regular filing cabinet organizes alphabetically. A vector database organizes by <strong>meaning</strong>. Searching "sweet treats" will find "apple pie recipe" and "chocolate cake" even though they don't share words!</p>
+            </div>
+        </section>
+
+        <!-- Section 4: Retrieval -->
+        <section id="retrieval" class="section">
+            <div class="section-header">
+                <span class="section-number">SECTION 04</span>
+                <h2 class="section-title">Retrieval</h2>
+                <p class="section-subtitle">Part 3: Finding the most relevant documents</p>
+            </div>
+
+            <span class="part-label indexing">🔍 Part 3</span>
+
+            <h3>How Retrieval Works</h3>
+
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-lang">Python</span>
+                </div>
+                <div class="code-content">
+<pre><span class="comment"># Create retriever that returns top 3 results</span>
+retriever = vectorstore.as_retriever(search_kwargs={<span class="string">"k"</span>: <span class="number">3</span>})
+
+<span class="comment"># Retrieve relevant documents</span>
+docs = retriever.get_relevant_documents(<span class="string">"What is Task Decomposition?"</span>)</pre>
+                </div>
+            </div>
+
+            <div class="diagram-box">
+                <div class="diagram-title">🔍 Retrieval Process</div>
+                <div class="diagram-content">
+┌─────────────────────────────────────────────────────────────────┐
+│                    RETRIEVAL PROCESS                            │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│   Question: "How do I make pasta?"                              │
+│                     │                                           │
+│                     ▼                                           │
+│   ┌─────────────────────────────────────┐                      │
+│   │  1. Convert to Embedding            │                      │
+│   │     [0.023, -0.014, 0.089, ...]     │                      │
+│   └─────────────────────────────────────┘                      │
+│                     │                                           │
+│                     ▼                                           │
+│   ┌─────────────────────────────────────┐                      │
+│   │  2. Calculate Cosine Similarity     │                      │
+│   │     with ALL stored vectors         │                      │
+│   └─────────────────────────────────────┘                      │
+│                     │                                           │
+│                     ▼                                           │
+│   ┌─────────────────────────────────────┐                      │
+│   │  3. Return Top K Results            │                      │
+│   │                                     │                      │
+│   │  • Card 12: "To make pasta..." 0.92 │ ← Most similar      │
+│   │  • Card 13: "Cook pasta for..." 0.87│                      │
+│   │  • Card 7:  "Best pasta shapes" 0.81│                      │
+│   └─────────────────────────────────────┘                      │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+                </div>
+            </div>
+
+            <h3>Cosine Similarity Explained</h3>
+
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-lang">Python</span>
+                </div>
+                <div class="code-content">
+<pre><span class="keyword">import</span> numpy <span class="keyword">as</span> np
+
+<span class="keyword">def</span> <span class="function">cosine_similarity</span>(vec1, vec2):
+    dot_product = np.dot(vec1, vec2)
+    norm_vec1 = np.linalg.norm(vec1)
+    norm_vec2 = np.linalg.norm(vec2)
+    <span class="keyword">return</span> dot_product / (norm_vec1 * norm_vec2)
+
+<span class="comment"># Returns value between 0 and 1</span>
+<span class="comment"># 1 = identical meaning, 0 = completely unrelated</span></pre>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Text 1</th>
+                            <th>Text 2</th>
+                            <th>Similarity</th>
+                            <th>Interpretation</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>"I love cats"</td>
+                            <td>"I adore kittens"</td>
+                            <td><span class="badge badge-green">0.92</span></td>
+                            <td>Very similar</td>
+                        </tr>
+                        <tr>
+                            <td>"I love cats"</td>
+                            <td>"Dogs are great"</td>
+                            <td><span class="badge badge-orange">0.65</span></td>
+                            <td>Somewhat related (pets)</td>
+                        </tr>
+                        <tr>
+                            <td>"I love cats"</td>
+                            <td>"Python programming"</td>
+                            <td><span class="badge badge-purple">0.12</span></td>
+                            <td>Not related</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Section 5: Generation -->
+        <section id="generation" class="section">
+            <div class="section-header">
+                <span class="section-number">SECTION 05</span>
+                <h2 class="section-title">Generation</h2>
+                <p class="section-subtitle">Part 4: Creating answers from retrieved context</p>
+            </div>
+
+            <span class="part-label indexing">✨ Part 4</span>
+
+            <h3>The Prompt Template</h3>
+
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-lang">Python</span>
+                </div>
+                <div class="code-content">
+<pre>template = <span class="string">"""Answer the question based only on the following context:
+{context}
+
+Question: {question}
+"""</span>
+
+prompt = ChatPromptTemplate.from_template(template)</pre>
+                </div>
+            </div>
+
+            <h3>The Complete RAG Chain</h3>
+
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-lang">Python</span>
+                </div>
+                <div class="code-content">
+<pre>rag_chain = (
+    {<span class="string">"context"</span>: retriever | format_docs, <span class="string">"question"</span>: RunnablePassthrough()}
+    | prompt
+    | llm
+    | StrOutputParser()
+)
+
+<span class="comment"># Ask a question!</span>
+answer = rag_chain.invoke(<span class="string">"What is Task Decomposition?"</span>)</pre>
+                </div>
+            </div>
+
+            <div class="diagram-box">
+                <div class="diagram-title">🔗 RAG Chain Flow</div>
+                <div class="diagram-content">
+Question: "What is Task Decomposition?"
+              │
+              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    WHAT THE LLM RECEIVES                        │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  Answer the question based only on the following context:       │
+│                                                                 │
+│  [Retrieved Doc 1]: Task decomposition is a technique that      │
+│  breaks down complex tasks into smaller, manageable steps...    │
+│                                                                 │
+│  [Retrieved Doc 2]: Common approaches to task decomposition     │
+│  include Chain of Thought prompting and Tree of Thoughts...     │
+│                                                                 │
+│  [Retrieved Doc 3]: LLM-based agents use task decomposition     │
+│  to plan and execute multi-step workflows...                    │
+│                                                                 │
+│  Question: What is Task Decomposition?                          │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+              │
+              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                       LLM GENERATES                             │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  "Task decomposition is a technique that breaks down complex    │
+│  tasks into smaller, manageable steps. It's commonly used in    │
+│  LLM-based agents through methods like Chain of Thought         │
+│  prompting and Tree of Thoughts to plan and execute             │
+│  multi-step workflows."                                         │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 6: Query Translation -->
+        <section id="query-translation" class="section">
+            <div class="section-header">
+                <span class="section-number">SECTION 06</span>
+                <h2 class="section-title">Query Translation</h2>
+                <p class="section-subtitle">Parts 5-9: Transforming questions for better retrieval</p>
+            </div>
+
+            <span class="part-label translation">🔄 Parts 5-9</span>
+
+            <h3>The Core Problem</h3>
+
+            <p>Users often write bad search queries. Just like when you Google something and don't find what you need on the first try — you rephrase and search again. Query Translation techniques do this <strong>automatically</strong>.</p>
+
+            <div class="callout callout-important">
+                <div class="callout-title">🎯 The Goal</div>
+                <p>Transform the user's question into one or more forms that are better suited for retrieval.</p>
+            </div>
+
+            <!-- Part 5: Multi-Query -->
+            <h3>Part 5: Multi-Query</h3>
+
+            <div class="diagram-box">
+                <div class="diagram-title">🔀 Multi-Query Flow</div>
+                <div class="diagram-content">
+                        ┌─→ Q1 → Search → Docs ─┐
+                        │                       │
+Question ──→ LLM ──→────├─→ Q2 → Search → Docs ─┼──→ Combine All → LLM → Answer
+                        │                       │
+                        └─→ Q3 → Search → Docs ─┘
+                </div>
+            </div>
+
+            <div class="callout callout-analogy">
+                <div class="callout-title">👥 Analogy: Asking 3 Different Librarians</div>
+                <p>You're looking for information about "how to stay healthy." Instead of asking one librarian, you ask three — and each interprets your question differently:</p>
+                <p>• Librarian 1 hears: "What are good exercise routines?"<br>
+                • Librarian 2 hears: "What foods should I eat?"<br>
+                • Librarian 3 hears: "How much sleep do I need?"</p>
+                <p>Each brings back relevant books. You now have a <strong>richer set of information</strong>!</p>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Original Question</th>
+                            <th>Generated Variants</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>"What is task decomposition in AI agents?"</td>
+                            <td>
+                                Q1: "How do AI agents break down complex tasks?"<br>
+                                Q2: "What are the steps in task decomposition?"<br>
+                                Q3: "Task planning methods for autonomous agents"
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Part 6: RAG-Fusion -->
+            <h3>Part 6: RAG-Fusion</h3>
+
+            <div class="diagram-box">
+                <div class="diagram-title">🔀➡️🏆 RAG-Fusion Flow</div>
+                <div class="diagram-content">
+                        ┌─→ Q1 → Search → Docs ─┐
+                        │                       │
+Question ──→ LLM ──→────├─→ Q2 → Search → Docs ─┼──→ RANK/FUSE → Best Docs → Answer
+                        │                       │    (funnel)
+                        └─→ Q3 → Search → Docs ─┘
+                </div>
+            </div>
+
+            <div class="callout callout-analogy">
+                <div class="callout-title">🏆 Analogy: American Idol Voting</div>
+                <p>Same as Multi-Query, but now there's a <strong>voting system</strong>. If a document appears in results from Q1, Q2, AND Q3 — it's probably really relevant (like a contestant getting votes from all judges). Documents that only appear once? Probably less important.</p>
+            </div>
+
+            <div class="diagram-box">
+                <div class="diagram-title">📊 Reciprocal Rank Fusion (RRF) Scoring</div>
+                <div class="diagram-content">
+Query Results:
+┌────────┬─────────────────────────────────────────────────────────┐
+│ Q1     │ Doc A (rank 1), Doc B (rank 2), Doc C (rank 3)          │
+│ Q2     │ Doc A (rank 1), Doc D (rank 2), Doc B (rank 3)          │
+│ Q3     │ Doc A (rank 1), Doc B (rank 2), Doc E (rank 3)          │
+└────────┴─────────────────────────────────────────────────────────┘
+
+After RRF Fusion:
+┌────────┬─────────────────────────────────────────────────────────┐
+│ Doc A  │ Rank 1 in all three → 🏆 TOP RESULT                     │
+│ Doc B  │ Rank 2, 3, 2 → Second best                              │
+│ Doc D  │ Only appeared once → Lower priority                     │
+└────────┴─────────────────────────────────────────────────────────┘
+                </div>
+            </div>
+
+            <!-- Part 7: Decomposition -->
+            <h3>Part 7: Decomposition</h3>
+
+            <div class="diagram-box">
+                <div class="diagram-title">🧩 Answer Recursively Flow</div>
+                <div class="diagram-content">
+                        ┌─→ Q1 → Search → Docs → LLM → Answer 1 ─┐
+                        │                                        │
+Question ──→ LLM ──→────├─→ Q2 → Search → Docs → LLM → Answer 2 ─┼──→ Combine
+                        │                                        │
+                        └─→ Q3 → Search → Docs → LLM → Answer 3 ─┘
+                </div>
+            </div>
+
+            <div class="callout callout-analogy">
+                <div class="callout-title">📝 Analogy: Solving a Math Word Problem</div>
+                <p>Teacher asks: "If John has 3 apples and buys 2 more, then gives half to Mary, how many does John have?"</p>
+                <p>You don't solve this in one step. You break it down:<br>
+                1. How many apples after buying? → 3 + 2 = 5<br>
+                2. What's half of 5? → 2.5<br>
+                3. How many does John keep? → 2.5</p>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Complex Question</th>
+                            <th>Decomposed Sub-Questions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>"Compare AWS Lambda vs Google Cloud Functions for high-traffic APIs"</td>
+                            <td>
+                                Q1: "What is AWS Lambda pricing model?"<br>
+                                Q2: "What is Google Cloud Functions pricing?"<br>
+                                Q3: "AWS Lambda performance benchmarks"<br>
+                                Q4: "Cloud Functions cold start latency"
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Part 8: Step-Back -->
+            <h3>Part 8: Step-Back Prompting</h3>
+
+            <div class="diagram-box">
+                <div class="diagram-title">⬆️ Abstraction Levels</div>
+                <div class="diagram-content">
+More abstract    ↑
+                 │    Step-back Question (Step-back prompting)
+                 │           ↑
+                 │           │
+                 │    Question ────→ Re-written (Multi-Query, RAG-Fusion)
+                 │           │
+                 │           ↓
+                 │    Sub-question (Least-to-Most)
+Less abstract    ↓
+                </div>
+            </div>
+
+            <div class="callout callout-analogy">
+                <div class="callout-title">🎓 Analogy: Asking Your Professor</div>
+                <p>You ask: "Why did my Python code crash on line 47?"</p>
+                <p>A good professor first asks: "What is your code supposed to do overall?" (step back)</p>
+                <p>By understanding the <strong>bigger picture</strong>, they can give a better answer to your specific question.</p>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Original (Too Specific)</th>
+                            <th>Step-Back (More Abstract)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>"Why did the 2008 crisis affect Toyota's sales in Ohio?"</td>
+                            <td>"What were the economic effects of the 2008 crisis on the automotive industry?"</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Part 9: HyDE -->
+            <h3>Part 9: HyDE (Hypothetical Document Embeddings)</h3>
+
+            <div class="diagram-box">
+                <div class="diagram-title">📝➡️🔍 HyDE Flow</div>
+                <div class="diagram-content">
+                                                          EMBEDDING SPACE
+                                                          
+Question ──→ LLM generates ──→ Embed hypothetical ──→    ○ [x,y,z...] (green doc)
+             "fake answer"      answer                        
+                   │                   │                  ● Hypothetical answer
+                   │                   │                  ○ [x,y,z...] (orange doc)  
+                   ▼                   ▼                      ↑
+          "Effective strategies    Find REAL docs        SEARCH finds
+           for reducing churn      that LOOK LIKE        documents similar
+           include loyalty         this fake answer      to the hypothetical!
+           programs..."
+                </div>
+            </div>
+
+            <div class="callout callout-analogy">
+                <div class="callout-title">🎨 Analogy: Drawing a Sketch for the Police</div>
+                <p>You saw a thief but can't find them. Instead of describing them in words, you work with a sketch artist to create a <strong>picture of what they look like</strong>.</p>
+                <p>Now police can compare the sketch to mugshots and find similar faces.</p>
+                <p><strong>HyDE does the same:</strong> Generate a fake answer (might be wrong, but looks like a real answer), then search for documents that look similar to this hypothetical answer.</p>
+            </div>
+
+            <h3>Query Translation Decision Matrix</h3>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Technique</th>
+                            <th>Best For</th>
+                            <th>Trade-off</th>
+                            <th>Latency</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Multi-Query</strong></td>
+                            <td>Vague questions, terminology variance</td>
+                            <td>More docs, might include noise</td>
+                            <td>3x</td>
+                        </tr>
+                        <tr>
+                            <td><strong>RAG-Fusion</strong></td>
+                            <td>Need precision + recall together</td>
+                            <td>Requires ranking step</td>
+                            <td>3x+</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Decomposition</strong></td>
+                            <td>Complex multi-part questions</td>
+                            <td>Multiple LLM calls</td>
+                            <td>5-10x</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Step-Back</strong></td>
+                            <td>Too-specific questions needing context</td>
+                            <td>May retrieve too-general info</td>
+                            <td>2x</td>
+                        </tr>
+                        <tr>
+                            <td><strong>HyDE</strong></td>
+                            <td>Mismatched question-answer language</td>
+                            <td>Risk of hallucinated hypothetical</td>
+                            <td>2x</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Section 7: Routing -->
+        <section id="routing" class="section">
+            <div class="section-header">
+                <span class="section-number">SECTION 07</span>
+                <h2 class="section-title">Routing</h2>
+                <p class="section-subtitle">Part 10: Directing questions to the right data source</p>
+            </div>
+
+            <span class="part-label routing">🚦 Part 10</span>
+
+            <h3>The Core Problem</h3>
+
+            <p>You have <strong>multiple data sources</strong>. How does the system know where to look?</p>
+
+            <div class="callout callout-analogy">
+                <div class="callout-title">🏥 Analogy: Hospital Reception Desk</div>
+                <p>You walk into a hospital and say "I have chest pain."</p>
+                <p>The receptionist doesn't send you to the dentist. They route you to:<br>
+                • Cardiology? (heart issues)<br>
+                • Gastroenterology? (stomach issues)<br>
+                • ER? (emergency)</p>
+                <p><strong>Routing in RAG = Same concept.</strong> Route the question to the right data source.</p>
+            </div>
+
+            <h3>Type 1: Logical Routing (LLM Decides)</h3>
+
+            <div class="diagram-box">
+                <div class="diagram-title">🧠 Logical Routing Flow</div>
+                <div class="diagram-content">
+                                 ┌──────────────────────┐
+                                 │   "Why doesn't my    │
+                                 │   Python code work?" │
+                                 └──────────┬───────────┘
+                                            │
+                                            ▼
+                                 ┌──────────────────────┐
+                                 │   LLM Classifier     │
+                                 │   "This is Python!"  │
+                                 │                      │
+                                 │   Returns JSON:      │
+                                 │   {datasource:       │
+                                 │    "python_docs"}    │
+                                 └──────────┬───────────┘
+                                            │
+                    ┌───────────────────────┼───────────────────────┐
+                    │                       │                       │
+                    ▼                       ▼                       ▼
+              ┌─────────┐            ┌─────────┐            ┌─────────┐
+              │ Python  │            │   JS    │            │ Golang  │
+              │  Docs   │            │  Docs   │            │  Docs   │
+              │   ✅    │            │         │            │         │
+              └─────────┘            └─────────┘            └─────────┘
+                </div>
+            </div>
+
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-lang">Python</span>
+                </div>
+                <div class="code-content">
+<pre><span class="keyword">class</span> <span class="function">RouteQuery</span>(BaseModel):
+    <span class="string">"""Route a user query to the most relevant datasource."""</span>
+    datasource: Literal[<span class="string">"python_docs"</span>, <span class="string">"js_docs"</span>, <span class="string">"golang_docs"</span>]
+
+<span class="comment"># LLM with structured output</span>
+structured_llm = llm.with_structured_output(RouteQuery)
+
+<span class="comment"># Route the question</span>
+result = router.invoke({<span class="string">"question"</span>: <span class="string">"Why doesn't my Python code work?"</span>})
+<span class="comment"># Returns: RouteQuery(datasource='python_docs')</span></pre>
+                </div>
+            </div>
+
+            <h3>Type 2: Semantic Routing (Embedding Similarity Decides)</h3>
+
+            <div class="diagram-box">
+                <div class="diagram-title">📐 Semantic Routing Flow</div>
+                <div class="diagram-content">
+                                        Chosen prompt
+                                            │
+Question ──→ Embed ──→ Compare ──→ Most Similar ──→ LLM ──→ Answer
+                          ↑
+                          │
+            ┌─────────────┴─────────────┐
+            │                           │
+      ┌───────────┐               ┌───────────┐
+      │ Physics   │               │   Math    │
+      │ Prompt    │               │  Prompt   │
+      │ (embedded)│               │ (embedded)│
+      └───────────┘               └───────────┘
+      
+"What's a black hole?" → Closer to Physics → Uses Physics prompt!
+                </div>
+            </div>
+
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-lang">Python</span>
+                </div>
+                <div class="code-content">
+<pre><span class="comment"># Two expert prompts</span>
+physics_template = <span class="string">"You are a smart physics professor..."</span>
+math_template = <span class="string">"You are a good mathematician..."</span>
+
+<span class="comment"># Embed the prompts</span>
+prompt_embeddings = embeddings.embed_documents([physics_template, math_template])
+
+<span class="keyword">def</span> <span class="function">prompt_router</span>(input):
+    <span class="comment"># Embed the question</span>
+    query_embedding = embeddings.embed_query(input[<span class="string">"query"</span>])
+    <span class="comment"># Find most similar prompt</span>
+    similarity = cosine_similarity([query_embedding], prompt_embeddings)
+    <span class="keyword">return</span> prompt_templates[similarity.argmax()]
+
+chain.invoke(<span class="string">"What's a black hole"</span>)  <span class="comment"># Uses Physics prompt!</span></pre>
+                </div>
+            </div>
+
+            <h3>Logical vs Semantic Routing</h3>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Aspect</th>
+                            <th>Logical Routing</th>
+                            <th>Semantic Routing</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>How it decides</strong></td>
+                            <td>LLM classification</td>
+                            <td>Embedding similarity</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Speed</strong></td>
+                            <td>Slower (LLM call)</td>
+                            <td>Faster (just math)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Cost</strong></td>
+                            <td>Higher (API call)</td>
+                            <td>Lower (local computation)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Best for</strong></td>
+                            <td>Clear categories (Python/JS/Go)</td>
+                            <td>Nuanced topics (Physics/Math)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Section 8: Query Construction -->
+        <section id="query-construction" class="section">
+            <div class="section-header">
+                <span class="section-number">SECTION 08</span>
+                <h2 class="section-title">Query Construction</h2>
+                <p class="section-subtitle">Part 11: Converting natural language to structured filters</p>
+            </div>
+
+            <span class="part-label construction">🔧 Part 11</span>
+
+            <h3>The Core Problem</h3>
+
+            <p>Your user says: <em>"Show me LangChain videos from 2024 that are under 5 minutes"</em></p>
+
+            <p>A basic vector search only does semantic similarity. It <strong>can't filter by date, video length, view count, or any other metadata</strong>.</p>
+
+            <div class="callout callout-analogy">
+                <div class="callout-title">🛒 Analogy: Shopping on Amazon</div>
+                <p>You tell your friend: "Find me a red dress under $50 with good reviews from the last month"</p>
+                <p>Your friend needs to:<br>
+                1. Search for "dress" (semantic search)<br>
+                2. Filter: color = red<br>
+                3. Filter: price &lt; $50<br>
+                4. Filter: rating &gt; 4 stars<br>
+                5. Filter: listed_date &gt; 30 days ago</p>
+                <p><strong>Query Construction does exactly this for databases!</strong></p>
+            </div>
+
+            <h3>How It Works</h3>
+
+            <div class="diagram-box">
+                <div class="diagram-title">🔧 Query Construction Flow</div>
+                <div class="diagram-content">
+┌─────────────────────────────────────────────────────────────────────────┐
+│                                                                         │
+│  User: "videos on chat langchain published after 2024"                  │
+│                                                                         │
+└─────────────────────────────────┬───────────────────────────────────────┘
+                                  │
+                                  ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│                           LLM + Schema                                  │
+│  ┌─────────────────────┐    ┌────────────────────────────────────────┐ │
+│  │ Function Schema:    │    │  LLM understands:                      │ │
+│  │ - content_search    │───→│  • "chat langchain" = search term      │ │
+│  │ - title_search      │    │  • "after 2024" = date filter          │ │
+│  │ - earliest_date     │    │                                        │ │
+│  │ - latest_date       │    │  Outputs JSON:                         │ │
+│  │ - min_views         │    │  {"content_search": "chat langchain",  │ │
+│  │ - max_length        │    │   "earliest_publish_date": "2024-01-01"}│ │
+│  └─────────────────────┘    └────────────────────────────────────────┘ │
+└─────────────────────────────────┬───────────────────────────────────────┘
+                                  │
+                                  ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│                         Vector DB Search                                │
+│                                                                         │
+│   SELECT * FROM videos                                                  │
+│   WHERE content SIMILAR TO "chat langchain"                             │
+│   AND publish_date >= "2024-01-01"                                      │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+                </div>
+            </div>
+
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-lang">Python</span>
+                </div>
+                <div class="code-content">
+<pre><span class="keyword">class</span> <span class="function">TutorialSearch</span>(BaseModel):
+    <span class="string">"""Search over tutorial videos."""</span>
+    
+    <span class="comment"># Semantic search fields</span>
+    content_search: str
+    title_search: str
+    
+    <span class="comment"># Metadata filters</span>
+    min_view_count: Optional[int]
+    max_view_count: Optional[int]
+    earliest_publish_date: Optional[date]
+    latest_publish_date: Optional[date]
+    min_length_sec: Optional[int]
+    max_length_sec: Optional[int]
+
+<span class="comment"># Convert natural language to structured query</span>
+query_analyzer.invoke({<span class="string">"question"</span>: <span class="string">"videos under 5 minutes about RAG"</span>})
+<span class="comment"># Returns: TutorialSearch(content_search="RAG", max_length_sec=300)</span></pre>
+                </div>
+            </div>
+
+            <h3>Examples</h3>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Natural Language Query</th>
+                            <th>Structured Output</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>"rag from scratch"</td>
+                            <td><code>content_search: "rag from scratch"</code></td>
+                        </tr>
+                        <tr>
+                            <td>"videos on chat langchain published in 2023"</td>
+                            <td><code>content_search: "chat langchain"</code><br><code>earliest_publish_date: 2023-01-01</code><br><code>latest_publish_date: 2023-12-31</code></td>
+                        </tr>
+                        <tr>
+                            <td>"multi-modal agents, only videos under 5 minutes"</td>
+                            <td><code>content_search: "multi-modal agents"</code><br><code>max_length_sec: 300</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>Query Construction for Different Databases</h3>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Database Type</th>
+                            <th>Query Language</th>
+                            <th>Example Output</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Vector DB</strong></td>
+                            <td>Metadata filters</td>
+                            <td><code>{"date_filter": ">2024-01-01"}</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>SQL DB</strong></td>
+                            <td>Text-to-SQL</td>
+                            <td><code>SELECT * FROM products WHERE price < 50</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Graph DB</strong></td>
+                            <td>Text-to-Cypher</td>
+                            <td><code>MATCH (p:Person)-[:KNOWS]->(f) RETURN f</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Section 9: Decision Guide -->
+        <section id="decision-guide" class="section">
+            <div class="section-header">
+                <span class="section-number">SECTION 09</span>
+                <h2 class="section-title">Decision Guide</h2>
+                <p class="section-subtitle">When to use which technique</p>
+            </div>
+
+            <div class="decision-box">
+                <h3 class="decision-title">🎯 Query Translation Decision Flowchart</h3>
+                <div class="diagram-content">
+                                 ┌─────────────────────────┐
+                                 │   What's the question   │
+                                 │        like?            │
+                                 └───────────┬─────────────┘
+                                             │
+                    ┌────────────────────────┼────────────────────────┐
+                    │                        │                        │
+                    ▼                        ▼                        ▼
+              ┌─────────┐            ┌─────────────┐            ┌─────────┐
+              │ Simple  │            │   Vague/    │            │ Complex │
+              │ Direct  │            │  Ambiguous  │            │Multi-part│
+              └────┬────┘            └──────┬──────┘            └────┬────┘
+                   │                        │                        │
+                   ▼                        ▼                        ▼
+              Basic RAG              Multi-Query or             Decomposition
+                                      RAG-Fusion
+                                             │
+                                             ▼
+                                 ┌─────────────────────┐
+                                 │ Still not working?  │
+                                 └──────────┬──────────┘
+                                            │
+                    ┌───────────────────────┼───────────────────────┐
+                    │                       │                       │
+                    ▼                       ▼                       ▼
+            ┌──────────────┐       ┌──────────────┐       ┌──────────────┐
+            │ Question too │       │  Q & Docs    │       │  Need more   │
+            │  specific?   │       │  mismatch?   │       │   context?   │
+            └──────┬───────┘       └──────┬───────┘       └──────┬───────┘
+                   │                      │                      │
+                   ▼                      ▼                      ▼
+              Step-Back                 HyDE                 Step-Back +
+                                                            Multi-Query
+                </div>
+            </div>
+
+            <h3>Real-World Scenarios</h3>
+
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h4>🤖 Customer Support Bot</h4>
+                    <p><strong>Question:</strong> "my thing isn't working"</p>
+                    <p><strong>Best approach:</strong> Multi-Query — generates variations to cover multiple interpretations of the vague question.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>⚖️ Legal Research</h4>
+                    <p><strong>Question:</strong> "GDPR implications for AI training data in German healthcare"</p>
+                    <p><strong>Best approach:</strong> Decomposition — break into GDPR requirements, AI data regulations, German healthcare laws.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>📚 Technical Docs</h4>
+                    <p><strong>Question:</strong> "how to fix error 503"</p>
+                    <p><strong>Best approach:</strong> HyDE + Step-Back — generate hypothetical troubleshooting guide, search for similar actual guides.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>🔍 Product Comparison</h4>
+                    <p><strong>Question:</strong> "Postgres vs MongoDB for real-time analytics?"</p>
+                    <p><strong>Best approach:</strong> Decomposition + RAG-Fusion — break into pros/cons for each, fuse rankings.</p>
+                </div>
+            </div>
+
+            <h3>Enterprise Example: Full Pipeline</h3>
+
+            <div class="diagram-box">
+                <div class="diagram-title">🏢 Complete Enterprise RAG Flow</div>
+                <div class="diagram-content">
+User: "Find Python tutorials about RAG published in 2024 under 10 minutes"
+
+┌──────────────────────────────────────────────────────────────────────────┐
+│                           ROUTING                                        │
+│                                                                          │
+│  LLM classifies: "This is a Python question"                            │
+│  Routes to: python_tutorials_database                                    │
+│                                                                          │
+└──────────────────────────────────────┬───────────────────────────────────┘
+                                       │
+                                       ▼
+┌──────────────────────────────────────────────────────────────────────────┐
+│                      QUERY CONSTRUCTION                                  │
+│                                                                          │
+│  {                                                                       │
+│    "content_search": "RAG tutorial",                                    │
+│    "language": "python",                                                 │
+│    "earliest_publish_date": "2024-01-01",                               │
+│    "max_length_sec": 600                                                 │
+│  }                                                                       │
+│                                                                          │
+└──────────────────────────────────────┬───────────────────────────────────┘
+                                       │
+                                       ▼
+┌──────────────────────────────────────────────────────────────────────────┐
+│                       MULTI-QUERY RETRIEVAL                              │
+│                                                                          │
+│  Q1: "RAG implementation Python"                                        │
+│  Q2: "Retrieval augmented generation tutorial"                          │
+│  Q3: "Build RAG system Python LangChain"                                │
+│                                                                          │
+│  Results fused with RRF → Top 5 documents                               │
+│                                                                          │
+└──────────────────────────────────────┬───────────────────────────────────┘
+                                       │
+                                       ▼
+┌──────────────────────────────────────────────────────────────────────────┐
+│                          GENERATION                                      │
+│                                                                          │
+│  LLM receives context + question → Generates comprehensive answer       │
+│                                                                          │
+└──────────────────────────────────────────────────────────────────────────┘
+                </div>
+            </div>
+
+            <h3>Key Takeaways</h3>
+
+            <div class="callout callout-tip">
+                <div class="callout-title">✅ Remember These Principles</div>
+                <p>
+                    <strong>1. Start Simple:</strong> Basic RAG works for most simple questions.<br><br>
+                    <strong>2. Add Complexity Only When Needed:</strong> Multi-Query for vague questions, Decomposition for complex ones.<br><br>
+                    <strong>3. Route First:</strong> If you have multiple data sources, route before searching.<br><br>
+                    <strong>4. Use Metadata:</strong> Query Construction unlocks filtering power that semantic search alone can't provide.<br><br>
+                    <strong>5. Iterate:</strong> If retrieval isn't working, try Step-Back or HyDE to bridge the question-document gap.
+                </p>
+            </div>
+        </section>
+
+        <!-- Resources Section -->
+        <section class="section">
+            <div class="section-header">
+                <span class="section-number">RESOURCES</span>
+                <h2 class="section-title">Further Learning</h2>
+            </div>
+
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h4>📺 Video Course</h4>
+                    <p><a href="https://www.youtube.com/playlist?list=PLfaIDFEXuae2LXbO1_PKyVJiQ23ZztA0x" style="color: var(--accent-orange);">RAG From Scratch by Lance Martin</a></p>
+                </div>
+                <div class="feature-card">
+                    <h4>💻 Code Repository</h4>
+                    <p><a href="https://github.com/langchain-ai/rag-from-scratch" style="color: var(--accent-orange);">LangChain RAG From Scratch</a></p>
+                </div>
+                <div class="feature-card">
+                    <h4>📖 Embeddings Guide</h4>
+                    <p><a href="https://simonwillison.net/2023/Oct/23/embeddings/" style="color: var(--accent-orange);">Simon Willison's Embeddings Explainer</a></p>
+                </div>
+                <div class="feature-card">
+                    <h4>🔍 HNSW Algorithm</h4>
+                    <p><a href="https://www.pinecone.io/learn/series/faiss/hnsw/" style="color: var(--accent-orange);">Pinecone's HNSW Guide</a></p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-brand">Daily Tutes</div>
+        <p class="footer-text">
+            Created on December 27, 2025 • Part of Gaurish's AI Learning Journey<br>
+            Based on Lance Martin's "RAG From Scratch" Course
+        </p>
+    </footer>
+</body>
+</html>

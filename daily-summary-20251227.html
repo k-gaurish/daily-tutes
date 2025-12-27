@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Summary - December 27, 2025 | RAG From Scratch</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Fraunces:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-tertiary: #1a1a25;
+            --bg-card: #16161f;
+            --text-primary: #f0f0f5;
+            --text-secondary: #a0a0b0;
+            --text-muted: #606070;
+            --accent-orange: #ff6b35;
+            --accent-blue: #4ecdc4;
+            --accent-purple: #a855f7;
+            --accent-pink: #ec4899;
+            --accent-green: #22c55e;
+            --accent-yellow: #fbbf24;
+            --border-color: #2a2a35;
+            --code-bg: #1e1e2e;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            font-size: 16px;
+        }
+
+        /* Header */
+        .header {
+            background: radial-gradient(ellipse at top, #1a1a2e 0%, var(--bg-primary) 70%);
+            padding: 3rem 2rem;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--accent-orange);
+            text-decoration: none;
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-link:hover {
+            color: var(--accent-yellow);
+        }
+
+        .header-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.4rem 1rem;
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            border-radius: 50px;
+            font-size: 0.8rem;
+            color: var(--accent-green);
+            margin-bottom: 1rem;
+            font-weight: 500;
+        }
+
+        .header-title {
+            font-family: 'Fraunces', serif;
+            font-size: clamp(2rem, 5vw, 3rem);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #fff 0%, #a0a0b0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .header-meta {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Main Content */
+        .content {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        /* Section Styling */
+        .section {
+            margin-bottom: 3rem;
+        }
+
+        .section-title {
+            font-family: 'Fraunces', serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        /* Topics Grid */
+        .topics-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .topic-badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+
+        .topic-badge.primary {
+            background: rgba(255, 107, 53, 0.15);
+            border-color: rgba(255, 107, 53, 0.3);
+            color: var(--accent-orange);
+        }
+
+        /* Key Points */
+        .key-points {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .key-points h4 {
+            font-size: 1rem;
+            color: var(--accent-blue);
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .key-points ul {
+            list-style: none;
+        }
+
+        .key-points li {
+            padding: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .key-points li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--accent-orange);
+        }
+
+        .key-points li strong {
+            color: var(--text-primary);
+        }
+
+        /* Comparison Table */
+        .table-container {
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        th {
+            background: var(--bg-tertiary);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-primary);
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        td {
+            padding: 0.85rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: rgba(255, 107, 53, 0.03);
+        }
+
+        /* Code Blocks */
+        .code-block {
+            background: var(--code-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            margin: 1rem 0;
+            overflow: hidden;
+        }
+
+        .code-header {
+            display: flex;
+            align-items: center;
+            padding: 0.6rem 1rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .code-lang {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--accent-green);
+        }
+
+        .code-content {
+            padding: 1rem;
+            overflow-x: auto;
+        }
+
+        .code-content pre {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        /* Callout */
+        .callout {
+            padding: 1.25rem;
+            border-radius: 10px;
+            margin: 1.5rem 0;
+            border-left: 4px solid;
+        }
+
+        .callout-tip {
+            background: rgba(34, 197, 94, 0.1);
+            border-color: var(--accent-green);
+        }
+
+        .callout-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--accent-green);
+        }
+
+        .callout p {
+            margin: 0;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        /* Deep Dive Link */
+        .deepdive-card {
+            background: linear-gradient(135deg, rgba(236, 72, 153, 0.1) 0%, rgba(255, 107, 53, 0.1) 100%);
+            border: 1px solid rgba(236, 72, 153, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .deepdive-info h4 {
+            font-family: 'Fraunces', serif;
+            font-size: 1.2rem;
+            margin-bottom: 0.25rem;
+            color: var(--text-primary);
+        }
+
+        .deepdive-info p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        .deepdive-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, var(--accent-pink) 0%, var(--accent-orange) 100%);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .deepdive-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(236, 72, 153, 0.4);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            border-top: 1px solid var(--border-color);
+            margin-top: 3rem;
+        }
+
+        .footer-text {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .footer a {
+            color: var(--accent-orange);
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .content {
+                padding: 2rem 1rem;
+            }
+
+            .header {
+                padding: 2rem 1rem;
+            }
+
+            .deepdive-card {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <a href="index.html" class="back-link">← Back to Timeline</a>
+        <div class="header-badge">✨ Day 5</div>
+        <h1 class="header-title">RAG From Scratch</h1>
+        <p class="header-subtitle">Complete RAG Pipeline — Parts 1-11 from Lance Martin's Course</p>
+        <div class="header-meta">
+            <div class="meta-item">
+                <span>📅</span>
+                <span>December 27, 2025</span>
+            </div>
+            <div class="meta-item">
+                <span>⏱️</span>
+                <span>~8 hours learning</span>
+            </div>
+            <div class="meta-item">
+                <span>🎯</span>
+                <span>15 Topics</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="content">
+        <!-- Topics Covered -->
+        <section class="section">
+            <h2 class="section-title">🎯 Topics Covered</h2>
+            <div class="topics-grid">
+                <span class="topic-badge primary">RAG Architecture</span>
+                <span class="topic-badge primary">LangChain</span>
+                <span class="topic-badge">Embeddings</span>
+                <span class="topic-badge">Vector Databases</span>
+                <span class="topic-badge">Chroma</span>
+                <span class="topic-badge">Multi-Query</span>
+                <span class="topic-badge">RAG-Fusion</span>
+                <span class="topic-badge">Decomposition</span>
+                <span class="topic-badge">Step-Back Prompting</span>
+                <span class="topic-badge">HyDE</span>
+                <span class="topic-badge">Logical Routing</span>
+                <span class="topic-badge">Semantic Routing</span>
+                <span class="topic-badge">Query Construction</span>
+                <span class="topic-badge">HNSW Algorithm</span>
+                <span class="topic-badge">Cosine Similarity</span>
+            </div>
+        </section>
+
+        <!-- Core RAG Pipeline -->
+        <section class="section">
+            <h2 class="section-title">📥 Core RAG Pipeline (Parts 1-4)</h2>
+            
+            <div class="key-points">
+                <h4>Indexing Phase</h4>
+                <ul>
+                    <li><strong>Load:</strong> WebBaseLoader fetches documents from URLs</li>
+                    <li><strong>Split:</strong> RecursiveCharacterTextSplitter (chunk_size=1000, overlap=200)</li>
+                    <li><strong>Embed:</strong> OpenAIEmbeddings → 1536-dimensional vectors</li>
+                    <li><strong>Store:</strong> Chroma vector database for similarity search</li>
+                </ul>
+            </div>
+
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-lang">Complete RAG Chain</span>
+                </div>
+                <div class="code-content">
+<pre>rag_chain = (
+    {"context": retriever | format_docs, "question": RunnablePassthrough()}
+    | prompt
+    | llm
+    | StrOutputParser()
+)
+answer = rag_chain.invoke("What is Task Decomposition?")</pre>
+                </div>
+            </div>
+
+            <div class="callout callout-tip">
+                <div class="callout-title">💡 Pizza Delivery Analogy</div>
+                <p>RAG = Load (receive ingredients) → Split (cut portions) → Embed (label containers) → Store (organize refrigerator) → Retrieve (find ingredients) → Generate (chef makes pizza) → Deliver (answer)</p>
+            </div>
+        </section>
+
+        <!-- Query Translation -->
+        <section class="section">
+            <h2 class="section-title">🔄 Query Translation Techniques (Parts 5-9)</h2>
+            
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Technique</th>
+                            <th>Analogy</th>
+                            <th>Best For</th>
+                            <th>Latency</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Multi-Query</strong></td>
+                            <td>3 Different Librarians</td>
+                            <td>Vague questions</td>
+                            <td>3x</td>
+                        </tr>
+                        <tr>
+                            <td><strong>RAG-Fusion</strong></td>
+                            <td>American Idol Voting</td>
+                            <td>Precision + Recall</td>
+                            <td>3x+</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Decomposition</strong></td>
+                            <td>Math Word Problem</td>
+                            <td>Complex multi-part</td>
+                            <td>5-10x</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Step-Back</strong></td>
+                            <td>Professor Context</td>
+                            <td>Too-specific questions</td>
+                            <td>2x</td>
+                        </tr>
+                        <tr>
+                            <td><strong>HyDE</strong></td>
+                            <td>Police Sketch Artist</td>
+                            <td>Q-A language mismatch</td>
+                            <td>2x</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="key-points">
+                <h4>Key Insights</h4>
+                <ul>
+                    <li><strong>Multi-Query:</strong> Generate 3 query variants, search each, combine results for broader coverage</li>
+                    <li><strong>RAG-Fusion:</strong> Same as Multi-Query but adds Reciprocal Rank Fusion scoring</li>
+                    <li><strong>Decomposition:</strong> Break complex questions into sub-questions, answer each separately</li>
+                    <li><strong>Step-Back:</strong> Ask abstract question first to get broader context</li>
+                    <li><strong>HyDE:</strong> Generate fake answer, search for docs similar to the hypothetical</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Routing -->
+        <section class="section">
+            <h2 class="section-title">🚦 Routing (Part 10)</h2>
+            
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>How It Works</th>
+                            <th>Speed</th>
+                            <th>Best For</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Logical Routing</strong></td>
+                            <td>LLM classifies to datasource</td>
+                            <td>Slower (API call)</td>
+                            <td>Clear categories (Python/JS/Go)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Semantic Routing</strong></td>
+                            <td>Embedding similarity</td>
+                            <td>Faster (local math)</td>
+                            <td>Nuanced topics (Physics/Math)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="callout callout-tip">
+                <div class="callout-title">🏥 Hospital Reception Analogy</div>
+                <p>Routing = Reception desk directing "chest pain" to Cardiology vs Gastro vs ER based on symptoms</p>
+            </div>
+        </section>
+
+        <!-- Query Construction -->
+        <section class="section">
+            <h2 class="section-title">🔧 Query Construction (Part 11)</h2>
+            
+            <div class="key-points">
+                <h4>Converting Natural Language to Structured Filters</h4>
+                <ul>
+                    <li><strong>Input:</strong> "videos on chat langchain from 2024 under 5 minutes"</li>
+                    <li><strong>Output:</strong> {"content_search": "chat langchain", "earliest_date": "2024-01-01", "max_length_sec": 300}</li>
+                    <li><strong>Use Cases:</strong> Vector DB metadata filters, Text-to-SQL, Text-to-Cypher</li>
+                </ul>
+            </div>
+
+            <div class="callout callout-tip">
+                <div class="callout-title">🛒 Amazon Shopping Analogy</div>
+                <p>"Red dress under $50 with good reviews" → Semantic search for "dress" + filters for color, price, rating</p>
+            </div>
+        </section>
+
+        <!-- Resources -->
+        <section class="section">
+            <h2 class="section-title">📚 Resources Studied</h2>
+            <div class="key-points">
+                <ul>
+                    <li><strong>Video Course:</strong> Lance Martin's RAG From Scratch (Parts 1-11)</li>
+                    <li><strong>Notebooks:</strong> rag_from_scratch_1_to_4.ipynb, rag_from_scratch_10_and_11.ipynb</li>
+                    <li><strong>HNSW Guide:</strong> Pinecone's learn series on vector search algorithms</li>
+                    <li><strong>Embeddings:</strong> Simon Willison's comprehensive embeddings explainer</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Deep Dive Link -->
+        <div class="deepdive-card">
+            <div class="deepdive-info">
+                <h4>📖 RAG Deep Dive Available</h4>
+                <p>Comprehensive 45-minute read covering all 11 parts with diagrams and code examples</p>
+            </div>
+            <a href="daily-tutes-deepdive-rag-comprehensive-20251227.html" class="deepdive-link">
+                View Deep Dive →
+            </a>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p class="footer-text">
+            <a href="index.html">← Back to Daily Tutes</a> • December 27, 2025
+        </p>
+    </footer>
+</body>
+</html>

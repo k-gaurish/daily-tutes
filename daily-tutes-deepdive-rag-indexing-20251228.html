@@ -1,0 +1,2353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAG Advanced Indexing Deep Dive | Parts 12-14</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Fraunces:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-tertiary: #1a1a25;
+            --bg-card: #16161f;
+            --text-primary: #f0f0f5;
+            --text-secondary: #a0a0b0;
+            --text-muted: #606070;
+            --accent-orange: #ff6b35;
+            --accent-blue: #4ecdc4;
+            --accent-purple: #a855f7;
+            --accent-pink: #ec4899;
+            --accent-green: #22c55e;
+            --accent-yellow: #fbbf24;
+            --border-color: #2a2a35;
+            --code-bg: #1e1e2e;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            font-size: 16px;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: radial-gradient(ellipse at top, #1a1a2e 0%, var(--bg-primary) 70%);
+            padding: 4rem 2rem;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(168, 85, 247, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(78, 205, 196, 0.1) 0%, transparent 40%);
+            pointer-events: none;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(168, 85, 247, 0.1);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            border-radius: 50px;
+            font-size: 0.85rem;
+            color: var(--accent-purple);
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+        }
+
+        .hero-title {
+            font-family: 'Fraunces', serif;
+            font-size: clamp(2.5rem, 6vw, 3.5rem);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #fff 0%, #a0a0b0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero-meta {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Layout */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .content {
+            padding: 3rem 0;
+        }
+
+        /* Table of Contents */
+        .toc {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .toc-title {
+            font-family: 'Fraunces', serif;
+            font-size: 1.3rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .toc-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 0.75rem;
+        }
+
+        .toc-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .toc-item:hover {
+            border-color: var(--accent-orange);
+            color: var(--text-primary);
+            background: rgba(255, 107, 53, 0.05);
+        }
+
+        .toc-number {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            background: var(--accent-orange);
+            color: #000;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            flex-shrink: 0;
+        }
+
+        /* Section Styling */
+        .section {
+            margin-bottom: 4rem;
+            scroll-margin-top: 2rem;
+        }
+
+        .section-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .section-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent-orange) 0%, var(--accent-yellow) 100%);
+            color: #000;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-right: 1rem;
+        }
+
+        .section-title {
+            font-family: 'Fraunces', serif;
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: inline;
+            vertical-align: middle;
+        }
+
+        h3 {
+            font-family: 'Fraunces', serif;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 2rem 0 1rem;
+        }
+
+        h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--accent-blue);
+            margin: 1.5rem 0 0.75rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .card-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Problem-Solution Cards */
+        .problem-card {
+            background: rgba(239, 68, 68, 0.05);
+            border-color: rgba(239, 68, 68, 0.2);
+        }
+
+        .solution-card {
+            background: rgba(34, 197, 94, 0.05);
+            border-color: rgba(34, 197, 94, 0.2);
+        }
+
+        /* Callouts */
+        .callout {
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin: 1.5rem 0;
+            border-left: 4px solid;
+        }
+
+        .callout-analogy {
+            background: rgba(168, 85, 247, 0.08);
+            border-color: var(--accent-purple);
+        }
+
+        .callout-tip {
+            background: rgba(34, 197, 94, 0.08);
+            border-color: var(--accent-green);
+        }
+
+        .callout-warning {
+            background: rgba(251, 191, 36, 0.08);
+            border-color: var(--accent-yellow);
+        }
+
+        .callout-important {
+            background: rgba(236, 72, 153, 0.08);
+            border-color: var(--accent-pink);
+        }
+
+        .callout-title {
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+        }
+
+        .callout p {
+            margin: 0;
+            color: var(--text-secondary);
+        }
+
+        /* Code Blocks */
+        .code-block {
+            background: var(--code-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            margin: 1.5rem 0;
+            overflow: hidden;
+        }
+
+        .code-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 1rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .code-lang {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--accent-green);
+            font-weight: 500;
+        }
+
+        .code-content {
+            padding: 1.25rem;
+            overflow-x: auto;
+        }
+
+        .code-content pre {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            color: var(--text-primary);
+            margin: 0;
+            white-space: pre;
+        }
+
+        .code-keyword { color: #c678dd; }
+        .code-string { color: #98c379; }
+        .code-comment { color: #5c6370; font-style: italic; }
+        .code-function { color: #61afef; }
+        .code-number { color: #d19a66; }
+        .code-class { color: #e5c07b; }
+
+        /* Diagrams */
+        .diagram-box {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            margin: 2rem 0;
+            overflow: hidden;
+        }
+
+        .diagram-title {
+            padding: 1rem 1.25rem;
+            background: var(--bg-tertiary);
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .diagram-content {
+            padding: 1.5rem;
+            overflow-x: auto;
+        }
+
+        .diagram-content pre {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            line-height: 1.4;
+            color: var(--accent-blue);
+            margin: 0;
+            white-space: pre;
+        }
+
+        /* Tables */
+        .table-container {
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        th {
+            background: var(--bg-tertiary);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-primary);
+            border-bottom: 2px solid var(--border-color);
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 0.85rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: rgba(255, 107, 53, 0.03);
+        }
+
+        /* Feature Grid */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .feature-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.25rem;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            border-color: var(--accent-orange);
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .feature-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        /* Lists */
+        ul, ol {
+            margin: 1rem 0 1rem 1.5rem;
+            color: var(--text-secondary);
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        li strong {
+            color: var(--text-primary);
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .badge-orange {
+            background: rgba(255, 107, 53, 0.15);
+            color: var(--accent-orange);
+        }
+
+        .badge-blue {
+            background: rgba(78, 205, 196, 0.15);
+            color: var(--accent-blue);
+        }
+
+        .badge-purple {
+            background: rgba(168, 85, 247, 0.15);
+            color: var(--accent-purple);
+        }
+
+        .badge-green {
+            background: rgba(34, 197, 94, 0.15);
+            color: var(--accent-green);
+        }
+
+        /* Steps */
+        .steps {
+            margin: 1.5rem 0;
+        }
+
+        .step {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .step-number {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            background: var(--accent-orange);
+            color: #000;
+            border-radius: 50%;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .step-desc {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        /* Comparison */
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .comparison-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .comparison-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .comparison-icon {
+            font-size: 1.5rem;
+        }
+
+        .comparison-title {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* Real World Example */
+        .example-box {
+            background: linear-gradient(135deg, rgba(78, 205, 196, 0.05) 0%, rgba(168, 85, 247, 0.05) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .example-title {
+            font-weight: 600;
+            color: var(--accent-blue);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 3rem 2rem;
+            border-top: 1px solid var(--border-color);
+            margin-top: 4rem;
+        }
+
+        .footer-brand {
+            font-family: 'Fraunces', serif;
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .footer-text {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .footer a {
+            color: var(--accent-orange);
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero {
+                padding: 3rem 1rem;
+            }
+
+            .container {
+                padding: 0 1rem;
+            }
+
+            .hero-meta {
+                gap: 1rem;
+            }
+
+            .toc-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .section-number {
+                width: 35px;
+                height: 35px;
+                font-size: 1rem;
+            }
+
+            .section-title {
+                font-size: 1.5rem;
+            }
+
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Navigation */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--accent-orange);
+            text-decoration: none;
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-link:hover {
+            color: var(--accent-yellow);
+        }
+
+        /* Highlight box */
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(255, 107, 53, 0.1) 0%, rgba(251, 191, 36, 0.1) 100%);
+            border: 1px solid rgba(255, 107, 53, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .highlight-box h4 {
+            color: var(--accent-orange);
+            margin-top: 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <header class="hero">
+        <div class="hero-content">
+            <a href="index.html" class="back-link">← Back to Timeline</a>
+            <div class="hero-badge">📚 Deep Dive Document</div>
+            <h1 class="hero-title">RAG Advanced Indexing</h1>
+            <p class="hero-subtitle">Master the Three Pillars of Advanced RAG Indexing: Multi-Representation, RAPTOR, and ColBERT — From Theory to Production</p>
+            <div class="hero-meta">
+                <div class="meta-item">
+                    <span>📅</span>
+                    <span>December 28, 2025</span>
+                </div>
+                <div class="meta-item">
+                    <span>⏱️</span>
+                    <span>~60 min read</span>
+                </div>
+                <div class="meta-item">
+                    <span>📖</span>
+                    <span>Parts 12-14 Covered</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <main class="content">
+            <!-- Table of Contents -->
+            <nav class="toc">
+                <h2 class="toc-title">📑 Table of Contents</h2>
+                <div class="toc-grid">
+                    <a href="#problem" class="toc-item" onclick="event.preventDefault(); document.getElementById('problem').scrollIntoView({behavior: 'smooth'});">
+                        <span class="toc-number">1</span>
+                        <span>The Indexing Problem</span>
+                    </a>
+                    <a href="#multi-rep" class="toc-item" onclick="event.preventDefault(); document.getElementById('multi-rep').scrollIntoView({behavior: 'smooth'});">
+                        <span class="toc-number">2</span>
+                        <span>Multi-Representation Indexing</span>
+                    </a>
+                    <a href="#propositions" class="toc-item" onclick="event.preventDefault(); document.getElementById('propositions').scrollIntoView({behavior: 'smooth'});">
+                        <span class="toc-number">3</span>
+                        <span>Propositions (Dense X)</span>
+                    </a>
+                    <a href="#parent-doc" class="toc-item" onclick="event.preventDefault(); document.getElementById('parent-doc').scrollIntoView({behavior: 'smooth'});">
+                        <span class="toc-number">4</span>
+                        <span>Parent Document Retrieval</span>
+                    </a>
+                    <a href="#raptor" class="toc-item" onclick="event.preventDefault(); document.getElementById('raptor').scrollIntoView({behavior: 'smooth'});">
+                        <span class="toc-number">5</span>
+                        <span>RAPTOR: Hierarchical Trees</span>
+                    </a>
+                    <a href="#raptor-impl" class="toc-item" onclick="event.preventDefault(); document.getElementById('raptor-impl').scrollIntoView({behavior: 'smooth'});">
+                        <span class="toc-number">6</span>
+                        <span>RAPTOR Implementation</span>
+                    </a>
+                    <a href="#colbert" class="toc-item" onclick="event.preventDefault(); document.getElementById('colbert').scrollIntoView({behavior: 'smooth'});">
+                        <span class="toc-number">7</span>
+                        <span>ColBERT: Token-Level Search</span>
+                    </a>
+                    <a href="#colbert-impl" class="toc-item" onclick="event.preventDefault(); document.getElementById('colbert-impl').scrollIntoView({behavior: 'smooth'});">
+                        <span class="toc-number">8</span>
+                        <span>ColBERT Implementation</span>
+                    </a>
+                    <a href="#comparison" class="toc-item" onclick="event.preventDefault(); document.getElementById('comparison').scrollIntoView({behavior: 'smooth'});">
+                        <span class="toc-number">9</span>
+                        <span>Comparison & Decision Guide</span>
+                    </a>
+                    <a href="#production" class="toc-item" onclick="event.preventDefault(); document.getElementById('production').scrollIntoView({behavior: 'smooth'});">
+                        <span class="toc-number">10</span>
+                        <span>Production Best Practices</span>
+                    </a>
+                </div>
+            </nav>
+
+            <!-- Section 1: The Indexing Problem -->
+            <section id="problem" class="section">
+                <div class="section-header">
+                    <span class="section-number">1</span>
+                    <h2 class="section-title">The Indexing Problem: Why Basic Chunking Fails</h2>
+                </div>
+
+                <p>In Parts 1-11, we learned the basic RAG pipeline: Load → Split → Embed → Store → Retrieve → Generate. But there's a fundamental problem with this approach that becomes painfully obvious in production systems.</p>
+
+                <div class="callout callout-analogy">
+                    <div class="callout-title">📚 Analogy: The Library Index Problem</div>
+                    <p>Imagine you're a librarian creating a card catalog for a massive library. The basic approach is like writing one index card for every 3 pages of every book. When someone asks about "World War II tanks," you find cards mentioning tanks. But what if the question is "What was the overall impact of mechanized warfare on 20th-century conflicts?" — a broader question requiring synthesis across multiple books and chapters. Your 3-page cards can't answer that because they're too granular!</p>
+                </div>
+
+                <h3>The Three Core Problems with Basic Chunking</h3>
+
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">🔍</div>
+                        <div class="feature-title">Problem 1: Embedding Dilution</div>
+                        <div class="feature-desc">A single vector trying to represent a 1000-word chunk loses nuance. Irrelevant content dilutes the semantic signal.</div>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🌲</div>
+                        <div class="feature-title">Problem 2: No Hierarchy</div>
+                        <div class="feature-desc">Flat indexing can't answer high-level "thematic" questions that require synthesizing information across multiple documents.</div>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🎯</div>
+                        <div class="feature-title">Problem 3: Lost Context</div>
+                        <div class="feature-desc">Small chunks are great for precision but terrible for context. You find the sentence but lose the paragraph that explains it.</div>
+                    </div>
+                </div>
+
+                <div class="diagram-box">
+                    <div class="diagram-title">📊 The Fundamental Trade-off</div>
+                    <div class="diagram-content">
+<pre>
+              CHUNK SIZE TRADE-OFF
+              
+    ┌─────────────────────────────────────────────────────────┐
+    │                                                         │
+    │   SMALL CHUNKS                    LARGE CHUNKS          │
+    │   (100-200 words)                 (1000+ words)         │
+    │                                                         │
+    │   ✅ Precise embeddings           ❌ Diluted embeddings  │
+    │   ✅ Good for specific facts      ✅ More context        │
+    │   ❌ Lost context                 ❌ Harder to match     │
+    │   ❌ Miss big picture             ✅ Better for themes   │
+    │                                                         │
+    └─────────────────────────────────────────────────────────┘
+
+    THE QUESTION: Can we have BOTH precision AND context?
+    
+    ANSWER: YES! That's what Parts 12-14 solve:
+    
+    ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐
+    │ Multi-Rep Index  │  │     RAPTOR       │  │     ColBERT      │
+    │ (Part 12)        │  │ (Part 13)        │  │ (Part 14)        │
+    │                  │  │                  │  │                  │
+    │ Index summaries, │  │ Build hierarchy  │  │ Token-level      │
+    │ return full docs │  │ of summaries     │  │ embeddings       │
+    └──────────────────┘  └──────────────────┘  └──────────────────┘
+</pre>
+                    </div>
+                </div>
+
+                <div class="highlight-box">
+                    <h4>🎯 What You'll Learn in This Deep Dive</h4>
+                    <p>By the end, you'll understand three advanced indexing strategies that solve the chunk size trade-off in different ways:</p>
+                    <ol>
+                        <li><strong>Multi-Representation Indexing:</strong> Index optimized representations (summaries/propositions), but return full documents</li>
+                        <li><strong>RAPTOR:</strong> Build a hierarchical tree of summaries for both detailed AND thematic questions</li>
+                        <li><strong>ColBERT:</strong> Use token-level embeddings for fine-grained matching without losing context</li>
+                    </ol>
+                </div>
+            </section>
+
+            <!-- Section 2: Multi-Representation Indexing -->
+            <section id="multi-rep" class="section">
+                <div class="section-header">
+                    <span class="section-number">2</span>
+                    <h2 class="section-title">Multi-Representation Indexing (Part 12)</h2>
+                </div>
+
+                <p>The core idea is elegantly simple: <strong>what you index for search doesn't have to be what you return to the LLM.</strong></p>
+
+                <div class="callout callout-analogy">
+                    <div class="callout-title">📚 Analogy: The Movie Trailer Approach</div>
+                    <p>Think of movie trailers. When you search for a movie to watch, you don't search through the entire 2-hour film. You watch the 2-minute trailer (optimized for discovery). But when you actually want to watch, you get the full movie (complete context). Multi-Representation Indexing works the same way: create optimized "trailers" (summaries) for search, but return the full "movie" (document) to the LLM.</p>
+                </div>
+
+                <h3>The Two-Store Architecture</h3>
+
+                <div class="diagram-box">
+                    <div class="diagram-title">📊 Multi-Representation Architecture</div>
+                    <div class="diagram-content">
+<pre>
+                    INDEXING PHASE
+    ┌──────────────────────────────────────────────────────────┐
+    │                                                          │
+    │   Original Document                                      │
+    │   ┌─────────────────────────────────────────────────┐    │
+    │   │ "The Transformer architecture was introduced    │    │
+    │   │  in the paper 'Attention Is All You Need' by   │    │
+    │   │  Vaswani et al. in 2017. It revolutionized     │    │
+    │   │  NLP by replacing recurrence with attention... │    │
+    │   │  [... 2000 more words ...]"                    │    │
+    │   └─────────────────────────────────────────────────┘    │
+    │                         │                                │
+    │                         ▼                                │
+    │              ┌──────────────────┐                        │
+    │              │   LLM Summarize  │                        │
+    │              └────────┬─────────┘                        │
+    │                       │                                  │
+    │         ┌─────────────┴─────────────┐                    │
+    │         ▼                           ▼                    │
+    │   ┌───────────────┐         ┌─────────────────┐          │
+    │   │ VECTOR STORE  │         │   DOC STORE     │          │
+    │   │ (Summaries)   │         │ (Full Docs)     │          │
+    │   │               │   ID    │                 │          │
+    │   │ Summary ──────┼────────►│ Full Document   │          │
+    │   │ Embedding     │   Link  │                 │          │
+    │   └───────────────┘         └─────────────────┘          │
+    │                                                          │
+    └──────────────────────────────────────────────────────────┘
+
+                    RETRIEVAL PHASE
+    ┌──────────────────────────────────────────────────────────┐
+    │                                                          │
+    │   User Query: "How do transformers work?"                │
+    │                         │                                │
+    │                         ▼                                │
+    │   ┌───────────────┐                                      │
+    │   │ VECTOR STORE  │◄─── Search summaries (fast match!)   │
+    │   │ (Summaries)   │                                      │
+    │   └───────┬───────┘                                      │
+    │           │ Get doc_id                                   │
+    │           ▼                                              │
+    │   ┌─────────────────┐                                    │
+    │   │   DOC STORE     │◄─── Fetch full document            │
+    │   │ (Full Docs)     │                                    │
+    │   └───────┬─────────┘                                    │
+    │           │                                              │
+    │           ▼                                              │
+    │   ┌─────────────────────────────────────────────────┐    │
+    │   │ Full Document → LLM (complete context!)         │    │
+    │   └─────────────────────────────────────────────────┘    │
+    │                                                          │
+    └──────────────────────────────────────────────────────────┘
+</pre>
+                    </div>
+                </div>
+
+                <h3>Key Insight: Separation of Concerns</h3>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Component</th>
+                                <th>Purpose</th>
+                                <th>Optimized For</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Vector Store</strong></td>
+                                <td>Fast similarity search</td>
+                                <td>Short, dense representations (summaries, propositions)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Doc Store</strong></td>
+                                <td>Store full content</td>
+                                <td>Complete context for LLM generation</td>
+                            </tr>
+                            <tr>
+                                <td><strong>ID Link</strong></td>
+                                <td>Connect the two stores</td>
+                                <td>Fast lookup from summary → document</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="example-box">
+                    <div class="example-title">🌍 Real-World Example: Legal Document Search</div>
+                    <p>Imagine a law firm with 10,000 case documents, each 50+ pages. With basic RAG:</p>
+                    <ul>
+                        <li>You'd chunk each into ~500 pieces = 5 million chunks</li>
+                        <li>Embeddings would be diluted with legal boilerplate</li>
+                        <li>Retrieval might find a relevant sentence but miss the case context</li>
+                    </ul>
+                    <p><strong>With Multi-Representation:</strong></p>
+                    <ul>
+                        <li>Create 1 summary per case = 10,000 summaries to search</li>
+                        <li>Summaries focus on key facts, rulings, precedents</li>
+                        <li>Return full case document for comprehensive LLM analysis</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Section 3: Propositions -->
+            <section id="propositions" class="section">
+                <div class="section-header">
+                    <span class="section-number">3</span>
+                    <h2 class="section-title">Propositions: The Dense X Retrieval Approach</h2>
+                </div>
+
+                <p>The "Dense X Retrieval" paper (Chen et al., 2023) introduced a powerful alternative to summaries: <strong>propositions</strong>. Instead of summarizing, you decompose documents into atomic, self-contained facts.</p>
+
+                <div class="callout callout-analogy">
+                    <div class="callout-title">📚 Analogy: Wikipedia Infobox vs Full Article</div>
+                    <p>Think of a Wikipedia article about Albert Einstein. The full article is 10,000 words. But the infobox on the right has discrete facts: "Born: March 14, 1879", "Known for: Theory of Relativity", "Nobel Prize: 1921". Each fact is a <strong>proposition</strong> — self-contained and searchable. When someone asks "When was Einstein born?", matching the proposition is easier than matching the whole article.</p>
+                </div>
+
+                <h3>What is a Proposition?</h3>
+
+                <div class="card">
+                    <div class="card-title">📋 Definition</div>
+                    <p>A <strong>proposition</strong> is an atomic expression of meaning with three properties:</p>
+                    <ol>
+                        <li><strong>Atomic:</strong> Cannot be split into smaller propositions</li>
+                        <li><strong>Self-contained:</strong> Includes all necessary context (no pronouns like "it", "they")</li>
+                        <li><strong>Factoid:</strong> Expresses a single, distinct fact</li>
+                    </ol>
+                </div>
+
+                <h3>Example: Transforming Text into Propositions</h3>
+
+                <div class="diagram-box">
+                    <div class="diagram-title">📊 Proposition Extraction</div>
+                    <div class="diagram-content">
+<pre>
+    ORIGINAL TEXT:
+    ┌─────────────────────────────────────────────────────────────────┐
+    │ "The Transformer architecture was introduced in the paper       │
+    │ 'Attention Is All You Need' by Vaswani et al. in 2017. It      │
+    │ revolutionized NLP by replacing recurrence with attention       │
+    │ mechanisms, enabling parallel processing of sequences."         │
+    └─────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+                         ┌──────────────────┐
+                         │  LLM Decompose   │
+                         │  into Propositions│
+                         └────────┬─────────┘
+                                  │
+                                  ▼
+    PROPOSITIONS:
+    ┌─────────────────────────────────────────────────────────────────┐
+    │                                                                 │
+    │  1. "The Transformer architecture was introduced in 2017."      │
+    │                                                                 │
+    │  2. "The Transformer was introduced in the paper titled         │
+    │      'Attention Is All You Need'."                              │
+    │                                                                 │
+    │  3. "The paper 'Attention Is All You Need' was authored         │
+    │      by Vaswani et al."                                         │
+    │                                                                 │
+    │  4. "The Transformer architecture revolutionized NLP."          │
+    │                                                                 │
+    │  5. "The Transformer replaced recurrence with attention         │
+    │      mechanisms."                                               │
+    │                                                                 │
+    │  6. "The Transformer's attention mechanism enables parallel     │
+    │      processing of sequences."                                  │
+    │                                                                 │
+    └─────────────────────────────────────────────────────────────────┘
+
+    NOTICE: 
+    - "It" was replaced with "The Transformer" (self-contained)
+    - Each proposition can stand alone
+    - 1 complex sentence → 6 searchable facts
+</pre>
+                    </div>
+                </div>
+
+                <h3>The Proposition Prompt</h3>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span class="code-lang">Prompt Template</span>
+                    </div>
+                    <div class="code-content">
+<pre>Decompose the "Content" into clear and simple propositions, ensuring 
+they are interpretable out of context.
+
+1. Split compound sentences into simple sentences. Maintain the 
+   original phrasing from the input whenever possible.
+
+2. For any named entity that is accompanied by additional descriptive 
+   information, separate this information into its own distinct 
+   proposition.
+
+3. Decontextualize the proposition by adding necessary modifiers to 
+   nouns or entire sentences and replacing pronouns (e.g., "it", 
+   "he", "she", "they", "this", "that") with the full name of the 
+   entities they refer to.
+
+4. Present the results as a list of strings, formatted in JSON.
+
+Content: {content}</pre>
+                    </div>
+                </div>
+
+                <h3>Why Propositions Outperform Passages</h3>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Metric</th>
+                                <th>Passage-based</th>
+                                <th>Sentence-based</th>
+                                <th>Proposition-based</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Retrieval Accuracy</strong></td>
+                                <td>Baseline</td>
+                                <td>+12%</td>
+                                <td><span class="badge badge-green">+35%</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Information Density</strong></td>
+                                <td>~2 facts per 100 words</td>
+                                <td>~5 facts per 100 words</td>
+                                <td><span class="badge badge-green">~10 facts per 100 words</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Context Independence</strong></td>
+                                <td>Low (requires surrounding text)</td>
+                                <td>Medium</td>
+                                <td><span class="badge badge-green">High (fully self-contained)</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>QA Accuracy</strong></td>
+                                <td>Baseline</td>
+                                <td>+8%</td>
+                                <td><span class="badge badge-green">+22.5%</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="callout callout-important">
+                    <div class="callout-title">💡 Key Insight: Information Density</div>
+                    <p>Given a fixed token budget (say 500 tokens), you can fit ~10 propositions vs ~2 passages. This means your LLM gets 5x more relevant facts for the same context window cost!</p>
+                </div>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span class="code-lang">Python - Multi-Vector Retriever with Propositions</span>
+                    </div>
+                    <div class="code-content">
+<pre><span class="code-keyword">import</span> uuid
+<span class="code-keyword">from</span> langchain.retrievers.multi_vector <span class="code-keyword">import</span> MultiVectorRetriever
+<span class="code-keyword">from</span> langchain.storage <span class="code-keyword">import</span> InMemoryStore
+<span class="code-keyword">from</span> langchain_chroma <span class="code-keyword">import</span> Chroma
+<span class="code-keyword">from</span> langchain_openai <span class="code-keyword">import</span> OpenAIEmbeddings
+
+<span class="code-comment"># 1. Create the two stores</span>
+vectorstore = Chroma(
+    collection_name=<span class="code-string">"propositions"</span>,
+    embedding_function=OpenAIEmbeddings()
+)
+docstore = InMemoryStore()  <span class="code-comment"># Stores full documents</span>
+
+<span class="code-comment"># 2. Create retriever with ID linkage</span>
+id_key = <span class="code-string">"doc_id"</span>
+retriever = MultiVectorRetriever(
+    vectorstore=vectorstore,
+    docstore=docstore,
+    id_key=id_key
+)
+
+<span class="code-comment"># 3. For each document, generate propositions</span>
+<span class="code-keyword">for</span> doc <span class="code-keyword">in</span> documents:
+    doc_id = str(uuid.uuid4())
+    
+    <span class="code-comment"># Generate propositions using LLM</span>
+    propositions = generate_propositions(doc.page_content)
+    
+    <span class="code-comment"># Create sub-documents for each proposition</span>
+    prop_docs = [
+        Document(
+            page_content=prop,
+            metadata={id_key: doc_id}  <span class="code-comment"># Link to parent!</span>
+        )
+        <span class="code-keyword">for</span> prop <span class="code-keyword">in</span> propositions
+    ]
+    
+    <span class="code-comment"># Store propositions in vector store</span>
+    retriever.vectorstore.add_documents(prop_docs)
+    
+    <span class="code-comment"># Store full document in doc store</span>
+    retriever.docstore.mset([(doc_id, doc)])
+
+<span class="code-comment"># 4. Query - searches propositions, returns full docs!</span>
+results = retriever.invoke(<span class="code-string">"When was the Transformer introduced?"</span>)
+</pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 4: Parent Document Retrieval -->
+            <section id="parent-doc" class="section">
+                <div class="section-header">
+                    <span class="section-number">4</span>
+                    <h2 class="section-title">Parent Document Retrieval: The Simpler Alternative</h2>
+                </div>
+
+                <p>If generating propositions with an LLM feels too expensive, there's a simpler approach: <strong>Parent Document Retrieval</strong>. It uses the same two-store architecture but with simple chunking instead of LLM-generated propositions.</p>
+
+                <div class="callout callout-analogy">
+                    <div class="callout-title">📚 Analogy: Book Chapter Sections</div>
+                    <p>Imagine a textbook chapter (the "parent"). You split it into paragraphs (the "children") and index each paragraph. When someone searches, you find the most relevant paragraph, but you return the ENTIRE chapter so they get full context. The paragraph tells you WHERE to look; the chapter provides the WHY and HOW.</p>
+                </div>
+
+                <div class="diagram-box">
+                    <div class="diagram-title">📊 Parent Document Architecture</div>
+                    <div class="diagram-content">
+<pre>
+                        PARENT DOCUMENT
+    ┌─────────────────────────────────────────────────────────────┐
+    │                                                             │
+    │  "Machine learning is a subset of AI... [3000 words]"       │
+    │                                                             │
+    │    Split into CHILD CHUNKS (400 chars each)                 │
+    │                                                             │
+    │    ┌────────┐  ┌────────┐  ┌────────┐  ┌────────┐          │
+    │    │ Child  │  │ Child  │  │ Child  │  │ Child  │   ...    │
+    │    │   1    │  │   2    │  │   3    │  │   4    │          │
+    │    └───┬────┘  └───┬────┘  └───┬────┘  └───┬────┘          │
+    │        │           │           │           │                │
+    │        │           │           │           │                │
+    │        └───────────┴─────┬─────┴───────────┘                │
+    │                          │                                  │
+    │                   All link back to                          │
+    │                   PARENT via doc_id                         │
+    │                                                             │
+    └─────────────────────────────────────────────────────────────┘
+
+                        RETRIEVAL FLOW
+    
+    Query: "What is supervised learning?"
+                    │
+                    ▼
+    ┌───────────────────────────┐
+    │ Search CHILD chunks       │◄── Find Child 3 matches best
+    └─────────────┬─────────────┘
+                  │
+                  ▼ Get parent doc_id from Child 3
+    ┌───────────────────────────┐
+    │ Return PARENT document    │◄── Return full 3000 words
+    └───────────────────────────┘
+    
+    RESULT: Precise matching + Full context!
+</pre>
+                    </div>
+                </div>
+
+                <h3>Two Modes of Parent Document Retrieval</h3>
+
+                <div class="comparison-grid">
+                    <div class="comparison-card">
+                        <div class="comparison-header">
+                            <span class="comparison-icon">📄</span>
+                            <span class="comparison-title">Mode 1: Return Full Document</span>
+                        </div>
+                        <p style="color: var(--text-secondary); font-size: 0.95rem;">
+                            <strong>Use when:</strong> Documents are reasonably sized (1-5 pages)<br><br>
+                            <strong>How:</strong> Only define child_splitter; the "parent" is the original document<br><br>
+                            <strong>Benefit:</strong> Maximum context for LLM
+                        </p>
+                    </div>
+                    <div class="comparison-card">
+                        <div class="comparison-header">
+                            <span class="comparison-icon">📑</span>
+                            <span class="comparison-title">Mode 2: Return Larger Chunks</span>
+                        </div>
+                        <p style="color: var(--text-secondary); font-size: 0.95rem;">
+                            <strong>Use when:</strong> Documents are very long (10+ pages)<br><br>
+                            <strong>How:</strong> Define both parent_splitter (larger) and child_splitter (smaller)<br><br>
+                            <strong>Benefit:</strong> Balanced context without overwhelming LLM
+                        </p>
+                    </div>
+                </div>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span class="code-lang">Python - Parent Document Retriever</span>
+                    </div>
+                    <div class="code-content">
+<pre><span class="code-keyword">from</span> langchain.retrievers <span class="code-keyword">import</span> ParentDocumentRetriever
+<span class="code-keyword">from</span> langchain.storage <span class="code-keyword">import</span> InMemoryStore
+<span class="code-keyword">from</span> langchain_chroma <span class="code-keyword">import</span> Chroma
+<span class="code-keyword">from</span> langchain_text_splitters <span class="code-keyword">import</span> RecursiveCharacterTextSplitter
+
+<span class="code-comment"># MODE 1: Child chunks → Full document</span>
+child_splitter = RecursiveCharacterTextSplitter(chunk_size=<span class="code-number">400</span>)
+
+vectorstore = Chroma(
+    collection_name=<span class="code-string">"parent_doc_full"</span>,
+    embedding_function=OpenAIEmbeddings()
+)
+store = InMemoryStore()
+
+retriever = ParentDocumentRetriever(
+    vectorstore=vectorstore,
+    docstore=store,
+    child_splitter=child_splitter  <span class="code-comment"># No parent_splitter = return full doc</span>
+)
+
+<span class="code-comment"># Add documents</span>
+retriever.add_documents(documents)
+
+<span class="code-comment"># Query - searches 400-char chunks, returns FULL documents</span>
+results = retriever.invoke(<span class="code-string">"What is machine learning?"</span>)
+print(len(results[<span class="code-number">0</span>].page_content))  <span class="code-comment"># Full document length!</span>
+</pre>
+                    </div>
+                </div>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span class="code-lang">Python - Two-Level Parent Document Retriever</span>
+                    </div>
+                    <div class="code-content">
+<pre><span class="code-comment"># MODE 2: Child chunks → Larger parent chunks (not full doc)</span>
+parent_splitter = RecursiveCharacterTextSplitter(chunk_size=<span class="code-number">2000</span>)
+child_splitter = RecursiveCharacterTextSplitter(chunk_size=<span class="code-number">400</span>)
+
+retriever = ParentDocumentRetriever(
+    vectorstore=vectorstore,
+    docstore=store,
+    parent_splitter=parent_splitter,  <span class="code-comment"># Creates 2000-char parents</span>
+    child_splitter=child_splitter      <span class="code-comment"># Indexes 400-char children</span>
+)
+
+<span class="code-comment"># Now:</span>
+<span class="code-comment"># - Search is on 400-char chunks (precise)</span>
+<span class="code-comment"># - Return is 2000-char chunks (contextualized)</span>
+</pre>
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <div class="example-title">🌍 Real-World Example: E-commerce Product Catalog</div>
+                    <p>An online store has 50,000 product pages, each with title, description, specs, and reviews.</p>
+                    <ul>
+                        <li><strong>Child chunks:</strong> Individual paragraphs from description, each spec, each review</li>
+                        <li><strong>Parent document:</strong> Full product page</li>
+                        <li><strong>Query:</strong> "laptop with good battery life for travel"</li>
+                        <li><strong>Child match:</strong> "12-hour battery life, perfect for long flights"</li>
+                        <li><strong>Return:</strong> Full product page with price, specs, reviews, etc.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Section 5: RAPTOR -->
+            <section id="raptor" class="section">
+                <div class="section-header">
+                    <span class="section-number">5</span>
+                    <h2 class="section-title">RAPTOR: Hierarchical Tree Indexing (Part 13)</h2>
+                </div>
+
+                <p>RAPTOR (Recursive Abstractive Processing for Tree-Organized Retrieval) solves a problem that Multi-Representation can't: answering questions that require synthesizing information across MULTIPLE documents.</p>
+
+                <div class="callout callout-analogy">
+                    <div class="callout-title">📚 Analogy: The Corporate Org Chart</div>
+                    <p>Imagine a company with 1,000 employees. If someone asks "Who manages the sales team in New York?", you can find the specific person (low-level question). But if they ask "What's the company's overall strategy?", you need to understand how all departments work together (high-level question).</p>
+                    <p style="margin-top: 1rem;">RAPTOR builds an "org chart" for your documents: individual paragraphs at the bottom, grouped into topic summaries, which are grouped into chapter summaries, all the way up to document-level themes. Now you can answer BOTH specific AND thematic questions!</p>
+                </div>
+
+                <div class="diagram-box">
+                    <div class="diagram-title">📊 RAPTOR Tree Structure</div>
+                    <div class="diagram-content">
+<pre>
+                           RAPTOR TREE
+                           
+    Level 2 (Root):        ┌─────────────────────────┐
+    Book Summary           │  "This book covers the  │
+                           │   complete history of   │
+                           │   artificial intelligence│
+                           │   from 1950 to 2024..." │
+                           └───────────┬─────────────┘
+                                       │
+              ┌────────────────────────┼────────────────────────┐
+              │                        │                        │
+              ▼                        ▼                        ▼
+    Level 1:  ┌──────────────┐ ┌──────────────┐ ┌──────────────┐
+    Chapter   │ "Early AI    │ │ "Machine     │ │ "Deep        │
+    Summaries │  research... │ │  Learning... │ │  Learning... │
+              └──────┬───────┘ └──────┬───────┘ └──────┬───────┘
+                     │                │                │
+         ┌──────┬────┘    ┌──────┬───┘    ┌──────┬────┘
+         │      │         │      │        │      │
+         ▼      ▼         ▼      ▼        ▼      ▼
+    Level 0: ┌───┐ ┌───┐ ┌───┐ ┌───┐ ┌───┐ ┌───┐ ┌───┐ ┌───┐
+    Original │ A │ │ B │ │ C │ │ D │ │ E │ │ F │ │ G │ │ H │
+    Chunks   └───┘ └───┘ └───┘ └───┘ └───┘ └───┘ └───┘ └───┘
+
+
+    QUERY EXAMPLES:
+    
+    ❓ "What year was the perceptron invented?"
+       → Matches Chunk B (Level 0) → Returns specific fact
+    
+    ❓ "How did machine learning evolve from early AI?"
+       → Matches Level 1 summaries → Returns synthesized view
+    
+    ❓ "What is the book about?"
+       → Matches Level 2 (Root) → Returns high-level overview
+</pre>
+                    </div>
+                </div>
+
+                <h3>The RAPTOR Algorithm: Step by Step</h3>
+
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <div class="step-title">Embed All Chunks</div>
+                            <div class="step-desc">Start with your original document chunks. Create embeddings for each chunk using your embedding model (e.g., OpenAI text-embedding-3-small).</div>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <div class="step-title">Cluster Similar Chunks</div>
+                            <div class="step-desc">Use Gaussian Mixture Models (GMM) with UMAP dimensionality reduction to cluster semantically similar chunks. GMM allows "soft" clustering where a chunk can belong to multiple clusters (important for multi-topic content).</div>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <div class="step-title">Summarize Each Cluster</div>
+                            <div class="step-desc">Use an LLM to generate a summary of all chunks in each cluster. This summary becomes a new "node" one level up in the tree.</div>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <div class="step-title">Repeat Recursively</div>
+                            <div class="step-desc">Take the summaries from Step 3, embed them, cluster them, and summarize again. Repeat until you reach a single root summary or a predefined depth.</div>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">5</div>
+                        <div class="step-content">
+                            <div class="step-title">Index ALL Levels</div>
+                            <div class="step-desc">Store ALL nodes (original chunks + all summaries) in a single vector store. This allows retrieval at any level of abstraction.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="callout callout-tip">
+                    <div class="callout-title">💡 Key Insight: Soft Clustering with GMM</div>
+                    <p>Unlike K-means (which assigns each chunk to exactly one cluster), GMM allows a chunk to partially belong to multiple clusters. This is crucial because a paragraph about "neural network training" might be relevant to both "machine learning algorithms" AND "computational resources" topics.</p>
+                </div>
+
+                <h3>Why RAPTOR Outperforms Traditional RAG</h3>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Benchmark</th>
+                                <th>Traditional RAG</th>
+                                <th>RAPTOR</th>
+                                <th>Improvement</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>QuALITY (multi-hop reasoning)</strong></td>
+                                <td>56.6%</td>
+                                <td>69.4%</td>
+                                <td><span class="badge badge-green">+22.6%</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>NarrativeQA (story comprehension)</strong></td>
+                                <td>23.5%</td>
+                                <td>28.1%</td>
+                                <td><span class="badge badge-green">+19.6%</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>High-level synthesis questions</strong></td>
+                                <td>Baseline</td>
+                                <td>+20%</td>
+                                <td><span class="badge badge-green">Significant</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="example-box">
+                    <div class="example-title">🌍 Real-World Example: Analyzing a Novel (Cinderella)</div>
+                    <p><strong>Traditional RAG failure case:</strong></p>
+                    <p>Question: "How did Cinderella reach her happy ending?"</p>
+                    <ul>
+                        <li>Traditional RAG retrieves: chunk about the glass slipper, chunk about the ball, chunk about the fairy godmother...</li>
+                        <li>These are disconnected pieces — LLM struggles to synthesize the JOURNEY</li>
+                    </ul>
+                    <p style="margin-top: 1rem;"><strong>RAPTOR success:</strong></p>
+                    <ul>
+                        <li>Level 1 has summaries like: "With magical help, Cinderella attends the ball, meets the prince, and is later identified by her unique glass slipper"</li>
+                        <li>This SYNTHESIS is directly retrievable as a single unit</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Section 6: RAPTOR Implementation -->
+            <section id="raptor-impl" class="section">
+                <div class="section-header">
+                    <span class="section-number">6</span>
+                    <h2 class="section-title">RAPTOR Implementation Deep Dive</h2>
+                </div>
+
+                <h3>Core Components</h3>
+
+                <div class="diagram-box">
+                    <div class="diagram-title">📊 RAPTOR Processing Pipeline</div>
+                    <div class="diagram-content">
+<pre>
+    ┌─────────────────────────────────────────────────────────────────┐
+    │                      RAPTOR PIPELINE                            │
+    └─────────────────────────────────────────────────────────────────┘
+    
+    STEP 1: EMBEDDING
+    ┌──────────────────────────────────────────────────────────┐
+    │  chunks = ["Text 1...", "Text 2...", "Text 3...", ...]   │
+    │                          │                                │
+    │                          ▼                                │
+    │  embeddings = embed(chunks)  → [1536-dim vectors]         │
+    └──────────────────────────────────────────────────────────┘
+                               │
+                               ▼
+    STEP 2: DIMENSIONALITY REDUCTION (UMAP)
+    ┌──────────────────────────────────────────────────────────┐
+    │  1536 dimensions → 10 dimensions                          │
+    │                                                           │
+    │  Why? GMM works better in lower dimensions                │
+    │  UMAP preserves local + global structure                  │
+    │                                                           │
+    │  Parameters:                                              │
+    │    n_neighbors = 10  (local structure)                    │
+    │    n_components = 10 (output dimensions)                  │
+    │    metric = "cosine" (similarity measure)                 │
+    └──────────────────────────────────────────────────────────┘
+                               │
+                               ▼
+    STEP 3: CLUSTERING (GMM + BIC)
+    ┌──────────────────────────────────────────────────────────┐
+    │  GMM = Gaussian Mixture Model                             │
+    │                                                           │
+    │  For k in range(1, max_clusters):                         │
+    │      fit GMM with k clusters                              │
+    │      calculate BIC score                                  │
+    │                                                           │
+    │  Select k with best BIC (Bayesian Info Criterion)         │
+    │                                                           │
+    │  BIC balances:                                            │
+    │    - Model fit (how well clusters explain data)           │
+    │    - Complexity penalty (avoid over-clustering)           │
+    └──────────────────────────────────────────────────────────┘
+                               │
+                               ▼
+    STEP 4: SUMMARIZATION
+    ┌──────────────────────────────────────────────────────────┐
+    │  For each cluster:                                        │
+    │      combined_text = join all chunks in cluster           │
+    │      summary = LLM.summarize(combined_text)               │
+    │                                                           │
+    │  Prompt: "Summarize the following documents into a        │
+    │           comprehensive summary..."                        │
+    └──────────────────────────────────────────────────────────┘
+                               │
+                               ▼
+    STEP 5: RECURSE
+    ┌──────────────────────────────────────────────────────────┐
+    │  if len(summaries) > 1:                                   │
+    │      repeat steps 1-4 with summaries as input             │
+    │                                                           │
+    │  Build tree structure:                                    │
+    │      Level 0: original chunks                             │
+    │      Level 1: cluster summaries                           │
+    │      Level 2: summary of summaries                        │
+    │      ...                                                  │
+    │      Level N: root summary                                │
+    └──────────────────────────────────────────────────────────┘
+</pre>
+                    </div>
+                </div>
+
+                <h3>Complete RAPTOR Code</h3>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span class="code-lang">Python - RAPTOR Core Functions</span>
+                    </div>
+                    <div class="code-content">
+<pre><span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
+<span class="code-keyword">import</span> umap
+<span class="code-keyword">from</span> sklearn.mixture <span class="code-keyword">import</span> GaussianMixture
+<span class="code-keyword">from</span> langchain_openai <span class="code-keyword">import</span> OpenAIEmbeddings, ChatOpenAI
+
+<span class="code-comment"># Initialize models</span>
+embd = OpenAIEmbeddings()
+llm = ChatOpenAI(model=<span class="code-string">"gpt-4o-mini"</span>, temperature=<span class="code-number">0</span>)
+
+<span class="code-keyword">def</span> <span class="code-function">embed_texts</span>(texts):
+    <span class="code-string">"""Embed list of texts into vectors."""</span>
+    <span class="code-keyword">return</span> np.array(embd.embed_documents(texts))
+
+<span class="code-keyword">def</span> <span class="code-function">reduce_dimensions</span>(embeddings, dim=<span class="code-number">10</span>):
+    <span class="code-string">"""Reduce embedding dimensions with UMAP."""</span>
+    reducer = umap.UMAP(
+        n_neighbors=<span class="code-number">10</span>,
+        n_components=dim,
+        metric=<span class="code-string">"cosine"</span>
+    )
+    <span class="code-keyword">return</span> reducer.fit_transform(embeddings)
+
+<span class="code-keyword">def</span> <span class="code-function">get_optimal_clusters</span>(embeddings, max_k=<span class="code-number">50</span>):
+    <span class="code-string">"""Find optimal number of clusters using BIC."""</span>
+    best_bic = float(<span class="code-string">'inf'</span>)
+    best_k = <span class="code-number">1</span>
+    
+    <span class="code-keyword">for</span> k <span class="code-keyword">in</span> range(<span class="code-number">1</span>, min(max_k, len(embeddings))):
+        gmm = GaussianMixture(n_components=k, random_state=<span class="code-number">42</span>)
+        gmm.fit(embeddings)
+        bic = gmm.bic(embeddings)
+        
+        <span class="code-keyword">if</span> bic < best_bic:
+            best_bic = bic
+            best_k = k
+    
+    <span class="code-keyword">return</span> best_k
+
+<span class="code-keyword">def</span> <span class="code-function">cluster_embeddings</span>(embeddings, n_clusters):
+    <span class="code-string">"""Cluster embeddings using GMM."""</span>
+    gmm = GaussianMixture(n_components=n_clusters, random_state=<span class="code-number">42</span>)
+    gmm.fit(embeddings)
+    <span class="code-keyword">return</span> gmm.predict(embeddings)
+
+<span class="code-keyword">def</span> <span class="code-function">summarize_cluster</span>(texts):
+    <span class="code-string">"""Generate summary for a cluster of texts."""</span>
+    combined = <span class="code-string">"\n\n"</span>.join(texts)
+    prompt = <span class="code-string">f"""Summarize the following documents into a coherent summary 
+that captures the key information:
+
+{combined}
+
+Summary:"""</span>
+    <span class="code-keyword">return</span> llm.invoke(prompt).content
+</pre>
+                    </div>
+                </div>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span class="code-lang">Python - RAPTOR Tree Builder</span>
+                    </div>
+                    <div class="code-content">
+<pre><span class="code-keyword">def</span> <span class="code-function">build_raptor_tree</span>(texts, max_depth=<span class="code-number">3</span>):
+    <span class="code-string">"""Build the complete RAPTOR tree."""</span>
+    all_nodes = []
+    current_level = texts
+    
+    <span class="code-keyword">for</span> level <span class="code-keyword">in</span> range(max_depth):
+        print(<span class="code-string">f"Building Level {level}..."</span>)
+        
+        <span class="code-comment"># Store current level nodes</span>
+        all_nodes.extend([
+            {<span class="code-string">"text"</span>: t, <span class="code-string">"level"</span>: level}
+            <span class="code-keyword">for</span> t <span class="code-keyword">in</span> current_level
+        ])
+        
+        <span class="code-comment"># Stop if only one node left</span>
+        <span class="code-keyword">if</span> len(current_level) <= <span class="code-number">1</span>:
+            <span class="code-keyword">break</span>
+        
+        <span class="code-comment"># Embed and reduce dimensions</span>
+        embeddings = embed_texts(current_level)
+        reduced = reduce_dimensions(embeddings)
+        
+        <span class="code-comment"># Find optimal clusters and cluster</span>
+        n_clusters = get_optimal_clusters(reduced)
+        labels = cluster_embeddings(reduced, n_clusters)
+        
+        <span class="code-comment"># Summarize each cluster</span>
+        next_level = []
+        <span class="code-keyword">for</span> cluster_id <span class="code-keyword">in</span> range(n_clusters):
+            cluster_texts = [
+                current_level[i] 
+                <span class="code-keyword">for</span> i, label <span class="code-keyword">in</span> enumerate(labels) 
+                <span class="code-keyword">if</span> label == cluster_id
+            ]
+            <span class="code-keyword">if</span> cluster_texts:
+                summary = summarize_cluster(cluster_texts)
+                next_level.append(summary)
+        
+        current_level = next_level
+        print(<span class="code-string">f"  Created {len(next_level)} summaries"</span>)
+    
+    <span class="code-keyword">return</span> all_nodes
+
+<span class="code-comment"># Build the tree</span>
+tree_nodes = build_raptor_tree(document_chunks)
+
+<span class="code-comment"># Index ALL nodes for retrieval</span>
+vectorstore = Chroma.from_texts(
+    texts=[node[<span class="code-string">"text"</span>] <span class="code-keyword">for</span> node <span class="code-keyword">in</span> tree_nodes],
+    embedding=OpenAIEmbeddings()
+)
+</pre>
+                    </div>
+                </div>
+
+                <h3>Retrieval Strategies</h3>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Strategy</th>
+                                <th>How It Works</th>
+                                <th>Best For</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Tree Traversal</strong></td>
+                                <td>Start at root, follow relevant branches down</td>
+                                <td>When you need to progressively narrow focus</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Collapsed Tree</strong></td>
+                                <td>Flatten tree, search all nodes at once (recommended)</td>
+                                <td>Most use cases — simpler and effective</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="callout callout-warning">
+                    <div class="callout-title">⚠️ RAPTOR Cost Considerations</div>
+                    <p>RAPTOR requires LLM calls to generate summaries at each level. For a corpus of 1000 chunks clustered into 100 → 10 → 1, you need ~111 summary generations. Factor this into your indexing budget.</p>
+                </div>
+            </section>
+
+            <!-- Section 7: ColBERT -->
+            <section id="colbert" class="section">
+                <div class="section-header">
+                    <span class="section-number">7</span>
+                    <h2 class="section-title">ColBERT: Token-Level Embeddings (Part 14)</h2>
+                </div>
+
+                <p>ColBERT (Contextualized Late Interaction over BERT) takes a completely different approach. Instead of creating better representations BEFORE indexing, it creates more GRANULAR representations that preserve nuance.</p>
+
+                <div class="callout callout-analogy">
+                    <div class="callout-title">📚 Analogy: The Fingerprint vs Photo ID</div>
+                    <p>Traditional embeddings are like a photo ID — one image represents your entire face. If someone has similar overall features, they might match. ColBERT is like a fingerprint — it captures EVERY detail (every ridge and whorl). When matching, it compares ridge-by-ridge for much higher accuracy.</p>
+                    <p style="margin-top: 1rem;">In RAG terms: traditional embeddings create ONE vector for a whole chunk. ColBERT creates one vector FOR EACH TOKEN, then matches token-by-token for precise retrieval.</p>
+                </div>
+
+                <h3>The Problem with Single-Vector Embeddings</h3>
+
+                <div class="diagram-box">
+                    <div class="diagram-title">📊 Single Vector vs Multi-Vector</div>
+                    <div class="diagram-content">
+<pre>
+    TRADITIONAL EMBEDDING (Single Vector)
+    ┌─────────────────────────────────────────────────────────────────┐
+    │                                                                 │
+    │  Document: "The bank of the river was muddy after the rain"     │
+    │                                                                 │
+    │                          │                                      │
+    │                          ▼                                      │
+    │                   ┌──────────────┐                              │
+    │                   │   Pooling    │ ◄── Average/CLS all tokens   │
+    │                   └──────┬───────┘                              │
+    │                          │                                      │
+    │                          ▼                                      │
+    │                    [ 0.12, -0.45, 0.78, ... ]  ◄── 1 vector     │
+    │                    (1536 dimensions)                            │
+    │                                                                 │
+    │  ❌ Problem: "bank" context (river bank vs financial bank)      │
+    │             is LOST in the averaged vector!                     │
+    │                                                                 │
+    └─────────────────────────────────────────────────────────────────┘
+
+    ColBERT EMBEDDING (Multi-Vector)
+    ┌─────────────────────────────────────────────────────────────────┐
+    │                                                                 │
+    │  Document: "The bank of the river was muddy after the rain"     │
+    │                                                                 │
+    │              │     │    │   │      │    │     │     │    │      │
+    │              ▼     ▼    ▼   ▼      ▼    ▼     ▼     ▼    ▼      │
+    │            ┌───┐ ┌───┐ ┌───┐ ┌───┐ ┌───┐ ┌───┐ ┌───┐ ┌───┐     │
+    │            │The│ │ban│ │of │ │the│ │riv│ │was│ │mud│ │aft│     │
+    │            └─┬─┘ └─┬─┘ └─┬─┘ └─┬─┘ └─┬─┘ └─┬─┘ └─┬─┘ └─┬─┘     │
+    │              │     │     │     │     │     │     │     │        │
+    │              ▼     ▼     ▼     ▼     ▼     ▼     ▼     ▼        │
+    │            [v1]  [v2]  [v3]  [v4]  [v5]  [v6]  [v7]  [v8]       │
+    │                                                                 │
+    │  ✅ Each token gets its OWN contextualized embedding            │
+    │  ✅ "bank" embedding is influenced by "river" context           │
+    │  ✅ Fine-grained matching possible                              │
+    │                                                                 │
+    └─────────────────────────────────────────────────────────────────┘
+</pre>
+                    </div>
+                </div>
+
+                <h3>The MaxSim Operator: How ColBERT Matches</h3>
+
+                <p>ColBERT's secret sauce is the <strong>MaxSim</strong> (Maximum Similarity) operator. Here's exactly how it works:</p>
+
+                <div class="diagram-box">
+                    <div class="diagram-title">📊 MaxSim Calculation Step-by-Step</div>
+                    <div class="diagram-content">
+<pre>
+    QUERY: "river bank erosion"
+    ┌───────────────────────────────────────┐
+    │  Tokens: [river] [bank] [erosion]     │
+    │  Embeddings: [q1] [q2] [q3]           │
+    └───────────────────────────────────────┘
+
+    DOCUMENT: "The bank of the river was muddy"
+    ┌───────────────────────────────────────────────────────────┐
+    │  Tokens: [The] [bank] [of] [the] [river] [was] [muddy]    │
+    │  Embeddings: [d1] [d2] [d3] [d4] [d5] [d6] [d7]           │
+    └───────────────────────────────────────────────────────────┘
+
+    STEP 1: For each QUERY token, compute similarity with ALL doc tokens
+    
+    Query token "river" (q1):
+    ┌────────────────────────────────────────────────────────────────┐
+    │  sim(q1, d1) = 0.12  (The)                                     │
+    │  sim(q1, d2) = 0.34  (bank)                                    │
+    │  sim(q1, d3) = 0.08  (of)                                      │
+    │  sim(q1, d4) = 0.11  (the)                                     │
+    │  sim(q1, d5) = 0.91  (river) ◄── MAXIMUM!                      │
+    │  sim(q1, d6) = 0.15  (was)                                     │
+    │  sim(q1, d7) = 0.22  (muddy)                                   │
+    │                                                                │
+    │  MaxSim(q1) = 0.91                                             │
+    └────────────────────────────────────────────────────────────────┘
+
+    Query token "bank" (q2):
+    ┌────────────────────────────────────────────────────────────────┐
+    │  sim(q2, d1) = 0.09  (The)                                     │
+    │  sim(q2, d2) = 0.88  (bank) ◄── MAXIMUM!                       │
+    │  sim(q2, d3) = 0.11  (of)                                      │
+    │  sim(q2, d4) = 0.10  (the)                                     │
+    │  sim(q2, d5) = 0.45  (river) ← Some similarity (related)       │
+    │  sim(q2, d6) = 0.13  (was)                                     │
+    │  sim(q2, d7) = 0.19  (muddy)                                   │
+    │                                                                │
+    │  MaxSim(q2) = 0.88                                             │
+    └────────────────────────────────────────────────────────────────┘
+
+    Query token "erosion" (q3):
+    ┌────────────────────────────────────────────────────────────────┐
+    │  sim(q3, d1) = 0.05  (The)                                     │
+    │  sim(q3, d2) = 0.25  (bank) ← Some similarity                  │
+    │  sim(q3, d3) = 0.03  (of)                                      │
+    │  sim(q3, d4) = 0.04  (the)                                     │
+    │  sim(q3, d5) = 0.31  (river) ← Some similarity                 │
+    │  sim(q3, d6) = 0.07  (was)                                     │
+    │  sim(q3, d7) = 0.42  (muddy) ◄── MAXIMUM! (mud ≈ erosion)      │
+    │                                                                │
+    │  MaxSim(q3) = 0.42                                             │
+    └────────────────────────────────────────────────────────────────┘
+
+    STEP 2: Sum all MaxSim scores
+    ┌────────────────────────────────────────────────────────────────┐
+    │                                                                │
+    │  FINAL SCORE = MaxSim(q1) + MaxSim(q2) + MaxSim(q3)            │
+    │              = 0.91 + 0.88 + 0.42                              │
+    │              = 2.21                                            │
+    │                                                                │
+    └────────────────────────────────────────────────────────────────┘
+
+    This score is compared across all documents to rank them!
+</pre>
+                    </div>
+                </div>
+
+                <div class="callout callout-tip">
+                    <div class="callout-title">💡 Why MaxSim Works So Well</div>
+                    <p>MaxSim ensures that <strong>every query term finds its best match</strong> in the document. Even if a document doesn't contain the exact word "erosion", it might have related words like "muddy" or "sediment" that score highly. Traditional embeddings might miss this because they average everything into one vector.</p>
+                </div>
+
+                <h3>Late Interaction: Why It's Called That</h3>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Interaction Type</th>
+                                <th>When Query-Doc Interact</th>
+                                <th>Example</th>
+                                <th>Speed</th>
+                                <th>Accuracy</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>No Interaction</strong></td>
+                                <td>Never (just cosine of pooled vectors)</td>
+                                <td>Sentence Transformers</td>
+                                <td><span class="badge badge-green">Fastest</span></td>
+                                <td>Baseline</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Early Interaction</strong></td>
+                                <td>During encoding (concatenate Q+D, run through BERT)</td>
+                                <td>Cross-Encoders</td>
+                                <td><span class="badge badge-orange">Very Slow</span></td>
+                                <td><span class="badge badge-green">Highest</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Late Interaction</strong></td>
+                                <td>After encoding (MaxSim on precomputed embeddings)</td>
+                                <td>ColBERT</td>
+                                <td><span class="badge badge-blue">Fast</span></td>
+                                <td><span class="badge badge-green">High</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <p>ColBERT is called "Late Interaction" because:</p>
+                <ol>
+                    <li><strong>Documents are pre-encoded</strong> into token matrices (can be done offline)</li>
+                    <li><strong>Queries are encoded at search time</strong> (fast, single pass)</li>
+                    <li><strong>Interaction (MaxSim) happens LATE</strong> — after both are encoded</li>
+                </ol>
+
+                <p>This is the sweet spot: you get the accuracy benefits of fine-grained interaction without the speed penalty of cross-encoders.</p>
+            </section>
+
+            <!-- Section 8: ColBERT Implementation -->
+            <section id="colbert-impl" class="section">
+                <div class="section-header">
+                    <span class="section-number">8</span>
+                    <h2 class="section-title">ColBERT Implementation with RAGatouille</h2>
+                </div>
+
+                <p>The easiest way to use ColBERT is through the <strong>RAGatouille</strong> library, which provides a clean Python API.</p>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span class="code-lang">Python - ColBERT with RAGatouille</span>
+                    </div>
+                    <div class="code-content">
+<pre><span class="code-comment"># Install</span>
+<span class="code-comment"># pip install ragatouille</span>
+
+<span class="code-keyword">from</span> ragatouille <span class="code-keyword">import</span> RAGPretrainedModel
+
+<span class="code-comment"># Initialize with pretrained ColBERT model</span>
+RAG = RAGPretrainedModel.from_pretrained(<span class="code-string">"colbert-ir/colbertv2.0"</span>)
+
+<span class="code-comment"># Your documents</span>
+documents = [
+    <span class="code-string">"The river bank was eroding rapidly due to increased rainfall..."</span>,
+    <span class="code-string">"The financial bank announced new interest rates today..."</span>,
+    <span class="code-string">"Muddy conditions near the riverbank caused flooding..."</span>,
+    <span class="code-string">"Bank erosion is a major environmental concern..."</span>,
+]
+
+<span class="code-comment"># Index the documents (creates token-level embeddings)</span>
+RAG.index(
+    collection=documents,
+    index_name=<span class="code-string">"my_colbert_index"</span>,
+    max_document_length=<span class="code-number">256</span>,  <span class="code-comment"># tokens per document</span>
+    split_documents=<span class="code-keyword">True</span>      <span class="code-comment"># auto-chunk long docs</span>
+)
+
+<span class="code-comment"># Search with ColBERT</span>
+results = RAG.search(
+    query=<span class="code-string">"river bank erosion environmental damage"</span>,
+    k=<span class="code-number">3</span>  <span class="code-comment"># top 3 results</span>
+)
+
+<span class="code-keyword">for</span> result <span class="code-keyword">in</span> results:
+    print(<span class="code-string">f"Score: {result['score']:.4f}"</span>)
+    print(<span class="code-string">f"Text: {result['content'][:100]}..."</span>)
+    print(<span class="code-string">"---"</span>)
+</pre>
+                    </div>
+                </div>
+
+                <h3>Integrating ColBERT with LangChain</h3>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span class="code-lang">Python - ColBERT as LangChain Retriever</span>
+                    </div>
+                    <div class="code-content">
+<pre><span class="code-keyword">from</span> ragatouille <span class="code-keyword">import</span> RAGPretrainedModel
+<span class="code-keyword">from</span> langchain.retrievers <span class="code-keyword">import</span> ContextualCompressionRetriever
+
+<span class="code-comment"># Initialize ColBERT</span>
+RAG = RAGPretrainedModel.from_pretrained(<span class="code-string">"colbert-ir/colbertv2.0"</span>)
+
+<span class="code-comment"># Index your documents</span>
+RAG.index(
+    collection=documents,
+    index_name=<span class="code-string">"langchain_colbert"</span>
+)
+
+<span class="code-comment"># Convert to LangChain retriever</span>
+retriever = RAG.as_langchain_retriever(k=<span class="code-number">5</span>)
+
+<span class="code-comment"># Use in a RAG chain</span>
+<span class="code-keyword">from</span> langchain_openai <span class="code-keyword">import</span> ChatOpenAI
+<span class="code-keyword">from</span> langchain.chains <span class="code-keyword">import</span> RetrievalQA
+
+llm = ChatOpenAI(model=<span class="code-string">"gpt-4o-mini"</span>)
+
+qa_chain = RetrievalQA.from_chain_type(
+    llm=llm,
+    chain_type=<span class="code-string">"stuff"</span>,
+    retriever=retriever
+)
+
+answer = qa_chain.invoke(<span class="code-string">"What causes river bank erosion?"</span>)
+print(answer[<span class="code-string">"result"</span>])
+</pre>
+                    </div>
+                </div>
+
+                <h3>ColBERT as a Re-ranker</h3>
+
+                <p>A powerful pattern: use fast traditional embeddings for initial retrieval, then use ColBERT to re-rank the top candidates.</p>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span class="code-lang">Python - ColBERT Re-ranking</span>
+                    </div>
+                    <div class="code-content">
+<pre><span class="code-keyword">from</span> ragatouille <span class="code-keyword">import</span> RAGPretrainedModel
+<span class="code-keyword">from</span> langchain_chroma <span class="code-keyword">import</span> Chroma
+<span class="code-keyword">from</span> langchain_openai <span class="code-keyword">import</span> OpenAIEmbeddings
+
+<span class="code-comment"># Stage 1: Fast retrieval with traditional embeddings</span>
+vectorstore = Chroma.from_texts(
+    texts=documents,
+    embedding=OpenAIEmbeddings()
+)
+initial_results = vectorstore.similarity_search(query, k=<span class="code-number">20</span>)
+
+<span class="code-comment"># Stage 2: Re-rank with ColBERT</span>
+RAG = RAGPretrainedModel.from_pretrained(<span class="code-string">"colbert-ir/colbertv2.0"</span>)
+
+reranked = RAG.rerank(
+    query=query,
+    documents=[doc.page_content <span class="code-keyword">for</span> doc <span class="code-keyword">in</span> initial_results],
+    k=<span class="code-number">5</span>  <span class="code-comment"># Return top 5 after re-ranking</span>
+)
+
+<span class="code-comment"># Result: Fast initial retrieval + High accuracy re-ranking</span>
+</pre>
+                    </div>
+                </div>
+
+                <div class="callout callout-warning">
+                    <div class="callout-title">⚠️ ColBERT Storage Considerations</div>
+                    <p>ColBERT stores one vector per token (not per document). A 300-token document requires 300 vectors! For 1 million documents averaging 200 tokens each, that's 200 million vectors to store.</p>
+                    <p style="margin-top: 0.5rem;"><strong>Solution:</strong> ColBERTv2 uses residual compression to reduce storage by ~16x while maintaining accuracy.</p>
+                </div>
+            </section>
+
+            <!-- Section 9: Comparison & Decision Guide -->
+            <section id="comparison" class="section">
+                <div class="section-header">
+                    <span class="section-number">9</span>
+                    <h2 class="section-title">Comparison & When to Use What</h2>
+                </div>
+
+                <h3>Side-by-Side Comparison</h3>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Aspect</th>
+                                <th>Multi-Rep / Propositions</th>
+                                <th>RAPTOR</th>
+                                <th>ColBERT</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Core Idea</strong></td>
+                                <td>Index optimized form, return full doc</td>
+                                <td>Build hierarchy of summaries</td>
+                                <td>Token-level embeddings</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Indexing Cost</strong></td>
+                                <td>High (LLM calls)</td>
+                                <td>Very High (recursive LLM)</td>
+                                <td>Medium (BERT inference)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Storage</strong></td>
+                                <td>Low (summaries only)</td>
+                                <td>Medium (all tree levels)</td>
+                                <td>High (per-token vectors)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Query Speed</strong></td>
+                                <td>Fast</td>
+                                <td>Fast</td>
+                                <td>Medium (MaxSim compute)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Best For</strong></td>
+                                <td>Fact-dense documents</td>
+                                <td>Multi-hop reasoning, themes</td>
+                                <td>Precise semantic matching</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Weakness</strong></td>
+                                <td>Expensive to generate props</td>
+                                <td>Most expensive indexing</td>
+                                <td>High storage requirements</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>Decision Flowchart</h3>
+
+                <div class="diagram-box">
+                    <div class="diagram-title">📊 Choose Your Indexing Strategy</div>
+                    <div class="diagram-content">
+<pre>
+                        START HERE
+                            │
+                            ▼
+        ┌───────────────────────────────────────┐
+        │ Do you need to answer questions that  │
+        │ require synthesizing across multiple  │
+        │ documents? (thematic/high-level)      │
+        └───────────────────┬───────────────────┘
+                            │
+              ┌─────────────┴─────────────┐
+              │                           │
+              ▼ YES                       ▼ NO
+    ┌─────────────────┐       ┌───────────────────────────────┐
+    │     RAPTOR      │       │ Do your documents have        │
+    │                 │       │ multiple distinct facts that  │
+    │ Best for:       │       │ could be searched separately? │
+    │ • Book analysis │       └───────────────┬───────────────┘
+    │ • Research Q&A  │                       │
+    │ • Knowledge base│         ┌─────────────┴─────────────┐
+    └─────────────────┘         │                           │
+                                ▼ YES                       ▼ NO
+                    ┌─────────────────┐       ┌───────────────────────┐
+                    │  PROPOSITIONS   │       │ Is precise token-level│
+                    │  (Dense X)      │       │ matching important?   │
+                    │                 │       └───────────┬───────────┘
+                    │ Best for:       │                   │
+                    │ • Legal docs    │     ┌─────────────┴─────────────┐
+                    │ • Technical     │     │                           │
+                    │ • Encyclopedic  │     ▼ YES                       ▼ NO
+                    └─────────────────┘   ┌──────────────┐   ┌──────────────────┐
+                                          │   ColBERT    │   │ Parent Document  │
+                                          │              │   │ Retriever        │
+                                          │ Best for:    │   │                  │
+                                          │ • Ambiguous  │   │ Best for:        │
+                                          │   terms      │   │ • Simple cases   │
+                                          │ • Semantic   │   │ • Fast retrieval │
+                                          │   nuance     │   │ • Low cost       │
+                                          └──────────────┘   └──────────────────┘
+</pre>
+                    </div>
+                </div>
+
+                <h3>Real-World Scenario Examples</h3>
+
+                <div class="example-box">
+                    <div class="example-title">🏥 Scenario 1: Medical Knowledge Base</div>
+                    <p><strong>Use Case:</strong> Hospital doctors querying treatment protocols</p>
+                    <p><strong>Question Types:</strong></p>
+                    <ul>
+                        <li>"What's the dosage for amoxicillin in pediatric patients?" (specific fact)</li>
+                        <li>"How do beta-blockers interact with diabetes medications?" (multi-doc synthesis)</li>
+                    </ul>
+                    <p><strong>Recommendation:</strong> <span class="badge badge-purple">RAPTOR + Propositions</span></p>
+                    <p>Use propositions for specific drug facts, RAPTOR for cross-document interaction analysis.</p>
+                </div>
+
+                <div class="example-box">
+                    <div class="example-title">⚖️ Scenario 2: Legal Contract Review</div>
+                    <p><strong>Use Case:</strong> Lawyers searching contract clauses</p>
+                    <p><strong>Question Types:</strong></p>
+                    <ul>
+                        <li>"Find clauses about liability limitations in our vendor contracts"</li>
+                        <li>"What are the termination conditions across all our SaaS agreements?"</li>
+                    </ul>
+                    <p><strong>Recommendation:</strong> <span class="badge badge-blue">ColBERT + Parent Doc</span></p>
+                    <p>ColBERT for precise legal term matching, Parent Doc to return full clause context.</p>
+                </div>
+
+                <div class="example-box">
+                    <div class="example-title">📚 Scenario 3: Academic Research Assistant</div>
+                    <p><strong>Use Case:</strong> Researchers querying scientific papers</p>
+                    <p><strong>Question Types:</strong></p>
+                    <ul>
+                        <li>"What methodologies have been used to study climate change effects on coral reefs?"</li>
+                        <li>"Summarize the evolution of transformer architectures from 2017-2024"</li>
+                    </ul>
+                    <p><strong>Recommendation:</strong> <span class="badge badge-purple">RAPTOR</span></p>
+                    <p>Hierarchical summaries enable both specific method retrieval and thematic synthesis.</p>
+                </div>
+
+                <div class="example-box">
+                    <div class="example-title">🛒 Scenario 4: E-commerce Product Search</div>
+                    <p><strong>Use Case:</strong> Customers searching product catalog</p>
+                    <p><strong>Question Types:</strong></p>
+                    <ul>
+                        <li>"Laptop with good battery life for travel under $1000"</li>
+                        <li>"Compare wireless earbuds with noise cancellation"</li>
+                    </ul>
+                    <p><strong>Recommendation:</strong> <span class="badge badge-green">Propositions + Query Construction</span></p>
+                    <p>Extract product attributes as propositions, use query construction for filters.</p>
+                </div>
+            </section>
+
+            <!-- Section 10: Production Best Practices -->
+            <section id="production" class="section">
+                <div class="section-header">
+                    <span class="section-number">10</span>
+                    <h2 class="section-title">Production Best Practices</h2>
+                </div>
+
+                <h3>Hybrid Approaches: Combining Strategies</h3>
+
+                <div class="diagram-box">
+                    <div class="diagram-title">📊 Enterprise RAG Pipeline</div>
+                    <div class="diagram-content">
+<pre>
+    ┌─────────────────────────────────────────────────────────────────┐
+    │                    ENTERPRISE RAG PIPELINE                      │
+    └─────────────────────────────────────────────────────────────────┘
+    
+                              USER QUERY
+                                  │
+                                  ▼
+                    ┌─────────────────────────┐
+                    │    QUERY ANALYSIS       │
+                    │  (Classify query type)  │
+                    └─────────────┬───────────┘
+                                  │
+              ┌───────────────────┼───────────────────┐
+              │                   │                   │
+              ▼                   ▼                   ▼
+    ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐
+    │ SPECIFIC FACT   │ │ THEMATIC/BROAD  │ │ SEMANTIC NUANCE │
+    │                 │ │                 │ │                 │
+    │ Propositions    │ │ RAPTOR Tree     │ │ ColBERT         │
+    │ + Parent Doc    │ │ (high levels)   │ │ Re-ranking      │
+    └────────┬────────┘ └────────┬────────┘ └────────┬────────┘
+             │                   │                   │
+             └───────────────────┼───────────────────┘
+                                 │
+                                 ▼
+                    ┌─────────────────────────┐
+                    │     RESULT FUSION       │
+                    │  (Reciprocal Rank Fusion)│
+                    └─────────────┬───────────┘
+                                  │
+                                  ▼
+                    ┌─────────────────────────┐
+                    │     CONTEXT BUILDING    │
+                    │  (Fetch full documents) │
+                    └─────────────┬───────────┘
+                                  │
+                                  ▼
+                    ┌─────────────────────────┐
+                    │        LLM GENERATE     │
+                    └─────────────────────────┘
+</pre>
+                    </div>
+                </div>
+
+                <h3>Cost-Performance Trade-offs</h3>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Indexing Strategy</th>
+                                <th>Indexing Cost</th>
+                                <th>Storage Cost</th>
+                                <th>Query Cost</th>
+                                <th>Retrieval Quality</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Basic Chunking</td>
+                                <td>$</td>
+                                <td>$</td>
+                                <td>$</td>
+                                <td>⭐⭐</td>
+                            </tr>
+                            <tr>
+                                <td>Parent Document</td>
+                                <td>$</td>
+                                <td>$$</td>
+                                <td>$</td>
+                                <td>⭐⭐⭐</td>
+                            </tr>
+                            <tr>
+                                <td>Propositions</td>
+                                <td>$$$</td>
+                                <td>$$</td>
+                                <td>$</td>
+                                <td>⭐⭐⭐⭐</td>
+                            </tr>
+                            <tr>
+                                <td>RAPTOR</td>
+                                <td>$$$$</td>
+                                <td>$$</td>
+                                <td>$</td>
+                                <td>⭐⭐⭐⭐⭐</td>
+                            </tr>
+                            <tr>
+                                <td>ColBERT</td>
+                                <td>$$</td>
+                                <td>$$$$</td>
+                                <td>$$</td>
+                                <td>⭐⭐⭐⭐</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>Key Takeaways</h3>
+
+                <div class="highlight-box">
+                    <h4>🎯 Summary: The Three Pillars of Advanced Indexing</h4>
+                    <ol>
+                        <li><strong>Multi-Representation (Part 12):</strong> Decouple what you search from what you return. Use optimized representations (summaries/propositions) for search, but give the LLM full documents for context.</li>
+                        <li><strong>RAPTOR (Part 13):</strong> Build a knowledge hierarchy through recursive clustering and summarization. Answer both specific AND thematic questions from the same index.</li>
+                        <li><strong>ColBERT (Part 14):</strong> Use token-level embeddings for fine-grained matching. Best for semantic precision where single-vector embeddings lose nuance.</li>
+                    </ol>
+                    <p style="margin-top: 1rem;"><strong>Remember:</strong> These techniques can be combined! Start simple (Parent Document), add complexity (RAPTOR for themes, ColBERT for re-ranking) as your use case demands.</p>
+                </div>
+
+                <h3>Resources</h3>
+
+                <div class="card">
+                    <div class="card-title">📚 Papers & References</div>
+                    <ul>
+                        <li><strong>Dense X Retrieval:</strong> <a href="https://arxiv.org/abs/2312.06648" style="color: var(--accent-orange);">arxiv.org/abs/2312.06648</a></li>
+                        <li><strong>RAPTOR:</strong> <a href="https://arxiv.org/abs/2401.18059" style="color: var(--accent-orange);">arxiv.org/abs/2401.18059</a></li>
+                        <li><strong>ColBERT:</strong> <a href="https://github.com/stanford-futuredata/ColBERT" style="color: var(--accent-orange);">github.com/stanford-futuredata/ColBERT</a></li>
+                        <li><strong>RAGatouille:</strong> <a href="https://github.com/bclavie/RAGatouille" style="color: var(--accent-orange);">github.com/bclavie/RAGatouille</a></li>
+                        <li><strong>LangChain Docs:</strong> <a href="https://python.langchain.com/docs/how_to/parent_document_retriever/" style="color: var(--accent-orange);">Parent Document Retriever</a></li>
+                        <li><strong>Video Course:</strong> <a href="https://www.youtube.com/playlist?list=PLfaIDFEXuae2LXbO1_PKyVJiQ23ZztA0x" style="color: var(--accent-orange);">RAG From Scratch (Lance Martin)</a></li>
+                    </ul>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-brand">Daily Tutes - RAG Advanced Indexing Deep Dive</div>
+        <p class="footer-text">
+            <a href="index.html">← Back to Timeline</a> • December 28, 2025
+        </p>
+    </footer>
+</body>
+</html>

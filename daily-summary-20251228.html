@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Day 6: Frontend Design & Development - Daily Tutes</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Fraunces:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-tertiary: #1a1a25;
+            --bg-card: #16161f;
+            --text-primary: #f0f0f5;
+            --text-secondary: #a0a0b0;
+            --text-muted: #606070;
+            --accent-orange: #ff6b35;
+            --accent-blue: #4ecdc4;
+            --accent-purple: #a855f7;
+            --accent-pink: #ec4899;
+            --accent-green: #22c55e;
+            --accent-yellow: #fbbf24;
+            --border-color: #2a2a35;
+            --code-bg: #1e1e2e;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+        }
+
+        /* Header */
+        .header {
+            background: radial-gradient(ellipse at top, #1a1a2e 0%, var(--bg-primary) 70%);
+            padding: 3rem 2rem;
+            border-bottom: 1px solid var(--border-color);
+            position: relative;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 30% 30%, rgba(236, 72, 153, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 70% 70%, rgba(255, 107, 53, 0.1) 0%, transparent 40%);
+            pointer-events: none;
+        }
+
+        .header-content {
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+            transition: color 0.3s ease;
+        }
+
+        .back-link:hover {
+            color: var(--accent-orange);
+        }
+
+        .day-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(34, 197, 94, 0.1) 100%);
+            border: 1px solid rgba(34, 197, 94, 0.4);
+            border-radius: 50px;
+            font-size: 0.9rem;
+            color: var(--accent-green);
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .header-title {
+            font-family: 'Fraunces', serif;
+            font-size: clamp(2rem, 5vw, 3rem);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #fff 0%, var(--accent-pink) 50%, var(--accent-orange) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        /* Topics Section */
+        .topics-section {
+            margin-bottom: 3rem;
+        }
+
+        .section-title {
+            font-family: 'Fraunces', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .topics-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .topic-badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+
+        .topic-badge.highlight {
+            background: rgba(255, 107, 53, 0.1);
+            border-color: rgba(255, 107, 53, 0.3);
+            color: var(--accent-orange);
+        }
+
+        .topic-badge.blue {
+            background: rgba(78, 205, 196, 0.1);
+            border-color: rgba(78, 205, 196, 0.3);
+            color: var(--accent-blue);
+        }
+
+        .topic-badge.purple {
+            background: rgba(168, 85, 247, 0.1);
+            border-color: rgba(168, 85, 247, 0.3);
+            color: var(--accent-purple);
+        }
+
+        .topic-badge.pink {
+            background: rgba(236, 72, 153, 0.1);
+            border-color: rgba(236, 72, 153, 0.3);
+            color: var(--accent-pink);
+        }
+
+        /* Content Cards */
+        .content-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .content-card h3 {
+            font-family: 'Fraunces', serif;
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .content-card p {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .content-card ul {
+            list-style: none;
+            margin: 1rem 0;
+        }
+
+        .content-card li {
+            padding: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+            color: var(--text-secondary);
+        }
+
+        .content-card li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--accent-orange);
+        }
+
+        .content-card li strong {
+            color: var(--text-primary);
+        }
+
+        /* Code Blocks */
+        .code-block {
+            background: var(--code-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            margin: 1rem 0;
+            overflow: hidden;
+        }
+
+        .code-header {
+            background: var(--bg-tertiary);
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--accent-blue);
+        }
+
+        .code-content {
+            padding: 1rem;
+            overflow-x: auto;
+        }
+
+        .code-content pre {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        /* Callout */
+        .callout {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-left: 4px solid var(--accent-purple);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+        }
+
+        .callout-title {
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .callout p {
+            color: var(--text-secondary);
+            margin: 0;
+        }
+
+        /* Tables */
+        .table-container {
+            overflow-x: auto;
+            margin: 1rem 0;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        thead {
+            background: var(--bg-tertiary);
+        }
+
+        th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-primary);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Diagram Box */
+        .diagram-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .diagram-title {
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+
+        .diagram-content {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            line-height: 1.4;
+            color: var(--text-secondary);
+            white-space: pre;
+            overflow-x: auto;
+        }
+
+        /* Deep Dive Card */
+        .deepdive-card {
+            background: linear-gradient(135deg, rgba(236, 72, 153, 0.1) 0%, rgba(255, 107, 53, 0.1) 100%);
+            border: 1px solid rgba(236, 72, 153, 0.3);
+            border-radius: 16px;
+            padding: 2rem;
+            margin: 2rem 0;
+            text-align: center;
+        }
+
+        .deepdive-card h3 {
+            font-family: 'Fraunces', serif;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .deepdive-card p {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        .deepdive-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, var(--accent-pink) 0%, var(--accent-orange) 100%);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .deepdive-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(236, 72, 153, 0.4);
+        }
+
+        /* Resources */
+        .resources-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .resource-item {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .resource-item h4 {
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .resource-item p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            border-top: 1px solid var(--border-color);
+            margin-top: 3rem;
+        }
+
+        .footer-nav {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s ease;
+        }
+
+        .footer-link:hover {
+            color: var(--accent-orange);
+        }
+
+        .footer-text {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header {
+                padding: 2rem 1rem;
+            }
+
+            .container {
+                padding: 2rem 1rem;
+            }
+
+            .header-meta {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .content-card {
+                padding: 1.25rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="index.html" class="back-link">← Back to Timeline</a>
+            <div class="day-badge">✨ Day 6</div>
+            <h1 class="header-title">Frontend Design & Development</h1>
+            <div class="header-meta">
+                <span class="meta-item">📅 December 28, 2025 — Sunday</span>
+                <span class="meta-item">⏱️ ~4 hours</span>
+                <span class="meta-item">📚 16 topics</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container">
+        <!-- Topics Covered -->
+        <section class="topics-section">
+            <h2 class="section-title">🎯 Topics Covered</h2>
+            <div class="topics-grid">
+                <span class="topic-badge highlight">Frontend Design SOP</span>
+                <span class="topic-badge highlight">v0.dev</span>
+                <span class="topic-badge highlight">Next.js 16</span>
+                <span class="topic-badge blue">TypeScript</span>
+                <span class="topic-badge blue">Tailwind CSS</span>
+                <span class="topic-badge purple">shadcn/ui</span>
+                <span class="topic-badge purple">Framer Motion</span>
+                <span class="topic-badge pink">Repository Strategy</span>
+                <span class="topic-badge">JTBD Framework</span>
+                <span class="topic-badge">User Personas</span>
+                <span class="topic-badge">Design Tokens</span>
+                <span class="topic-badge">ASCII Animation</span>
+                <span class="topic-badge">Symlinks</span>
+                <span class="topic-badge">FastAPI Integration</span>
+                <span class="topic-badge">App Router</span>
+                <span class="topic-badge">Lucide Icons</span>
+            </div>
+        </section>
+
+        <!-- Key Learning 1 -->
+        <div class="content-card">
+            <h3>📋 Frontend Design SOP: 6-Phase Workflow</h3>
+            <p>Established a complete, repeatable workflow for building production-ready frontends for AI applications. Each phase uses the optimal tool for the job.</p>
+            
+            <div class="diagram-box">
+                <div class="diagram-title">The 6-Phase Pipeline</div>
+                <div class="diagram-content">
+PHASE 1: DISCOVERY     →  What are we building and why?      [Claude]
+PHASE 2: INSPIRATION   →  What should it look/feel like?    [Mobbin]
+PHASE 3: DESIGN        →  Wireframes → Prototype JSX        [Claude]
+PHASE 4: BUILD         →  v0.dev → Full React code          [v0.dev]
+PHASE 5: INTEGRATE     →  Connect FE ↔ BE                   [Antigravity]
+PHASE 6: POLISH        →  Test, fix, iterate                [Manual]
+                </div>
+            </div>
+
+            <ul>
+                <li><strong>Discovery:</strong> JTBD statements, personas, user journeys, screen prioritization</li>
+                <li><strong>Inspiration:</strong> Find north star design, extract design tokens</li>
+                <li><strong>Design:</strong> Claude generates prototype JSX with inline styles</li>
+                <li><strong>Build:</strong> v0.dev transforms prototypes into production Next.js code</li>
+                <li><strong>Integrate:</strong> Connect to backend APIs (FastAPI + Agno)</li>
+                <li><strong>Polish:</strong> Testing checklist, responsive design, error handling</li>
+            </ul>
+        </div>
+
+        <!-- Key Learning 2 -->
+        <div class="content-card">
+            <h3>🤖 v0.dev: AI-Powered Frontend Development</h3>
+            <p>Vercel's v0.dev is not just a code generator — it's a complete development environment that understands modern React patterns.</p>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Feature</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Chat Interface</strong></td>
+                            <td>Describe in natural language, get working code</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Live Preview</strong></td>
+                            <td>Test interactions before exporting</td>
+                        </tr>
+                        <tr>
+                            <td><strong>shadcn/ui</strong></td>
+                            <td>Accessible, customizable components by default</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Export Options</strong></td>
+                            <td>ZIP download or push to new GitHub repo</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="callout">
+                <div class="callout-title">💡 Key Insight: Incremental Prompting</div>
+                <p>Multiple small prompts get better results than one massive prompt. Ask for one feature at a time: "Add responsive design" → "Add loading states" → "Add animations"</p>
+            </div>
+        </div>
+
+        <!-- Key Learning 3 -->
+        <div class="content-card">
+            <h3>🔧 Tool Chain: Claude → v0.dev → GitHub → Antigravity</h3>
+            <p>The complete toolchain connects four tools into a seamless development flow.</p>
+
+            <div class="diagram-box">
+                <div class="diagram-title">The Golden Path</div>
+                <div class="diagram-content">
+┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+│   Claude    │ ──▶│   v0.dev    │ ──▶│   GitHub    │ ──▶│ Antigravity │
+│  (Design)   │    │  (Build)    │    │  (Store)    │    │   (Run)     │
+└─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘
+      │                  │                  │                  │
+      ▼                  ▼                  ▼                  ▼
+  Prototype          Production         Version             Local Dev
+    JSX               Code              Control           + Backend
+                </div>
+            </div>
+
+            <ul>
+                <li><strong>Claude:</strong> Discovery, design, prototype JSX generation</li>
+                <li><strong>v0.dev:</strong> Transform prototypes into production Next.js code</li>
+                <li><strong>GitHub:</strong> Version control, backup, collaboration (g-v0-lab repo)</li>
+                <li><strong>Antigravity:</strong> Local development, backend integration, testing</li>
+            </ul>
+        </div>
+
+        <!-- Key Learning 4 -->
+        <div class="content-card">
+            <h3>📂 Repository Strategy: Two-Repo Approach</h3>
+            <p>Separate repos for frontend and backend provide clean separation while symlinks enable seamless local development.</p>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Repository</th>
+                            <th>Purpose</th>
+                            <th>Contents</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>g-ai-lab</strong></td>
+                            <td>AI/Backend</td>
+                            <td>Agents, APIs, observability, Python</td>
+                        </tr>
+                        <tr>
+                            <td><strong>g-v0-lab</strong></td>
+                            <td>Frontend</td>
+                            <td>React/Next.js apps from v0.dev</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="code-block">
+                <div class="code-header">Symlink Connection</div>
+                <div class="code-content">
+<pre># Link frontend repo to backend project
+cd ~/g-ai-lab/projects/02-ai-travel-agent/working
+ln -s ~/g-v0-lab/01-travel-agent-frontend frontend
+
+# Now frontend appears in backend project but lives in its own repo!</pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Key Learning 5 -->
+        <div class="content-card">
+            <h3>🎨 Tech Stack: Modern React Development</h3>
+            <p>Built the Travel Agent frontend with a production-grade tech stack.</p>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Layer</th>
+                            <th>Technology</th>
+                            <th>Purpose</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Framework</strong></td>
+                            <td>Next.js 16 (App Router)</td>
+                            <td>File-based routing, server components</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Language</strong></td>
+                            <td>TypeScript</td>
+                            <td>Type-safe JavaScript</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Styling</strong></td>
+                            <td>Tailwind CSS</td>
+                            <td>Utility-first CSS</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Animations</strong></td>
+                            <td>Framer Motion</td>
+                            <td>Production motion library</td>
+                        </tr>
+                        <tr>
+                            <td><strong>UI Components</strong></td>
+                            <td>shadcn/ui</td>
+                            <td>Accessible, customizable primitives</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Icons</strong></td>
+                            <td>Lucide React</td>
+                            <td>Beautiful, consistent icons</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Key Learning 6 -->
+        <div class="content-card">
+            <h3>⚠️ Learnings & Gotchas</h3>
+            <p>Real-world insights from building the Travel Agent frontend.</p>
+
+            <ul>
+                <li><strong>v0 MCP Limitation:</strong> Can create new repos, but cannot push to existing repo subfolders. Use ZIP download + manual push.</li>
+                <li><strong>Hydration Errors:</strong> Happen when server HTML doesn't match client. Move <code>window</code> and <code>Math.random()</code> to <code>useEffect</code>.</li>
+                <li><strong>ZIP Extraction:</strong> v0 exports may extract files directly without parent folder. Always check with <code>ls</code> first.</li>
+                <li><strong>Symlink Safety:</strong> Never <code>rm -r symlink</code> — it deletes through the link! Use just <code>rm symlink</code>.</li>
+                <li><strong>Iterative Prompting:</strong> Ask v0 for one thing at a time for better results.</li>
+            </ul>
+        </div>
+
+        <!-- What Was Built -->
+        <div class="content-card">
+            <h3>🏗️ What We Built</h3>
+            <p>Complete AI Travel Agent frontend with three screens:</p>
+            
+            <ul>
+                <li><strong>Landing Page:</strong> ASCII art animation cycling TRAVEL/TRIP/VACATION with glare effects and shatter physics</li>
+                <li><strong>Trip Form:</strong> Destination, dates, travelers, interests, budget selection with validation</li>
+                <li><strong>Itinerary Page:</strong> Day-by-day travel plan with Morning/Afternoon/Evening time slots</li>
+            </ul>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Deliverable</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Frontend Design SOP</td>
+                            <td>✅ Created</td>
+                        </tr>
+                        <tr>
+                            <td>Discovery Template</td>
+                            <td>✅ Created</td>
+                        </tr>
+                        <tr>
+                            <td>Design Tokens Template</td>
+                            <td>✅ Created</td>
+                        </tr>
+                        <tr>
+                            <td>g-v0-lab Repository</td>
+                            <td>✅ Created</td>
+                        </tr>
+                        <tr>
+                            <td>Travel Agent Frontend</td>
+                            <td>✅ Built & Running</td>
+                        </tr>
+                        <tr>
+                            <td>Symlink to g-ai-lab</td>
+                            <td>✅ Connected</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Resources -->
+        <div class="content-card">
+            <h3>📚 Resources Studied</h3>
+            <div class="resources-grid">
+                <div class="resource-item">
+                    <h4>v0.dev</h4>
+                    <p>AI-powered frontend tool by Vercel</p>
+                </div>
+                <div class="resource-item">
+                    <h4>Next.js Docs</h4>
+                    <p>App Router, Server Components</p>
+                </div>
+                <div class="resource-item">
+                    <h4>shadcn/ui</h4>
+                    <p>Component primitives</p>
+                </div>
+                <div class="resource-item">
+                    <h4>Tailwind CSS</h4>
+                    <p>Utility-first styling</p>
+                </div>
+                <div class="resource-item">
+                    <h4>Mobbin</h4>
+                    <p>Design inspiration</p>
+                </div>
+                <div class="resource-item">
+                    <h4>Lucide Icons</h4>
+                    <p>Icon library</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Deep Dive Card -->
+        <div class="deepdive-card">
+            <h3>📖 Deep Dive Available</h3>
+            <p>Comprehensive 15-section guide covering the complete frontend development workflow, v0.dev deep dive, Next.js fundamentals, repository strategy, and ASCII animation technical details.</p>
+            <a href="daily-tutes-deepdive-frontend-design-20251228.html" class="deepdive-link">📖 Read Frontend Design Deep Dive</a>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <nav class="footer-nav">
+            <a href="index.html" class="footer-link">← Back to Timeline</a>
+            <a href="daily-summary-20251227.html" class="footer-link">← Previous Day</a>
+            <a href="daily-tutes-deepdive-frontend-design-20251228.html" class="footer-link">📖 Deep Dive</a>
+        </nav>
+        <p class="footer-text">Day 6 of Daily Tutes • December 28, 2025</p>
+    </footer>
+</body>
+</html>

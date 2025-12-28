@@ -1,0 +1,3202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frontend Design & Development: Complete Guide - Daily Tutes Deep Dive</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Fraunces:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-tertiary: #1a1a25;
+            --bg-card: #16161f;
+            --text-primary: #f0f0f5;
+            --text-secondary: #a0a0b0;
+            --text-muted: #606070;
+            --accent-orange: #ff6b35;
+            --accent-blue: #4ecdc4;
+            --accent-purple: #a855f7;
+            --accent-pink: #ec4899;
+            --accent-green: #22c55e;
+            --accent-yellow: #fbbf24;
+            --accent-red: #ef4444;
+            --border-color: #2a2a35;
+            --code-bg: #1e1e2e;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            font-size: 16px;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: radial-gradient(ellipse at top, #1a1a2e 0%, var(--bg-primary) 70%);
+            padding: 4rem 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 30% 20%, rgba(236, 72, 153, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 70% 80%, rgba(255, 107, 53, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(168, 85, 247, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1.2rem;
+            background: linear-gradient(135deg, rgba(236, 72, 153, 0.2) 0%, rgba(255, 107, 53, 0.2) 100%);
+            border: 1px solid rgba(236, 72, 153, 0.4);
+            border-radius: 50px;
+            font-size: 0.9rem;
+            color: var(--accent-pink);
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+        }
+
+        .hero-title {
+            font-family: 'Fraunces', serif;
+            font-size: clamp(2.2rem, 5vw, 3.5rem);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #fff 0%, #ec4899 50%, #ff6b35 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero-meta {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .hero-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .back-link {
+            position: absolute;
+            top: 2rem;
+            left: 2rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: color 0.3s ease;
+            z-index: 10;
+        }
+
+        .back-link:hover {
+            color: var(--accent-orange);
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        /* Table of Contents */
+        .toc {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .toc-title {
+            font-family: 'Fraunces', serif;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .toc-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 0.75rem;
+        }
+
+        .toc-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .toc-item:hover {
+            background: var(--bg-secondary);
+            border-color: var(--accent-orange);
+            color: var(--text-primary);
+        }
+
+        .toc-number {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--accent-orange);
+            font-weight: 600;
+        }
+
+        /* Sections */
+        section {
+            margin-bottom: 4rem;
+        }
+
+        .section-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .section-number {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--accent-orange);
+            font-weight: 600;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .section-title {
+            font-family: 'Fraunces', serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        h3 {
+            font-family: 'Fraunces', serif;
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 2rem 0 1rem;
+        }
+
+        h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--accent-blue);
+            margin: 1.5rem 0 0.75rem;
+        }
+
+        p {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        strong {
+            color: var(--text-primary);
+        }
+
+        /* Lists */
+        ul, ol {
+            margin: 1rem 0 1.5rem 1.5rem;
+            color: var(--text-secondary);
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        li strong {
+            color: var(--accent-orange);
+        }
+
+        /* Callouts */
+        .callout {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-left: 4px solid var(--accent-orange);
+        }
+
+        .callout-analogy {
+            border-left-color: var(--accent-purple);
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.05) 0%, var(--bg-card) 100%);
+        }
+
+        .callout-tip {
+            border-left-color: var(--accent-green);
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.05) 0%, var(--bg-card) 100%);
+        }
+
+        .callout-warning {
+            border-left-color: var(--accent-yellow);
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.05) 0%, var(--bg-card) 100%);
+        }
+
+        .callout-important {
+            border-left-color: var(--accent-pink);
+            background: linear-gradient(135deg, rgba(236, 72, 153, 0.05) 0%, var(--bg-card) 100%);
+        }
+
+        .callout-title {
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.75rem;
+            font-size: 1rem;
+        }
+
+        .callout p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Code Blocks */
+        .code-block {
+            background: var(--code-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            margin: 1.5rem 0;
+            overflow: hidden;
+        }
+
+        .code-header {
+            background: var(--bg-tertiary);
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .code-lang {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--accent-blue);
+            font-weight: 600;
+        }
+
+        .code-filename {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .code-content {
+            padding: 1.25rem;
+            overflow-x: auto;
+        }
+
+        .code-content pre {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            color: var(--text-primary);
+            white-space: pre;
+            margin: 0;
+        }
+
+        /* Syntax Highlighting */
+        .keyword { color: #c678dd; }
+        .string { color: #98c379; }
+        .comment { color: #5c6370; font-style: italic; }
+        .function { color: #61afef; }
+        .variable { color: #e5c07b; }
+        .number { color: #d19a66; }
+        .operator { color: #56b6c2; }
+        .tag { color: #e06c75; }
+        .attr { color: #d19a66; }
+        .type { color: #e5c07b; }
+
+        /* Inline Code */
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85em;
+            background: var(--bg-tertiary);
+            padding: 0.2em 0.5em;
+            border-radius: 4px;
+            color: var(--accent-blue);
+        }
+
+        /* Tables */
+        .table-container {
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        thead {
+            background: var(--bg-tertiary);
+        }
+
+        th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-primary);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tbody tr:hover {
+            background: var(--bg-card);
+        }
+
+        /* Diagram Boxes */
+        .diagram-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+        }
+
+        .diagram-title {
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            font-size: 1rem;
+        }
+
+        .diagram-content {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            line-height: 1.4;
+            color: var(--text-secondary);
+            white-space: pre;
+        }
+
+        /* Topic Badges */
+        .topic-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        .topic-badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+
+        .topic-badge.highlight {
+            background: rgba(255, 107, 53, 0.1);
+            border-color: rgba(255, 107, 53, 0.3);
+            color: var(--accent-orange);
+        }
+
+        .topic-badge.blue {
+            background: rgba(78, 205, 196, 0.1);
+            border-color: rgba(78, 205, 196, 0.3);
+            color: var(--accent-blue);
+        }
+
+        .topic-badge.purple {
+            background: rgba(168, 85, 247, 0.1);
+            border-color: rgba(168, 85, 247, 0.3);
+            color: var(--accent-purple);
+        }
+
+        .topic-badge.pink {
+            background: rgba(236, 72, 153, 0.1);
+            border-color: rgba(236, 72, 153, 0.3);
+            color: var(--accent-pink);
+        }
+
+        .topic-badge.green {
+            background: rgba(34, 197, 94, 0.1);
+            border-color: rgba(34, 197, 94, 0.3);
+            color: var(--accent-green);
+        }
+
+        /* Workflow Steps */
+        .workflow-steps {
+            display: grid;
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .workflow-step {
+            display: flex;
+            gap: 1rem;
+            padding: 1.25rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .workflow-step:hover {
+            border-color: var(--accent-orange);
+            transform: translateX(5px);
+        }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-orange) 0%, var(--accent-pink) 100%);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .step-content h4 {
+            margin: 0 0 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .step-content p {
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        /* Feature Cards */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .feature-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            border-color: var(--accent-blue);
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-desc {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+
+        /* Key-Value Grid */
+        .kv-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .kv-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .kv-key {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 0.25rem;
+        }
+
+        .kv-value {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* Comparison Boxes */
+        .comparison-box {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        @media (max-width: 768px) {
+            .comparison-box {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .comparison-side {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .comparison-side.good {
+            border-color: rgba(34, 197, 94, 0.3);
+        }
+
+        .comparison-side.bad {
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        .comparison-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .comparison-side.good .comparison-header {
+            color: var(--accent-green);
+        }
+
+        .comparison-side.bad .comparison-header {
+            color: var(--accent-red);
+        }
+
+        /* Timeline */
+        .phase-timeline {
+            position: relative;
+            padding-left: 2rem;
+            margin: 2rem 0;
+        }
+
+        .phase-timeline::before {
+            content: '';
+            position: absolute;
+            left: 0.5rem;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(to bottom, var(--accent-orange), var(--accent-purple), var(--accent-blue));
+            border-radius: 3px;
+        }
+
+        .phase-item {
+            position: relative;
+            padding-bottom: 2rem;
+        }
+
+        .phase-item:last-child {
+            padding-bottom: 0;
+        }
+
+        .phase-item::before {
+            content: '';
+            position: absolute;
+            left: -1.5rem;
+            top: 0.25rem;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--accent-orange);
+            border: 2px solid var(--bg-primary);
+        }
+
+        .phase-title {
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .phase-tool {
+            font-size: 0.85rem;
+            color: var(--accent-blue);
+            margin-bottom: 0.5rem;
+        }
+
+        .phase-desc {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 3rem 2rem;
+            border-top: 1px solid var(--border-color);
+            margin-top: 4rem;
+        }
+
+        .footer-nav {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: color 0.3s ease;
+        }
+
+        .footer-link:hover {
+            color: var(--accent-orange);
+        }
+
+        .footer-brand {
+            font-family: 'Fraunces', serif;
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .footer-text {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero {
+                padding: 3rem 1rem;
+            }
+
+            .back-link {
+                top: 1rem;
+                left: 1rem;
+            }
+
+            .container {
+                padding: 2rem 1rem;
+            }
+
+            .section-title {
+                font-size: 1.6rem;
+            }
+
+            .hero-meta {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .toc-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .workflow-step {
+                flex-direction: column;
+            }
+
+            .step-number {
+                margin-bottom: 0.5rem;
+            }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+
+        /* Smooth Scroll */
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero">
+        <a href="index.html" class="back-link">← Back to Timeline</a>
+        <div class="hero-content">
+            <div class="hero-badge">📚 Deep Dive Document</div>
+            <h1 class="hero-title">Frontend Design & Development: The Complete Guide</h1>
+            <p class="hero-subtitle">From Discovery to Deployment — Building Production-Ready AI Application Frontends with Claude, v0.dev, Next.js, and Modern Tooling</p>
+            <div class="hero-meta">
+                <div class="hero-meta-item">📅 December 28, 2025</div>
+                <div class="hero-meta-item">⏱️ ~45 min read</div>
+                <div class="hero-meta-item">📖 15 Sections</div>
+                <div class="hero-meta-item">💻 Travel Agent Project</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="container">
+        <!-- Table of Contents -->
+        <nav class="toc">
+            <h2 class="toc-title">📑 Table of Contents</h2>
+            <div class="toc-grid">
+                <a href="#overview" class="toc-item" onclick="event.preventDefault(); document.getElementById('overview').scrollIntoView({behavior: 'smooth'});">
+                    <span class="toc-number">01</span> Overview & Tech Stack
+                </a>
+                <a href="#sop" class="toc-item" onclick="event.preventDefault(); document.getElementById('sop').scrollIntoView({behavior: 'smooth'});">
+                    <span class="toc-number">02</span> Frontend Design SOP
+                </a>
+                <a href="#discovery" class="toc-item" onclick="event.preventDefault(); document.getElementById('discovery').scrollIntoView({behavior: 'smooth'});">
+                    <span class="toc-number">03</span> Phase 1: Discovery
+                </a>
+                <a href="#inspiration" class="toc-item" onclick="event.preventDefault(); document.getElementById('inspiration').scrollIntoView({behavior: 'smooth'});">
+                    <span class="toc-number">04</span> Phase 2: Inspiration
+                </a>
+                <a href="#design" class="toc-item" onclick="event.preventDefault(); document.getElementById('design').scrollIntoView({behavior: 'smooth'});">
+                    <span class="toc-number">05</span> Phase 3: Design
+                </a>
+                <a href="#build" class="toc-item" onclick="event.preventDefault(); document.getElementById('build').scrollIntoView({behavior: 'smooth'});">
+                    <span class="toc-number">06</span> Phase 4: Build (v0.dev)
+                </a>
+                <a href="#integrate" class="toc-item" onclick="event.preventDefault(); document.getElementById('integrate').scrollIntoView({behavior: 'smooth'});">
+                    <span class="toc-number">07</span> Phase 5: Integration
+                </a>
+                <a href="#polish" class="toc-item" onclick="event.preventDefault(); document.getElementById('polish').scrollIntoView({behavior: 'smooth'});">
+                    <span class="toc-number">08</span> Phase 6: Polish
+                </a>
+                <a href="#v0-deepdive" class="toc-item" onclick="event.preventDefault(); document.getElementById('v0-deepdive').scrollIntoView({behavior: 'smooth'});">
+                    <span class="toc-number">09</span> v0.dev Deep Dive
+                </a>
+                <a href="#nextjs" class="toc-item" onclick="event.preventDefault(); document.getElementById('nextjs').scrollIntoView({behavior: 'smooth'});">
+                    <span class="toc-number">10</span> Next.js Fundamentals
+                </a>
+                <a href="#repository" class="toc-item" onclick="event.preventDefault(); document.getElementById('repository').scrollIntoView({behavior: 'smooth'});">
+                    <span class="toc-number">11</span> Repository Strategy
+                </a>
+                <a href="#toolchain" class="toc-item" onclick="event.preventDefault(); document.getElementById('toolchain').scrollIntoView({behavior: 'smooth'});">
+                    <span class="toc-number">12</span> Tool Chain Integration
+                </a>
+                <a href="#ascii" class="toc-item" onclick="event.preventDefault(); document.getElementById('ascii').scrollIntoView({behavior: 'smooth'});">
+                    <span class="toc-number">13</span> ASCII Animation Technical
+                </a>
+                <a href="#gotchas" class="toc-item" onclick="event.preventDefault(); document.getElementById('gotchas').scrollIntoView({behavior: 'smooth'});">
+                    <span class="toc-number">14</span> Learnings & Gotchas
+                </a>
+                <a href="#resources" class="toc-item" onclick="event.preventDefault(); document.getElementById('resources').scrollIntoView({behavior: 'smooth'});">
+                    <span class="toc-number">15</span> Resources & Next Steps
+                </a>
+            </div>
+        </nav>
+
+        <!-- Section 1: Overview -->
+        <section id="overview">
+            <div class="section-header">
+                <span class="section-number">Section 01</span>
+                <h2 class="section-title">Overview & Tech Stack</h2>
+            </div>
+
+            <p>This deep dive documents the complete frontend development workflow established while building the AI Travel Agent application. We'll explore everything from initial discovery through to deployment, including the tools, frameworks, and patterns that make modern AI application frontends possible.</p>
+
+            <h3>What We Built</h3>
+            <p>A complete frontend for an AI Travel Agent application featuring three core screens:</p>
+
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🏠</div>
+                    <div class="feature-title">Landing Page</div>
+                    <p class="feature-desc">ASCII art animation cycling through TRAVEL/TRIP/VACATION with glare effects, shatter physics on click, and elegant icon carousel loader.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📝</div>
+                    <div class="feature-title">Trip Form</div>
+                    <p class="feature-desc">Destination selection, date pickers, traveler count, interest tags, and budget selection with validation and state management.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🗓️</div>
+                    <div class="feature-title">Itinerary Page</div>
+                    <p class="feature-desc">Day-by-day travel plan with Morning/Afternoon/Evening time slots, activity cards, and accommodation sections.</p>
+                </div>
+            </div>
+
+            <h3>The Technology Stack</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Layer</th>
+                            <th>Technology</th>
+                            <th>Purpose</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Framework</strong></td>
+                            <td>Next.js 16 (App Router)</td>
+                            <td>React framework with file-based routing, server components</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Language</strong></td>
+                            <td>TypeScript</td>
+                            <td>Type-safe JavaScript with better tooling</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Styling</strong></td>
+                            <td>Tailwind CSS</td>
+                            <td>Utility-first CSS framework</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Animations</strong></td>
+                            <td>Framer Motion</td>
+                            <td>Production-ready motion library for React</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Icons</strong></td>
+                            <td>Lucide React</td>
+                            <td>Beautiful, consistent icon set</td>
+                        </tr>
+                        <tr>
+                            <td><strong>UI Components</strong></td>
+                            <td>shadcn/ui</td>
+                            <td>Accessible, customizable component primitives</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Package Manager</strong></td>
+                            <td>pnpm</td>
+                            <td>Fast, disk-efficient package manager</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="callout callout-analogy">
+                <div class="callout-title">📚 Analogy: The Restaurant Metaphor</div>
+                <p>Think of this tech stack like a restaurant kitchen:</p>
+                <ul>
+                    <li><strong>Next.js</strong> is the kitchen layout — it determines how orders flow and how food gets served</li>
+                    <li><strong>TypeScript</strong> is the recipe book with precise measurements — no guessing allowed</li>
+                    <li><strong>Tailwind CSS</strong> is your spice rack — everything labeled, grab what you need</li>
+                    <li><strong>Framer Motion</strong> is the presentation — the final plating and garnishes</li>
+                    <li><strong>shadcn/ui</strong> is your prep station with pre-chopped ingredients</li>
+                </ul>
+            </div>
+
+            <h3>Design Aesthetic</h3>
+            <p>The Travel Agent frontend follows an <strong>Aino Agency / Editorial / Minimal</strong> aesthetic:</p>
+
+            <div class="kv-grid">
+                <div class="kv-item">
+                    <div class="kv-key">Background</div>
+                    <div class="kv-value" style="color: var(--accent-yellow);">#F5F5F0 (Cream)</div>
+                </div>
+                <div class="kv-item">
+                    <div class="kv-key">Text</div>
+                    <div class="kv-value">#1a1a1a (Near Black)</div>
+                </div>
+                <div class="kv-item">
+                    <div class="kv-key">Typography</div>
+                    <div class="kv-value">System UI</div>
+                </div>
+                <div class="kv-item">
+                    <div class="kv-key">Labels</div>
+                    <div class="kv-value">Uppercase + 4px tracking</div>
+                </div>
+            </div>
+
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-lang">CSS</span>
+                    <span class="code-filename">Design Tokens</span>
+                </div>
+                <div class="code-content">
+<pre><span class="comment">/* Core Design Tokens */</span>
+<span class="keyword">:root</span> {
+    <span class="variable">--bg-primary</span>: <span class="string">#F5F5F0</span>;
+    <span class="variable">--text-primary</span>: <span class="string">#1a1a1a</span>;
+    <span class="variable">--font-primary</span>: <span class="string">system-ui, -apple-system, sans-serif</span>;
+    <span class="variable">--letter-spacing-wide</span>: <span class="number">4px</span>;
+    <span class="variable">--border-radius</span>: <span class="number">8px</span>;
+    <span class="variable">--transition-default</span>: <span class="string">all 0.3s ease</span>;
+}</pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Frontend Design SOP -->
+        <section id="sop">
+            <div class="section-header">
+                <span class="section-number">Section 02</span>
+                <h2 class="section-title">Frontend Design SOP</h2>
+            </div>
+
+            <p>A Standard Operating Procedure (SOP) is a documented workflow that ensures consistent, high-quality output every time. This Frontend Design SOP captures the complete process from idea to production.</p>
+
+            <h3>When to Use This SOP</h3>
+            <p>Not every project needs a frontend. Use this decision matrix:</p>
+
+            <div class="comparison-box">
+                <div class="comparison-side good">
+                    <div class="comparison-header">✅ Needs Frontend</div>
+                    <ul>
+                        <li>User-facing applications</li>
+                        <li>Dashboards & analytics</li>
+                        <li>Chat interfaces (like AI agents)</li>
+                        <li>Visual output tools</li>
+                        <li>Forms & data input</li>
+                        <li>E-commerce flows</li>
+                    </ul>
+                </div>
+                <div class="comparison-side bad">
+                    <div class="comparison-header">❌ Skip Frontend</div>
+                    <ul>
+                        <li>CLI tools</li>
+                        <li>API-only services</li>
+                        <li>Data pipelines</li>
+                        <li>Backend-only agents</li>
+                        <li>Batch processing scripts</li>
+                        <li>Internal automation</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>The 6-Phase Workflow</h3>
+            <div class="diagram-box">
+                <div class="diagram-title">📊 Frontend Development Pipeline</div>
+                <div class="diagram-content">
+┌──────────────┐    ┌──────────────┐    ┌──────────────┐
+│   PHASE 1    │───▶│   PHASE 2    │───▶│   PHASE 3    │
+│  DISCOVERY   │    │ INSPIRATION  │    │    DESIGN    │
+│   (Claude)   │    │   (Mobbin)   │    │   (Claude)   │
+│              │    │              │    │              │
+│ What & Why?  │    │ Look & Feel? │    │ Prototype?   │
+└──────────────┘    └──────────────┘    └──────────────┘
+                                               │
+        ┌──────────────────────────────────────┘
+        │
+        ▼
+┌──────────────┐    ┌──────────────┐    ┌──────────────┐
+│   PHASE 4    │───▶│   PHASE 5    │───▶│   PHASE 6    │
+│    BUILD     │    │  INTEGRATE   │    │    POLISH    │
+│  (v0.dev)    │    │(Antigravity) │    │   (Testing)  │
+│              │    │              │    │              │
+│ Production   │    │ Connect FE ↔ │    │ Test, Fix,   │
+│ Code         │    │ BE           │    │ Iterate      │
+└──────────────┘    └──────────────┘    └──────────────┘
+                </div>
+            </div>
+
+            <div class="phase-timeline">
+                <div class="phase-item">
+                    <div class="phase-title">Phase 1: Discovery</div>
+                    <div class="phase-tool">Tool: Claude</div>
+                    <div class="phase-desc">Define what you're building and why. Create JTBD statements, personas, user journey maps, and prioritized screen lists.</div>
+                </div>
+                <div class="phase-item">
+                    <div class="phase-title">Phase 2: Inspiration</div>
+                    <div class="phase-tool">Tool: Mobbin, Dribbble, html.to.design</div>
+                    <div class="phase-desc">Find reference designs, establish a "north star" aesthetic, and extract design tokens.</div>
+                </div>
+                <div class="phase-item">
+                    <div class="phase-title">Phase 3: Design</div>
+                    <div class="phase-tool">Tool: Claude</div>
+                    <div class="phase-desc">Generate prototype JSX components with inline styles. Iterate rapidly between Claude and v0.dev preview.</div>
+                </div>
+                <div class="phase-item">
+                    <div class="phase-title">Phase 4: Build</div>
+                    <div class="phase-tool">Tool: v0.dev</div>
+                    <div class="phase-desc">Transform prototypes into production-ready Next.js code with routing, components, and configurations.</div>
+                </div>
+                <div class="phase-item">
+                    <div class="phase-title">Phase 5: Integrate</div>
+                    <div class="phase-tool">Tool: Antigravity / Local Dev</div>
+                    <div class="phase-desc">Connect frontend to backend APIs. Define contracts, create services, wire up data flow.</div>
+                </div>
+                <div class="phase-item">
+                    <div class="phase-title">Phase 6: Polish</div>
+                    <div class="phase-tool">Tool: Manual Testing</div>
+                    <div class="phase-desc">Test all flows, fix bugs, optimize performance, ensure responsive design works.</div>
+                </div>
+            </div>
+
+            <div class="callout callout-analogy">
+                <div class="callout-title">📚 Analogy: Building a House</div>
+                <p>The 6 phases map perfectly to building a house:</p>
+                <ul>
+                    <li><strong>Discovery</strong> = Talking to the architect about what you need (bedrooms, bathrooms, lifestyle)</li>
+                    <li><strong>Inspiration</strong> = Looking at home magazines and Pinterest for style ideas</li>
+                    <li><strong>Design</strong> = Getting rough sketches and floor plans</li>
+                    <li><strong>Build</strong> = Actual construction with real materials</li>
+                    <li><strong>Integrate</strong> = Connecting plumbing, electricity, and HVAC</li>
+                    <li><strong>Polish</strong> = Final walkthrough, punch list, move-in ready</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Section 3: Discovery -->
+        <section id="discovery">
+            <div class="section-header">
+                <span class="section-number">Section 03</span>
+                <h2 class="section-title">Phase 1: Discovery</h2>
+            </div>
+
+            <p>Discovery is about understanding <strong>what</strong> you're building and <strong>why</strong>. Skip this phase and you'll build the wrong thing beautifully.</p>
+
+            <h3>Output: DISCOVERY.md</h3>
+            <p>Every project should have a discovery document containing:</p>
+
+            <h4>1. Jobs-To-Be-Done (JTBD) Statements</h4>
+            <p>JTBD is a framework that focuses on what the user is trying to accomplish, not what features they want.</p>
+
+            <div class="callout callout-tip">
+                <div class="callout-title">💡 JTBD Formula</div>
+                <p><strong>When</strong> [situation], <strong>I want</strong> [motivation], <strong>so I can</strong> [outcome].</p>
+            </div>
+
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-lang">Markdown</span>
+                    <span class="code-filename">Travel Agent JTBD</span>
+                </div>
+                <div class="code-content">
+<pre><span class="comment">## Jobs-To-Be-Done</span>
+
+<span class="string">1.</span> <span class="keyword">When</span> I'm planning a trip but feel overwhelmed by options,
+   <span class="keyword">I want</span> an AI to create a personalized itinerary,
+   <span class="keyword">so I can</span> save time and discover hidden gems I'd miss.
+
+<span class="string">2.</span> <span class="keyword">When</span> I'm traveling with family and have diverse interests,
+   <span class="keyword">I want</span> balanced daily plans that satisfy everyone,
+   <span class="keyword">so I can</span> avoid conflicts and maximize enjoyment.
+
+<span class="string">3.</span> <span class="keyword">When</span> I have a fixed budget but want great experiences,
+   <span class="keyword">I want</span> optimized recommendations within my price range,
+   <span class="keyword">so I can</span> spend confidently without overspending.</pre>
+                </div>
+            </div>
+
+            <h4>2. Persona (1-2 Maximum)</h4>
+            <p>Personas are fictional users that represent your target audience. Keep it to 1-2 to maintain focus.</p>
+
+            <div class="feature-card" style="margin: 1.5rem 0;">
+                <div class="feature-icon">👩‍💼</div>
+                <div class="feature-title">Maya Chen, 32 — Product Designer</div>
+                <p class="feature-desc">
+                    <strong>Goals:</strong> Efficient trip planning, unique experiences, photo-worthy destinations<br>
+                    <strong>Frustrations:</strong> Generic travel guides, endless research, decision fatigue<br>
+                    <strong>Tech-savvy:</strong> Uses apps for everything, expects AI to "get" her<br>
+                    <strong>Quote:</strong> "I don't want the tourist version. I want to eat where locals eat."
+                </p>
+            </div>
+
+            <h4>3. User Journey Map</h4>
+            <p>The journey map traces the user's experience from first contact to goal completion.</p>
+
+            <div class="diagram-box">
+                <div class="diagram-title">📊 Travel Agent User Journey</div>
+                <div class="diagram-content">
+STAGE        │ AWARENESS      │ CONSIDERATION │ PLANNING      │ USING         │ SHARING
+─────────────┼────────────────┼───────────────┼───────────────┼───────────────┼────────────
+ACTIONS      │ Sees landing   │ Explores form │ Fills details │ Reviews plan  │ Saves/shares
+             │ page animation │ options       │ & submits     │ & modifies    │ itinerary
+─────────────┼────────────────┼───────────────┼───────────────┼───────────────┼────────────
+EMOTIONS     │ 😮 Intrigued   │ 🤔 Curious    │ 😊 Hopeful    │ 🤩 Excited    │ 🎉 Satisfied
+─────────────┼────────────────┼───────────────┼───────────────┼───────────────┼────────────
+PAIN POINTS  │ "Is this       │ "Will it      │ "What if it's │ "Too many     │ "Hard to
+             │ legit?"        │ understand?"  │ generic?"     │ options!"     │ share?"
+─────────────┼────────────────┼───────────────┼───────────────┼───────────────┼────────────
+OPPORTUNITY  │ Impressive     │ Clear value   │ Delightful    │ Perfect       │ Easy export
+             │ first moment   │ proposition   │ loading UX    │ results       │ & social
+                </div>
+            </div>
+
+            <h4>4. Screen Prioritization</h4>
+            <p>Not all screens are created equal. Use P0/P1/P2 to prioritize:</p>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Priority</th>
+                            <th>Meaning</th>
+                            <th>Travel Agent Screens</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="topic-badge highlight">P0</span></td>
+                            <td>MVP — Must have for launch</td>
+                            <td>Landing, Trip Form, Itinerary Results</td>
+                        </tr>
+                        <tr>
+                            <td><span class="topic-badge blue">P1</span></td>
+                            <td>V2 — Next iteration</td>
+                            <td>Save/Share, User Accounts, Trip History</td>
+                        </tr>
+                        <tr>
+                            <td><span class="topic-badge">P2</span></td>
+                            <td>Future — Nice to have</td>
+                            <td>Booking Integration, Social Features, AI Chat</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>Claude Prompt for Discovery</h3>
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-lang">Prompt</span>
+                    <span class="code-filename">Discovery Prompt Template</span>
+                </div>
+                <div class="code-content">
+<pre>I'm building <span class="string">[PRODUCT DESCRIPTION]</span>. Help me with:
+
+<span class="number">1.</span> Write <span class="number">2-3</span> JTBD statements for the primary use case
+<span class="number">2.</span> Create <span class="number">1</span> primary persona with:
+   - Name, age, role
+   - Goals (<span class="number">3</span> items)
+   - Frustrations (<span class="number">3</span> items)
+   - Tech comfort level
+   - A representative quote
+<span class="number">3.</span> Map the user journey with <span class="number">4-5</span> stages including:
+   - Actions at each stage
+   - Emotional state
+   - Pain points
+   - Opportunities
+<span class="number">4.</span> List all screens needed, prioritized as P0/P1/P2</pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Inspiration -->
+        <section id="inspiration">
+            <div class="section-header">
+                <span class="section-number">Section 04</span>
+                <h2 class="section-title">Phase 2: Inspiration</h2>
+            </div>
+
+            <p>Inspiration is about finding your visual direction. You're not designing in a vacuum — the best designs stand on the shoulders of great references.</p>
+
+            <h3>Two Paths: Greenfield vs B2B</h3>
+
+            <div class="comparison-box">
+                <div class="comparison-side good">
+                    <div class="comparison-header">🌱 Path A: Greenfield (New Project)</div>
+                    <p>Starting from scratch with no existing design system.</p>
+                    <ol>
+                        <li>Search similar apps on <strong>Mobbin</strong> or <strong>Dribbble</strong></li>
+                        <li>Collect 5-10 reference screenshots</li>
+                        <li>Pick 1 "north star" design</li>
+                        <li>(Optional) Clone to Figma using html.to.design</li>
+                        <li>Extract and define design tokens</li>
+                    </ol>
+                </div>
+                <div class="comparison-side good">
+                    <div class="comparison-header">🏢 Path B: B2B (Existing System)</div>
+                    <p>Adding to an existing product with established patterns.</p>
+                    <ol>
+                        <li>Screenshot existing system pages</li>
+                        <li>Clone pages to Figma using html.to.design</li>
+                        <li>Extract design tokens from DevTools</li>
+                        <li>Document existing components</li>
+                        <li>Identify gaps — what's new vs existing</li>
+                    </ol>
+                </div>
+            </div>
+
+            <h3>Finding a North Star</h3>
+            <p>For the Travel Agent, we chose the <strong>Aino Agency aesthetic</strong>:</p>
+
+            <div class="kv-grid">
+                <div class="kv-item">
+                    <div class="kv-key">Style</div>
+                    <div class="kv-value">Editorial / Minimal</div>
+                </div>
+                <div class="kv-item">
+                    <div class="kv-key">Color Scheme</div>
+                    <div class="kv-value">Cream + Black</div>
+                </div>
+                <div class="kv-item">
+                    <div class="kv-key">Typography</div>
+                    <div class="kv-value">System UI + Wide Tracking</div>
+                </div>
+                <div class="kv-item">
+                    <div class="kv-key">Animations</div>
+                    <div class="kv-value">Subtle + Elegant</div>
+                </div>
+            </div>
+
+            <div class="callout callout-analogy">
+                <div class="callout-title">📚 Analogy: Fashion Inspiration</div>
+                <p>Finding design inspiration is like developing your fashion sense. You don't copy an outfit exactly — you notice that you're drawn to minimalist Scandinavian aesthetics, neutral colors, and clean lines. Then you build your wardrobe around those principles, making it your own.</p>
+            </div>
+
+            <h3>Design Tokens Template</h3>
+            <p>Design tokens are the atomic values that make up your visual language. They ensure consistency across the entire application.</p>
+
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-lang">Markdown</span>
+                    <span class="code-filename">DESIGN_TOKENS_TEMPLATE.md</span>
+                </div>
+                <div class="code-content">
+<pre><span class="comment"># Design Tokens - [Project Name]</span>
+
+<span class="keyword">## Colors</span>
+| Token | Value | Usage |
+|-------|-------|-------|
+| --bg-primary | #F5F5F0 | Page backgrounds |
+| --text-primary | #1a1a1a | Headings, body text |
+| --accent | #ff6b35 | CTAs, highlights |
+| --border | #e5e5e0 | Dividers, outlines |
+
+<span class="keyword">## Typography</span>
+| Token | Value |
+|-------|-------|
+| --font-primary | system-ui, -apple-system |
+| --font-display | Georgia, serif |
+| --font-mono | 'JetBrains Mono' |
+
+<span class="keyword">## Spacing Scale</span>
+4px → 8px → 12px → 16px → 24px → 32px → 48px → 64px
+
+<span class="keyword">## Border Radius</span>
+| Token | Value | Usage |
+|-------|-------|-------|
+| --radius-sm | 4px | Buttons, inputs |
+| --radius-md | 8px | Cards |
+| --radius-lg | 16px | Modals |
+| --radius-full | 9999px | Pills, avatars |</pre>
+                </div>
+            </div>
+
+            <h3>Reference Collection Tools</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Tool</th>
+                            <th>Best For</th>
+                            <th>URL</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Mobbin</strong></td>
+                            <td>Mobile app UI patterns, real-world screenshots</td>
+                            <td>mobbin.com</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Dribbble</strong></td>
+                            <td>Creative/concept designs, visual inspiration</td>
+                            <td>dribbble.com</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Awwwards</strong></td>
+                            <td>Award-winning websites, cutting-edge design</td>
+                            <td>awwwards.com</td>
+                        </tr>
+                        <tr>
+                            <td><strong>html.to.design</strong></td>
+                            <td>Clone any website to Figma for analysis</td>
+                            <td>html.to.design</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Refero</strong></td>
+                            <td>Curated design references by category</td>
+                            <td>refero.design</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Section 5: Design -->
+        <section id="design">
+            <div class="section-header">
+                <span class="section-number">Section 05</span>
+                <h2 class="section-title">Phase 3: Design (Prototype JSX)</h2>
+            </div>
+
+            <p>In this phase, we generate prototype JSX components using Claude. These aren't production-ready but are perfect for rapid iteration and visual validation.</p>
+
+            <h3>The Iteration Loop</h3>
+            <div class="diagram-box">
+                <div class="diagram-title">📊 Claude → v0.dev Iteration Cycle</div>
+                <div class="diagram-content">
+┌─────────────────────────────────────────────────────────────┐
+│                                                             │
+│   ┌─────────┐         ┌─────────┐         ┌─────────┐      │
+│   │ Claude  │ ──────▶ │  v0.dev │ ──────▶ │ Preview │      │
+│   │ (JSX)   │         │ (Paste) │         │ (View)  │      │
+│   └─────────┘         └─────────┘         └─────────┘      │
+│        ▲                                       │            │
+│        │                                       │            │
+│        └───── Feedback ◀───────────────────────┘            │
+│               "Add glare animation"                         │
+│               "Fix container width"                         │
+│               "Add word cycling"                            │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+                </div>
+            </div>
+
+            <h3>Claude Prompt for Greenfield Design</h3>
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-lang">Prompt</span>
+                    <span class="code-filename">Design Prompt - Greenfield</span>
+                </div>
+                <div class="code-content">
+<pre>Create a React component for <span class="string">[SCREEN NAME]</span>.
+
+<span class="keyword">Design tokens:</span>
+- Background: <span class="string">#F5F5F0</span> (cream)
+- Text: <span class="string">#1a1a1a</span> (near black)
+- Font: system-ui
+- Style: Editorial/minimal with wide letter-spacing labels
+
+<span class="keyword">Include:</span>
+- <span class="string">[List key elements]</span>
+- <span class="string">[List interactions]</span>
+- Use inline styles (not Tailwind yet)
+- Use Lucide React for icons
+
+<span class="keyword">Aesthetic notes:</span>
+- Uppercase labels with 4px letter-spacing
+- Generous whitespace
+- Subtle hover transitions
+- No harsh colors</pre>
+                </div>
+            </div>
+
+            <h3>Claude Prompt for B2B Extension</h3>
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-lang">Prompt</span>
+                    <span class="code-filename">Design Prompt - B2B</span>
+                </div>
+                <div class="code-content">
+<pre>Create a React component for <span class="string">[SCREEN NAME]</span>.
+
+<span class="keyword">Existing design system:</span>
+- Primary: <span class="string">#0066FF</span>
+- Background: <span class="string">#FFFFFF</span>
+- Text: <span class="string">#1a1a1a</span>
+- Font: Inter
+- Border radius: 8px
+- Existing components: Button, Card, Input, Modal
+
+<span class="keyword">New feature:</span> <span class="string">[Describe the feature]</span>
+
+Match the existing design system and extend it 
+for this functionality. Use existing component patterns.</pre>
+                </div>
+            </div>
+
+            <h3>Iteration Example: Travel Hero</h3>
+            <p>Here's how the ASCII hero component evolved through iteration:</p>
+
+            <div class="workflow-steps">
+                <div class="workflow-step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h4>Initial ASCII Text</h4>
+                        <p>Basic bitmap-rendered ASCII letters displaying "TRAVEL" in a grid of random characters.</p>
+                    </div>
+                </div>
+                <div class="workflow-step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h4>Added Glare Animation</h4>
+                        <p>Horizontal gradient sweep moving left to right on 2800ms cycle, creating a metallic shine effect.</p>
+                    </div>
+                </div>
+                <div class="workflow-step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h4>Added Word Cycling</h4>
+                        <p>3D rotateX flip animation cycling TRAVEL → TRIP → VACATION every 3 seconds.</p>
+                    </div>
+                </div>
+                <div class="workflow-step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h4>Lucide Icon Carousel</h4>
+                        <p>Replaced spinner with 20-icon carousel using Lucide React (Plane, Map, Compass, etc.).</p>
+                    </div>
+                </div>
+                <div class="workflow-step">
+                    <div class="step-number">5</div>
+                    <div class="step-content">
+                        <h4>Fixed Container Width</h4>
+                        <p>Constrained ASCII art to consistent width to prevent layout shifts during word changes.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="callout callout-tip">
+                <div class="callout-title">💡 Pro Tip: Single Responsibility Iterations</div>
+                <p>Ask for one thing at a time. "Add glare animation" is better than "Add glare animation, word cycling, and fix the loader." Each iteration should be focused and testable.</p>
+            </div>
+        </section>
+
+        <!-- Section 6: Build -->
+        <section id="build">
+            <div class="section-header">
+                <span class="section-number">Section 06</span>
+                <h2 class="section-title">Phase 4: Build with v0.dev</h2>
+            </div>
+
+            <p>v0.dev is where prototype JSX becomes production-ready Next.js code. It's the magical bridge between "looks good in my head" and "works in the browser."</p>
+
+            <h3>What v0.dev Does</h3>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🤖</div>
+                    <div class="feature-title">AI-Powered Generation</div>
+                    <p class="feature-desc">Describe what you want in natural language, get React/Next.js code.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎨</div>
+                    <div class="feature-title">shadcn/ui Integration</div>
+                    <p class="feature-desc">Uses accessible, customizable component primitives by default.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">👁️</div>
+                    <div class="feature-title">Live Preview</div>
+                    <p class="feature-desc">See your changes in real-time, test interactions before export.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📦</div>
+                    <div class="feature-title">Full Project Export</div>
+                    <p class="feature-desc">Download complete Next.js project with routing, config, and components.</p>
+                </div>
+            </div>
+
+            <h3>v0 Prompt Sequence</h3>
+            <p>Don't try to do everything in one prompt. Build up incrementally:</p>
+
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-lang">Prompt Sequence</span>
+                    <span class="code-filename">5-Step v0 Workflow</span>
+                </div>
+                <div class="code-content">
+<pre><span class="comment"># Step 1: Initial Component</span>
+<span class="string">"Here's my component: [paste JSX]. Add [feature]."</span>
+
+<span class="comment"># Step 2: Responsive Design</span>
+<span class="string">"Make it responsive for mobile with breakpoints at 768px and 480px"</span>
+
+<span class="comment"># Step 3: States</span>
+<span class="string">"Add loading and error states with appropriate feedback"</span>
+
+<span class="comment"># Step 4: Animations</span>
+<span class="string">"Add these animations: staggered reveal on load, hover scale on cards"</span>
+
+<span class="comment"># Step 5: Component Split</span>
+<span class="string">"Split into separate components: TravelHero, TripForm, ItineraryCard"</span></pre>
+                </div>
+            </div>
+
+            <h3>Effective Prompting for v0</h3>
+            <div class="comparison-box">
+                <div class="comparison-side good">
+                    <div class="comparison-header">✅ Do</div>
+                    <ul>
+                        <li>Be specific about layout and positioning</li>
+                        <li>Reference design systems ("Aino-style")</li>
+                        <li>Include exact color values and spacing</li>
+                        <li>Describe interactions and states</li>
+                        <li>Iterate incrementally</li>
+                    </ul>
+                </div>
+                <div class="comparison-side bad">
+                    <div class="comparison-header">❌ Don't</div>
+                    <ul>
+                        <li>Paste huge code blocks without context</li>
+                        <li>Ask for multiple major features at once</li>
+                        <li>Expect pixel-perfect from vague descriptions</li>
+                        <li>Forget to test in preview before exporting</li>
+                        <li>Ignore accessibility</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>Prompt Templates</h3>
+
+            <h4>Initial Component</h4>
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-lang">Prompt</span>
+                </div>
+                <div class="code-content">
+<pre>Create a <span class="string">[component type]</span> with:
+- <span class="string">[Layout description]</span>
+- <span class="string">[Key elements]</span>
+- <span class="string">[Interactions]</span>
+- Style: <span class="string">[aesthetic]</span> with <span class="string">[colors]</span>
+- Use Lucide React for icons</pre>
+                </div>
+            </div>
+
+            <h4>Add Feature</h4>
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-lang">Prompt</span>
+                </div>
+                <div class="code-content">
+<pre>Add <span class="string">[feature]</span> to this component:
+- <span class="string">[Specific requirements]</span>
+- <span class="string">[Behavior on interaction]</span>
+- Match existing style</pre>
+                </div>
+            </div>
+
+            <h4>Fix Issues</h4>
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-lang">Prompt</span>
+                </div>
+                <div class="code-content">
+<pre>Fix these issues:
+<span class="number">1.</span> <span class="string">[Issue 1]</span>
+<span class="number">2.</span> <span class="string">[Issue 2]</span>
+Keep everything else the same.</pre>
+                </div>
+            </div>
+
+            <div class="callout callout-warning">
+                <div class="callout-title">⚠️ v0 + GitHub MCP Limitation</div>
+                <p>v0 can create <strong>new</strong> repositories but cannot push to existing repos as subfolders. Workaround: Download ZIP → Manual CLI push. See Section 11 for the complete workflow.</p>
+            </div>
+        </section>
+
+        <!-- Section 7: Integration -->
+        <section id="integrate">
+            <div class="section-header">
+                <span class="section-number">Section 07</span>
+                <h2 class="section-title">Phase 5: Backend Integration</h2>
+            </div>
+
+            <p>Integration connects your beautiful frontend to your powerful backend. For AI applications, this typically means connecting React to a Python/FastAPI backend running your AI agent.</p>
+
+            <h3>Architecture Overview</h3>
+            <div class="diagram-box">
+                <div class="diagram-title">📊 Frontend ↔ Backend Communication</div>
+                <div class="diagram-content">
+┌─────────────────────────────────────────────────────────────────┐
+│  FRONTEND (Next.js)              │  BACKEND (Python)            │
+│  localhost:3000                  │  localhost:8000              │
+├─────────────────────────────────────────────────────────────────┤
+│                                  │                              │
+│  Trip Form submits ──────────────→ POST /plan                   │
+│  {                               │     │                        │
+│    destination: "Tokyo",         │     ▼                        │
+│    days: 6,                      │  FastAPI receives            │
+│    travelers: 2,                 │     │                        │
+│    interests: ["Food"],          │     ▼                        │
+│    budget: "luxury"              │  Agno agent processes        │
+│  }                               │     │                        │
+│                                  │     ▼                        │
+│  Itinerary displays ◀────────────── SerpAPI searches            │
+│  {                               │     │                        │
+│    days: [...]                   │     ▼                        │
+│  }                               │  Returns JSON                │
+│                                  │                              │
+└─────────────────────────────────────────────────────────────────┘
+                </div>
+            </div>
+
+            <h3>API Contract Definition</h3>
+            <p>Before writing code, define the exact shape of your API requests and responses:</p>
+
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-lang">TypeScript</span>
+                    <span class="code-filename">types/api.ts</span>
+                </div>
+                <div class="code-content">
+<pre><span class="comment">// Request shape</span>
+<span class="keyword">export interface</span> <span class="type">TripRequest</span> {
+  destination: <span class="type">string</span>;
+  days: <span class="type">number</span>;
+  travelers: <span class="type">number</span>;
+  interests: <span class="type">string</span>[];
+  budget: <span class="string">'budget'</span> | <span class="string">'moderate'</span> | <span class="string">'luxury'</span>;
+}
+
+<span class="comment">// Response shape</span>
+<span class="keyword">export interface</span> <span class="type">ItineraryDay</span> {
+  day: <span class="type">number</span>;
+  date: <span class="type">string</span>;
+  morning: <span class="type">Activity</span>;
+  afternoon: <span class="type">Activity</span>;
+  evening: <span class="type">Activity</span>;
+  accommodation: <span class="type">Accommodation</span>;
+}
+
+<span class="keyword">export interface</span> <span class="type">TripResponse</span> {
+  itinerary: <span class="type">ItineraryDay</span>[];
+  totalBudget: <span class="type">number</span>;
+  tips: <span class="type">string</span>[];
+}</pre>
+                </div>
+            </div>
+
+            <h3>Backend API (FastAPI)</h3>
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-lang">Python</span>
+                    <span class="code-filename">api.py</span>
+                </div>
+                <div class="code-content">
+<pre><span class="keyword">from</span> fastapi <span class="keyword">import</span> FastAPI
+<span class="keyword">from</span> fastapi.middleware.cors <span class="keyword">import</span> CORSMiddleware
+<span class="keyword">from</span> pydantic <span class="keyword">import</span> BaseModel
+<span class="keyword">from</span> travel_agent <span class="keyword">import</span> agent
+
+app = FastAPI()
+
+<span class="comment"># CORS configuration for local development</span>
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[<span class="string">"http://localhost:3000"</span>],  <span class="comment"># Frontend URL</span>
+    allow_methods=[<span class="string">"*"</span>],
+    allow_headers=[<span class="string">"*"</span>],
+)
+
+<span class="keyword">class</span> <span class="type">TripRequest</span>(BaseModel):
+    destination: <span class="type">str</span>
+    days: <span class="type">int</span>
+    travelers: <span class="type">int</span>
+    interests: <span class="type">list</span>[<span class="type">str</span>]
+    budget: <span class="type">str</span>
+
+<span class="keyword">@app.post</span>(<span class="string">"/plan"</span>)
+<span class="keyword">async def</span> <span class="function">plan_trip</span>(request: TripRequest):
+    prompt = <span class="string">f"""
+    Plan a {request.days} day trip to {request.destination}
+    for {request.travelers} travelers.
+    Interests: {', '.join(request.interests)}
+    Budget: {request.budget}
+    """</span>
+    result = agent.run(prompt)
+    <span class="keyword">return</span> {<span class="string">"itinerary"</span>: result}</pre>
+                </div>
+            </div>
+
+            <h3>Frontend API Service</h3>
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-lang">TypeScript</span>
+                    <span class="code-filename">services/api.ts</span>
+                </div>
+                <div class="code-content">
+<pre><span class="keyword">const</span> API_BASE = <span class="string">'http://localhost:8000'</span>;
+
+<span class="keyword">export interface</span> <span class="type">TripRequest</span> {
+  destination: <span class="type">string</span>;
+  days: <span class="type">number</span>;
+  travelers: <span class="type">number</span>;
+  interests: <span class="type">string</span>[];
+  budget: <span class="type">string</span>;
+}
+
+<span class="keyword">export async function</span> <span class="function">planTrip</span>(data: <span class="type">TripRequest</span>) {
+  <span class="keyword">const</span> response = <span class="keyword">await</span> fetch(<span class="string">`${API_BASE}/plan`</span>, {
+    method: <span class="string">'POST'</span>,
+    headers: { <span class="string">'Content-Type'</span>: <span class="string">'application/json'</span> },
+    body: JSON.stringify(data),
+  });
+  
+  <span class="keyword">if</span> (!response.ok) {
+    <span class="keyword">throw new</span> Error(<span class="string">'Failed to plan trip'</span>);
+  }
+  
+  <span class="keyword">return</span> response.json();
+}</pre>
+                </div>
+            </div>
+
+            <h3>Using the API in Components</h3>
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-lang">TypeScript</span>
+                    <span class="code-filename">components/TripForm.tsx</span>
+                </div>
+                <div class="code-content">
+<pre><span class="string">'use client'</span>;
+
+<span class="keyword">import</span> { useState } <span class="keyword">from</span> <span class="string">'react'</span>;
+<span class="keyword">import</span> { useRouter } <span class="keyword">from</span> <span class="string">'next/navigation'</span>;
+<span class="keyword">import</span> { planTrip } <span class="keyword">from</span> <span class="string">'@/services/api'</span>;
+
+<span class="keyword">export function</span> <span class="function">TripForm</span>() {
+  <span class="keyword">const</span> [loading, setLoading] = useState(<span class="keyword">false</span>);
+  <span class="keyword">const</span> [error, setError] = useState&lt;<span class="type">string</span> | <span class="keyword">null</span>&gt;(<span class="keyword">null</span>);
+  <span class="keyword">const</span> router = useRouter();
+
+  <span class="keyword">const</span> <span class="function">handleSubmit</span> = <span class="keyword">async</span> (formData: <span class="type">FormData</span>) =&gt; {
+    setLoading(<span class="keyword">true</span>);
+    setError(<span class="keyword">null</span>);
+    
+    <span class="keyword">try</span> {
+      <span class="keyword">const</span> result = <span class="keyword">await</span> planTrip({
+        destination: formData.get(<span class="string">'destination'</span>) <span class="keyword">as</span> <span class="type">string</span>,
+        days: Number(formData.get(<span class="string">'days'</span>)),
+        travelers: Number(formData.get(<span class="string">'travelers'</span>)),
+        interests: formData.getAll(<span class="string">'interests'</span>) <span class="keyword">as</span> <span class="type">string</span>[],
+        budget: formData.get(<span class="string">'budget'</span>) <span class="keyword">as</span> <span class="type">string</span>,
+      });
+      
+      <span class="comment">// Store result and navigate</span>
+      sessionStorage.setItem(<span class="string">'itinerary'</span>, JSON.stringify(result));
+      router.push(<span class="string">'/itinerary'</span>);
+    } <span class="keyword">catch</span> (err) {
+      setError(<span class="string">'Failed to plan trip. Please try again.'</span>);
+    } <span class="keyword">finally</span> {
+      setLoading(<span class="keyword">false</span>);
+    }
+  };
+
+  <span class="comment">// ... form JSX</span>
+}</pre>
+                </div>
+            </div>
+
+            <div class="callout callout-analogy">
+                <div class="callout-title">📚 Analogy: Restaurant Order System</div>
+                <p>Frontend-backend integration is like a restaurant's order system:</p>
+                <ul>
+                    <li><strong>Frontend (Waiter)</strong> takes your order and presents it nicely</li>
+                    <li><strong>API (Order Ticket)</strong> is the standardized format both sides understand</li>
+                    <li><strong>Backend (Kitchen)</strong> does the actual work of making the food</li>
+                    <li><strong>CORS (Service Door)</strong> is the designated entry point between dining room and kitchen</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Section 8: Polish -->
+        <section id="polish">
+            <div class="section-header">
+                <span class="section-number">Section 08</span>
+                <h2 class="section-title">Phase 6: Polish & Testing</h2>
+            </div>
+
+            <p>Polish is where good products become great. It's the attention to detail that users feel but can't always articulate.</p>
+
+            <h3>Testing Checklist</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Test Item</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Functionality</strong></td>
+                            <td>Page loads without console errors</td>
+                            <td>☐</td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td>Form validation works (required fields, formats)</td>
+                            <td>☐</td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td>API calls succeed and return expected data</td>
+                            <td>☐</td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td>All buttons and links work</td>
+                            <td>☐</td>
+                        </tr>
+                        <tr>
+                            <td><strong>States</strong></td>
+                            <td>Loading states show correctly</td>
+                            <td>☐</td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td>Error states handled gracefully</td>
+                            <td>☐</td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td>Empty states have appropriate messaging</td>
+                            <td>☐</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Responsive</strong></td>
+                            <td>Works on mobile (320px - 768px)</td>
+                            <td>☐</td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td>Works on tablet (768px - 1024px)</td>
+                            <td>☐</td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td>Works on desktop (1024px+)</td>
+                            <td>☐</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Visual</strong></td>
+                            <td>Data displays correctly</td>
+                            <td>☐</td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td>Animations are smooth (60fps)</td>
+                            <td>☐</td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td>No layout shifts on load</td>
+                            <td>☐</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Edge Cases</strong></td>
+                            <td>Very long text truncates properly</td>
+                            <td>☐</td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td>Network timeout shows error</td>
+                            <td>☐</td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td>Refreshing preserves state where appropriate</td>
+                            <td>☐</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>Common Issues & Fixes</h3>
+
+            <h4>Hydration Errors</h4>
+            <p>Next.js hydration errors happen when server-rendered HTML doesn't match client-rendered HTML.</p>
+
+            <div class="comparison-box">
+                <div class="comparison-side bad">
+                    <div class="comparison-header">❌ Problem: Using window in render</div>
+                    <div class="code-block" style="margin: 0.5rem 0;">
+                        <div class="code-content">
+<pre><span class="comment">// This causes hydration error</span>
+<span class="keyword">const</span> width = window.innerWidth;
+<span class="keyword">return</span> &lt;div&gt;{width}&lt;/div&gt;;</pre>
+                        </div>
+                    </div>
+                </div>
+                <div class="comparison-side good">
+                    <div class="comparison-header">✅ Solution: Use useEffect</div>
+                    <div class="code-block" style="margin: 0.5rem 0;">
+                        <div class="code-content">
+<pre><span class="keyword">const</span> [width, setWidth] = useState(<span class="number">0</span>);
+useEffect(() =&gt; {
+  setWidth(window.innerWidth);
+}, []);</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h4>Layout Shifts (CLS)</h4>
+            <p>Content that "jumps" as the page loads creates a jarring experience.</p>
+
+            <div class="comparison-box">
+                <div class="comparison-side bad">
+                    <div class="comparison-header">❌ Problem: Dynamic size without reservation</div>
+                    <div class="code-block" style="margin: 0.5rem 0;">
+                        <div class="code-content">
+<pre><span class="comment">// Image loads and pushes content down</span>
+&lt;img src=<span class="string">"photo.jpg"</span> /&gt;</pre>
+                        </div>
+                    </div>
+                </div>
+                <div class="comparison-side good">
+                    <div class="comparison-header">✅ Solution: Reserve space with aspect-ratio</div>
+                    <div class="code-block" style="margin: 0.5rem 0;">
+                        <div class="code-content">
+<pre>&lt;img 
+  src=<span class="string">"photo.jpg"</span>
+  width=<span class="number">800</span>
+  height=<span class="number">600</span>
+  style={{ aspectRatio: <span class="string">'4/3'</span> }}
+/&gt;</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="callout callout-tip">
+                <div class="callout-title">💡 The Polish Mindset</div>
+                <p>Polish isn't about perfection — it's about respect for your users. Every smooth animation, helpful error message, and edge case handled says "I thought about you when building this."</p>
+            </div>
+        </section>
+
+        <!-- Section 9: v0.dev Deep Dive -->
+        <section id="v0-deepdive">
+            <div class="section-header">
+                <span class="section-number">Section 09</span>
+                <h2 class="section-title">v0.dev Deep Dive</h2>
+            </div>
+
+            <p>v0.dev is Vercel's AI-powered frontend development tool. It's not just another code generator — it's a complete development environment that understands modern React patterns.</p>
+
+            <h3>Key Features</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Feature</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Chat Interface</strong></td>
+                            <td>Describe what you want in natural language, get working code</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Live Preview</strong></td>
+                            <td>See changes in real-time, interact with the UI before exporting</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Code View</strong></td>
+                            <td>Full access to generated code, copy individual files or entire project</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Version History</strong></td>
+                            <td>Restore previous iterations if you go down the wrong path</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Export Options</strong></td>
+                            <td>Download as ZIP or push directly to a new GitHub repository</td>
+                        </tr>
+                        <tr>
+                            <td><strong>shadcn/ui</strong></td>
+                            <td>Uses accessible, customizable component library by default</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>What v0 Generates</h3>
+            <p>When you export a project from v0.dev, you get a complete Next.js application:</p>
+
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-lang">File Tree</span>
+                    <span class="code-filename">v0 Export Structure</span>
+                </div>
+                <div class="code-content">
+<pre>📁 travel-agent-frontend/
+├── 📁 app/
+│   ├── globals.css          <span class="comment"># Tailwind imports</span>
+│   ├── layout.tsx           <span class="comment"># Root layout with providers</span>
+│   ├── page.tsx             <span class="comment"># Landing page (route: /)</span>
+│   └── 📁 itinerary/
+│       └── page.tsx         <span class="comment"># Results page (route: /itinerary)</span>
+├── 📁 components/
+│   ├── travel-hero.tsx      <span class="comment"># ASCII animation</span>
+│   ├── itinerary-details.tsx
+│   ├── theme-provider.tsx
+│   └── 📁 ui/               <span class="comment"># 50+ shadcn components</span>
+│       ├── button.tsx
+│       ├── card.tsx
+│       ├── input.tsx
+│       └── ...
+├── 📁 hooks/
+│   ├── use-mobile.ts        <span class="comment"># Responsive hook</span>
+│   └── use-toast.ts         <span class="comment"># Toast notifications</span>
+├── 📁 lib/
+│   ├── utils.ts             <span class="comment"># cn() helper</span>
+│   └── destination-utils.ts
+├── 📁 public/
+│   └── 📁 images/
+├── components.json           <span class="comment"># shadcn configuration</span>
+├── next.config.mjs
+├── package.json
+├── pnpm-lock.yaml
+├── postcss.config.mjs
+├── tailwind.config.ts
+└── tsconfig.json</pre>
+                </div>
+            </div>
+
+            <h3>Understanding shadcn/ui</h3>
+            <p>shadcn/ui is not a traditional component library — it's a collection of copy-paste components you own and customize.</p>
+
+            <div class="callout callout-analogy">
+                <div class="callout-title">📚 Analogy: Recipe vs Frozen Meal</div>
+                <p>Traditional component libraries (Material-UI, Chakra) are like <strong>frozen meals</strong> — convenient but hard to customize. You're stuck with their choices.</p>
+                <p>shadcn/ui is like a <strong>recipe with ingredients</strong> — you get the recipe (code) and you can modify anything: swap ingredients, adjust spices, make it your own.</p>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Aspect</th>
+                            <th>Traditional Libraries</th>
+                            <th>shadcn/ui</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Installation</strong></td>
+                            <td><code>npm install package</code></td>
+                            <td><code>npx shadcn add button</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Code Location</strong></td>
+                            <td>node_modules (hidden)</td>
+                            <td>Your project (visible, editable)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Customization</strong></td>
+                            <td>Limited to exposed props</td>
+                            <td>Full access to all code</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Updates</strong></td>
+                            <td>Auto-update via npm</td>
+                            <td>Manual update (you choose)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Bundle Size</strong></td>
+                            <td>Includes unused components</td>
+                            <td>Only what you use</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>The cn() Utility Function</h3>
+            <p>v0 generates use a helper function <code>cn()</code> for conditional class names:</p>
+
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-lang">TypeScript</span>
+                    <span class="code-filename">lib/utils.ts</span>
+                </div>
+                <div class="code-content">
+<pre><span class="keyword">import</span> { clsx, type ClassValue } <span class="keyword">from</span> <span class="string">'clsx'</span>;
+<span class="keyword">import</span> { twMerge } <span class="keyword">from</span> <span class="string">'tailwind-merge'</span>;
+
+<span class="keyword">export function</span> <span class="function">cn</span>(...inputs: ClassValue[]) {
+  <span class="keyword">return</span> twMerge(clsx(inputs));
+}
+
+<span class="comment">// Usage example:</span>
+&lt;button className={cn(
+  <span class="string">'px-4 py-2 rounded'</span>,           <span class="comment">// Base styles</span>
+  isActive && <span class="string">'bg-orange-500'</span>,      <span class="comment">// Conditional</span>
+  className                          <span class="comment">// Override from props</span>
+)} /&gt;</pre>
+                </div>
+            </div>
+
+            <h3>GitHub Integration</h3>
+            <p>v0.dev can push directly to GitHub, but with a limitation:</p>
+
+            <div class="callout callout-warning">
+                <div class="callout-title">⚠️ MCP Limitation</div>
+                <p>v0's GitHub integration creates <strong>new repositories only</strong>. It cannot push to existing repos as subfolders. For monorepo structures, use the manual ZIP workflow.</p>
+            </div>
+
+            <h4>Manual ZIP Workflow</h4>
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-lang">Bash</span>
+                    <span class="code-filename">Manual Export Workflow</span>
+                </div>
+                <div class="code-content">
+<pre><span class="comment"># 1. Download ZIP from v0.dev (use the download button)</span>
+
+<span class="comment"># 2. Extract and check structure</span>
+cd ~/Downloads
+unzip travel-itinerary-page.zip
+ls  <span class="comment"># Note: files may extract directly without parent folder</span>
+
+<span class="comment"># 3. Create target folder and move files</span>
+mkdir ~/g-v0-lab/01-travel-agent-frontend
+mv ~/Downloads/app ~/g-v0-lab/01-travel-agent-frontend/
+mv ~/Downloads/components ~/g-v0-lab/01-travel-agent-frontend/
+mv ~/Downloads/hooks ~/g-v0-lab/01-travel-agent-frontend/
+mv ~/Downloads/lib ~/g-v0-lab/01-travel-agent-frontend/
+mv ~/Downloads/public ~/g-v0-lab/01-travel-agent-frontend/
+mv ~/Downloads/styles ~/g-v0-lab/01-travel-agent-frontend/
+mv ~/Downloads/package.json ~/g-v0-lab/01-travel-agent-frontend/
+mv ~/Downloads/pnpm-lock.yaml ~/g-v0-lab/01-travel-agent-frontend/
+mv ~/Downloads/next.config.mjs ~/g-v0-lab/01-travel-agent-frontend/
+mv ~/Downloads/components.json ~/g-v0-lab/01-travel-agent-frontend/
+
+<span class="comment"># 4. Push to GitHub</span>
+cd ~/g-v0-lab
+git add .
+git commit -m <span class="string">"Add 01-travel-agent-frontend"</span>
+git push</pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 10: Next.js -->
+        <section id="nextjs">
+            <div class="section-header">
+                <span class="section-number">Section 10</span>
+                <h2 class="section-title">Next.js Fundamentals</h2>
+            </div>
+
+            <p>Next.js is a React framework that provides structure, routing, and optimizations out of the box. Understanding its patterns is essential for working with v0.dev output.</p>
+
+            <h3>App Router (Next.js 13+)</h3>
+            <p>The App Router is Next.js's new file-based routing system:</p>
+
+            <div class="diagram-box">
+                <div class="diagram-title">📊 File-Based Routing</div>
+                <div class="diagram-content">
+📁 app/
+├── page.tsx           →  Route: /
+├── layout.tsx         →  Wraps all pages
+├── 📁 about/
+│   └── page.tsx       →  Route: /about
+├── 📁 itinerary/
+│   └── page.tsx       →  Route: /itinerary
+└── 📁 trip/
+    └── 📁 [id]/
+        └── page.tsx   →  Route: /trip/123 (dynamic)
+                </div>
+            </div>
+
+            <h3>Server vs Client Components</h3>
+            <p>Next.js distinguishes between Server Components (default) and Client Components.</p>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Aspect</th>
+                            <th>Server Components</th>
+                            <th>Client Components</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Default</strong></td>
+                            <td>Yes (no directive needed)</td>
+                            <td>No (requires <code>'use client'</code>)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Rendered</strong></td>
+                            <td>On the server</td>
+                            <td>On the client (browser)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Bundle</strong></td>
+                            <td>Not included in JS bundle</td>
+                            <td>Included in JS bundle</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Use Cases</strong></td>
+                            <td>Data fetching, static content</td>
+                            <td>Interactivity, useState, useEffect</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Access</strong></td>
+                            <td>Database, filesystem</td>
+                            <td>Browser APIs, window, document</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-lang">TypeScript</span>
+                    <span class="code-filename">Client Component Example</span>
+                </div>
+                <div class="code-content">
+<pre><span class="string">'use client'</span>;  <span class="comment">// ← This makes it a Client Component</span>
+
+<span class="keyword">import</span> { useState, useEffect } <span class="keyword">from</span> <span class="string">'react'</span>;
+
+<span class="keyword">export function</span> <span class="function">Counter</span>() {
+  <span class="keyword">const</span> [count, setCount] = useState(<span class="number">0</span>);
+  
+  <span class="comment">// Can use browser APIs in useEffect</span>
+  useEffect(() =&gt; {
+    console.log(<span class="string">'Mounted in browser'</span>);
+  }, []);
+  
+  <span class="keyword">return</span> (
+    &lt;button onClick={() =&gt; setCount(c =&gt; c + <span class="number">1</span>)}&gt;
+      Count: {count}
+    &lt;/button&gt;
+  );
+}</pre>
+                </div>
+            </div>
+
+            <div class="callout callout-analogy">
+                <div class="callout-title">📚 Analogy: Restaurant Kitchen</div>
+                <p>Think of Server vs Client Components like a restaurant:</p>
+                <ul>
+                    <li><strong>Server Components</strong> are the kitchen — heavy lifting, prep work, plating happens here (hidden from diners)</li>
+                    <li><strong>Client Components</strong> are the tableside — flambe, mixing cocktails, anything the customer interacts with directly</li>
+                </ul>
+                <p>You don't bring the whole kitchen to the table. Same logic: don't send server code to the browser.</p>
+            </div>
+
+            <h3>Common Next.js Patterns</h3>
+
+            <h4>1. Layout Composition</h4>
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-lang">TypeScript</span>
+                    <span class="code-filename">app/layout.tsx</span>
+                </div>
+                <div class="code-content">
+<pre><span class="keyword">export default function</span> <span class="function">RootLayout</span>({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  <span class="keyword">return</span> (
+    &lt;html lang=<span class="string">"en"</span>&gt;
+      &lt;body&gt;
+        &lt;Header /&gt;
+        &lt;main&gt;{children}&lt;/main&gt;
+        &lt;Footer /&gt;
+      &lt;/body&gt;
+    &lt;/html&gt;
+  );
+}</pre>
+                </div>
+            </div>
+
+            <h4>2. Client-Side Navigation</h4>
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-lang">TypeScript</span>
+                    <span class="code-filename">Navigation with useRouter</span>
+                </div>
+                <div class="code-content">
+<pre><span class="string">'use client'</span>;
+
+<span class="keyword">import</span> { useRouter } <span class="keyword">from</span> <span class="string">'next/navigation'</span>;
+
+<span class="keyword">export function</span> <span class="function">NavigationButton</span>() {
+  <span class="keyword">const</span> router = useRouter();
+  
+  <span class="keyword">return</span> (
+    &lt;button onClick={() =&gt; router.push(<span class="string">'/itinerary'</span>)}&gt;
+      View Itinerary
+    &lt;/button&gt;
+  );
+}</pre>
+                </div>
+            </div>
+
+            <h4>3. Loading UI</h4>
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-lang">TypeScript</span>
+                    <span class="code-filename">app/itinerary/loading.tsx</span>
+                </div>
+                <div class="code-content">
+<pre><span class="comment">// This file shows while itinerary/page.tsx is loading</span>
+<span class="keyword">export default function</span> <span class="function">Loading</span>() {
+  <span class="keyword">return</span> (
+    &lt;div className=<span class="string">"flex items-center justify-center h-screen"</span>&gt;
+      &lt;div className=<span class="string">"animate-spin rounded-full h-12 w-12 border-t-2"</span> /&gt;
+    &lt;/div&gt;
+  );
+}</pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 11: Repository Strategy -->
+        <section id="repository">
+            <div class="section-header">
+                <span class="section-number">Section 11</span>
+                <h2 class="section-title">Repository Strategy</h2>
+            </div>
+
+            <p>How you organize your code repositories affects development speed, deployment, and team collaboration. This section covers the two-repo strategy used for the Travel Agent project.</p>
+
+            <h3>Two-Repo Approach</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Repository</th>
+                            <th>Purpose</th>
+                            <th>Contents</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>g-ai-lab</strong></td>
+                            <td>AI/Backend projects</td>
+                            <td>Agents, APIs, observability, Python code</td>
+                        </tr>
+                        <tr>
+                            <td><strong>g-v0-lab</strong></td>
+                            <td>Frontend projects</td>
+                            <td>React/Next.js apps from v0.dev</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>Why Separate Repos?</h3>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🔀</div>
+                    <div class="feature-title">Clean Separation</div>
+                    <p class="feature-desc">Frontend and backend have different workflows, dependencies, and concerns.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🚀</div>
+                    <div class="feature-title">Independent Versioning</div>
+                    <p class="feature-desc">Deploy frontend without touching backend. Different release cycles.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔧</div>
+                    <div class="feature-title">Tool Alignment</div>
+                    <p class="feature-desc">v0.dev works with frontend, Antigravity with backend. No confusion.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔗</div>
+                    <div class="feature-title">Symlink Flexibility</div>
+                    <p class="feature-desc">Connect any frontend to any backend. Swap easily during development.</p>
+                </div>
+            </div>
+
+            <h3>Folder Structure</h3>
+            <div class="diagram-box">
+                <div class="diagram-title">📊 Complete Project Layout</div>
+                <div class="diagram-content">
+~/g-ai-lab/                                  <span style="color: var(--accent-blue);"># AI/Backend Repository</span>
+├── projects/
+│   ├── 01-ai-data-analysis-agent/
+│   ├── 02-ai-travel-agent/
+│   │   └── working/
+│   │       ├── backend/                     <span style="color: var(--accent-blue);"># Python/Agno code</span>
+│   │       └── frontend → symlink           <span style="color: var(--accent-green);"># Points to g-v0-lab</span>
+│   └── ...
+└── knowledge-base/
+    └── sops/
+        ├── SOP-005-frontend-design.md
+        └── templates/
+            ├── DISCOVERY_TEMPLATE.md
+            └── DESIGN_TOKENS_TEMPLATE.md
+
+~/g-v0-lab/                                  <span style="color: var(--accent-pink);"># Frontend Repository</span>
+├── .gitignore
+├── README.md
+└── 01-travel-agent-frontend/                <span style="color: var(--accent-pink);"># Complete Next.js app</span>
+    ├── app/
+    ├── components/
+    ├── hooks/
+    ├── lib/
+    ├── public/
+    └── package.json
+                </div>
+            </div>
+
+            <h3>Symlinks Explained</h3>
+            <p>A symlink (symbolic link) is like a shortcut that makes one folder appear to exist in another location.</p>
+
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-lang">Bash</span>
+                    <span class="code-filename">Creating a Symlink</span>
+                </div>
+                <div class="code-content">
+<pre><span class="comment"># Navigate to where you want the link</span>
+cd ~/g-ai-lab/projects/02-ai-travel-agent/working
+
+<span class="comment"># Create symlink: ln -s [source] [link-name]</span>
+ln -s ~/g-v0-lab/01-travel-agent-frontend frontend
+
+<span class="comment"># Verify with ls -la</span>
+ls -la
+<span class="comment"># Output: frontend -> /Users/you/g-v0-lab/01-travel-agent-frontend</span>
+
+<span class="comment"># Now you can cd into frontend as if it's a real folder</span>
+cd frontend
+npm run dev</pre>
+                </div>
+            </div>
+
+            <div class="callout callout-analogy">
+                <div class="callout-title">📚 Analogy: Library Book Shortcut</div>
+                <p>Imagine you have a book on your desk, but you want it to appear on your bookshelf too without moving it. A symlink is like putting a card on the bookshelf that says "This book is actually on the desk." When someone looks for it on the shelf, the card redirects them to the desk.</p>
+            </div>
+
+            <h3>Symlink Benefits</h3>
+            <ul>
+                <li><strong>Edit anywhere:</strong> Changes in source reflect in the link (and vice versa)</li>
+                <li><strong>Independent repos:</strong> Each repo has its own git history</li>
+                <li><strong>Easy swapping:</strong> Point to different frontends by recreating the symlink</li>
+                <li><strong>Clean structure:</strong> Backend project "sees" frontend without actually containing it</li>
+            </ul>
+
+            <h3>Managing Symlinks</h3>
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-lang">Bash</span>
+                    <span class="code-filename">Symlink Management Commands</span>
+                </div>
+                <div class="code-content">
+<pre><span class="comment"># Remove a symlink (doesn't delete source!)</span>
+rm frontend
+
+<span class="comment"># Update symlink to point elsewhere</span>
+rm frontend
+ln -s ~/g-v0-lab/02-new-frontend frontend
+
+<span class="comment"># Check if something is a symlink</span>
+file frontend
+<span class="comment"># Output: frontend: symbolic link to /path/to/source</span>
+
+<span class="comment"># WARNING: rm -r on a symlink deletes the symlink AND follows into source!</span>
+<span class="comment"># Always use just 'rm' for symlinks, never 'rm -r'</span></pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 12: Tool Chain -->
+        <section id="toolchain">
+            <div class="section-header">
+                <span class="section-number">Section 12</span>
+                <h2 class="section-title">Tool Chain Integration</h2>
+            </div>
+
+            <p>The complete toolchain connects Claude, v0.dev, GitHub, and Antigravity into a seamless development flow.</p>
+
+            <h3>The Complete Pipeline</h3>
+            <div class="diagram-box">
+                <div class="diagram-title">📊 Tool Chain Flow</div>
+                <div class="diagram-content">
+┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+│   Claude    │ ──▶│   v0.dev    │ ──▶│   GitHub    │ ──▶│ Antigravity │
+│  (Design)   │    │  (Build)    │    │  (Store)    │    │   (Run)     │
+└─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘
+      │                  │                  │                  │
+      ▼                  ▼                  ▼                  ▼
+  Prototype          Production         Version             Local
+    JSX               Code              Control            Development
+                                                          + Backend
+                </div>
+            </div>
+
+            <h3>Tool Purposes</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Tool</th>
+                            <th>Primary Purpose</th>
+                            <th>Output</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Claude</strong></td>
+                            <td>Discovery, design, prototype JSX generation</td>
+                            <td>Single-file JSX components with inline styles</td>
+                        </tr>
+                        <tr>
+                            <td><strong>v0.dev</strong></td>
+                            <td>Expand prototypes into production code</td>
+                            <td>Complete Next.js projects with routing</td>
+                        </tr>
+                        <tr>
+                            <td><strong>GitHub</strong></td>
+                            <td>Version control, backup, collaboration</td>
+                            <td>Persistent code storage, history</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Antigravity</strong></td>
+                            <td>Local development, backend integration</td>
+                            <td>Running application, debugging</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>Why This Combination?</h3>
+
+            <div class="callout callout-analogy">
+                <div class="callout-title">📚 Analogy: Movie Production</div>
+                <p>Making software is like making a movie:</p>
+                <ul>
+                    <li><strong>Claude (Screenwriter)</strong> — Develops the story, characters, scenes (discovery, prototypes)</li>
+                    <li><strong>v0.dev (Production Studio)</strong> — Turns scripts into actual footage (production code)</li>
+                    <li><strong>GitHub (Archive)</strong> — Stores all versions, allows collaboration (version control)</li>
+                    <li><strong>Antigravity (Editing Suite)</strong> — Where everything comes together for final output (local dev)</li>
+                </ul>
+            </div>
+
+            <h3>Complete Workflow Example</h3>
+            <div class="workflow-steps">
+                <div class="workflow-step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h4>Discovery with Claude</h4>
+                        <p>Define JTBD, persona, user journey, screen prioritization. Output: DISCOVERY.md</p>
+                    </div>
+                </div>
+                <div class="workflow-step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h4>Inspiration Gathering</h4>
+                        <p>Find north star design on Mobbin/Dribbble. Extract design tokens. Output: DESIGN_TOKENS.md</p>
+                    </div>
+                </div>
+                <div class="workflow-step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h4>Prototype with Claude</h4>
+                        <p>Generate initial JSX components with inline styles. Iterate on Claude → v0 preview loop.</p>
+                    </div>
+                </div>
+                <div class="workflow-step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h4>Build with v0.dev</h4>
+                        <p>Paste prototype, add pages/routing, polish responsive design, add animations.</p>
+                    </div>
+                </div>
+                <div class="workflow-step">
+                    <div class="step-number">5</div>
+                    <div class="step-content">
+                        <h4>Export & Push to GitHub</h4>
+                        <p>Download ZIP → extract → organize → git add/commit/push to g-v0-lab.</p>
+                    </div>
+                </div>
+                <div class="workflow-step">
+                    <div class="step-number">6</div>
+                    <div class="step-content">
+                        <h4>Setup in Antigravity</h4>
+                        <p>Clone repo, create symlink to g-ai-lab project, npm install, npm run dev.</p>
+                    </div>
+                </div>
+                <div class="workflow-step">
+                    <div class="step-number">7</div>
+                    <div class="step-content">
+                        <h4>Backend Integration</h4>
+                        <p>Define API contract, create services/api.ts, connect components to backend.</p>
+                    </div>
+                </div>
+                <div class="workflow-step">
+                    <div class="step-number">8</div>
+                    <div class="step-content">
+                        <h4>Polish & Test</h4>
+                        <p>Run through testing checklist, fix issues, optimize performance.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 13: ASCII Animation -->
+        <section id="ascii">
+            <div class="section-header">
+                <span class="section-number">Section 13</span>
+                <h2 class="section-title">ASCII Animation Technical Details</h2>
+            </div>
+
+            <p>The Travel Agent hero features a complex ASCII animation system. Here's how it works under the hood.</p>
+
+            <h3>Letter Bitmap System</h3>
+            <p>Each letter is defined as a 2D grid of 1s and 0s:</p>
+
+            <div class="kv-grid">
+                <div class="kv-item">
+                    <div class="kv-key">Width</div>
+                    <div class="kv-value">12-16 columns</div>
+                </div>
+                <div class="kv-item">
+                    <div class="kv-key">Height</div>
+                    <div class="kv-value">14 rows</div>
+                </div>
+                <div class="kv-item">
+                    <div class="kv-key">1 = Filled</div>
+                    <div class="kv-value">Renders as character</div>
+                </div>
+                <div class="kv-item">
+                    <div class="kv-key">0 = Empty</div>
+                    <div class="kv-value">Renders as space</div>
+                </div>
+            </div>
+
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-lang">JavaScript</span>
+                    <span class="code-filename">Letter Bitmap Example</span>
+                </div>
+                <div class="code-content">
+<pre><span class="keyword">const</span> LETTER_BITMAPS = {
+  T: [
+    <span class="string">'111111111111'</span>,
+    <span class="string">'111111111111'</span>,
+    <span class="string">'000011110000'</span>,
+    <span class="string">'000011110000'</span>,
+    <span class="string">'000011110000'</span>,
+    <span class="string">'000011110000'</span>,
+    <span class="string">'000011110000'</span>,
+    <span class="string">'000011110000'</span>,
+    <span class="string">'000011110000'</span>,
+    <span class="string">'000011110000'</span>,
+    <span class="string">'000011110000'</span>,
+    <span class="string">'000011110000'</span>,
+    <span class="string">'000011110000'</span>,
+    <span class="string">'000011110000'</span>,
+  ],
+  <span class="comment">// ... other letters</span>
+};</pre>
+                </div>
+            </div>
+
+            <h3>Character Pool</h3>
+            <p>Filled cells are rendered using random characters from this pool:</p>
+
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-lang">JavaScript</span>
+                    <span class="code-filename">Character Pool</span>
+                </div>
+                <div class="code-content">
+<pre><span class="keyword">const</span> CHARS = <span class="string">'0123456789@#$%&*+=<>?/\\|{}[]~^`;:\'"!ΣΩπ∆√∞≈≠±×÷αβγδ'</span>;
+
+<span class="comment">// Get random character for flickering effect</span>
+<span class="keyword">function</span> <span class="function">getRandomChar</span>() {
+  <span class="keyword">return</span> CHARS[Math.floor(Math.random() * CHARS.length)];
+}</pre>
+                </div>
+            </div>
+
+            <h3>Animation Effects</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Effect</th>
+                            <th>Duration</th>
+                            <th>Interval</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Character Flicker</strong></td>
+                            <td>—</td>
+                            <td>100ms</td>
+                            <td>Random character replacement for visual noise</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Glare Sweep</strong></td>
+                            <td>2000ms</td>
+                            <td>2800ms cycle</td>
+                            <td>Horizontal gradient moving left to right</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Word Flip</strong></td>
+                            <td>600ms</td>
+                            <td>3000ms</td>
+                            <td>3D rotateX animation between words</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Shatter</strong></td>
+                            <td>800ms</td>
+                            <td>One-time</td>
+                            <td>Physics-based particle explosion on click</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Icon Loader</strong></td>
+                            <td>150ms/icon</td>
+                            <td>3000ms total</td>
+                            <td>Sequential icon carousel while loading</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>Glare Effect Implementation</h3>
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-lang">CSS</span>
+                    <span class="code-filename">Glare Animation</span>
+                </div>
+                <div class="code-content">
+<pre><span class="keyword">@keyframes</span> glare-sweep {
+  <span class="number">0%</span> {
+    <span class="attr">left</span>: <span class="number">-100%</span>;
+  }
+  <span class="number">100%</span> {
+    <span class="attr">left</span>: <span class="number">200%</span>;
+  }
+}
+
+<span class="keyword">.glare-overlay</span> {
+  <span class="attr">position</span>: absolute;
+  <span class="attr">width</span>: <span class="number">20%</span>;
+  <span class="attr">height</span>: <span class="number">100%</span>;
+  <span class="attr">background</span>: linear-gradient(
+    <span class="number">90deg</span>,
+    transparent,
+    <span class="string">rgba(255, 255, 255, 0.3)</span>,
+    transparent
+  );
+  <span class="attr">animation</span>: glare-sweep <span class="number">2s</span> ease-in-out infinite;
+  <span class="attr">animation-delay</span>: <span class="number">0.8s</span>;
+}</pre>
+                </div>
+            </div>
+
+            <h3>Word Cycling Logic</h3>
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-lang">TypeScript</span>
+                    <span class="code-filename">Word Cycling Hook</span>
+                </div>
+                <div class="code-content">
+<pre><span class="keyword">const</span> WORDS = [<span class="string">'TRAVEL'</span>, <span class="string">'TRIP'</span>, <span class="string">'VACATION'</span>];
+
+<span class="keyword">function</span> <span class="function">useWordCycle</span>(intervalMs: <span class="type">number</span> = <span class="number">3000</span>) {
+  <span class="keyword">const</span> [wordIndex, setWordIndex] = useState(<span class="number">0</span>);
+  <span class="keyword">const</span> [isFlipping, setIsFlipping] = useState(<span class="keyword">false</span>);
+
+  useEffect(() =&gt; {
+    <span class="keyword">const</span> interval = setInterval(() =&gt; {
+      setIsFlipping(<span class="keyword">true</span>);
+      
+      setTimeout(() =&gt; {
+        setWordIndex((prev) =&gt; (prev + <span class="number">1</span>) % WORDS.length);
+        setIsFlipping(<span class="keyword">false</span>);
+      }, <span class="number">300</span>); <span class="comment">// Half of flip animation</span>
+      
+    }, intervalMs);
+
+    <span class="keyword">return</span> () =&gt; clearInterval(interval);
+  }, [intervalMs]);
+
+  <span class="keyword">return</span> { word: WORDS[wordIndex], isFlipping };
+}</pre>
+                </div>
+            </div>
+
+            <div class="callout callout-tip">
+                <div class="callout-title">💡 Performance Tip: Canvas Alternative</div>
+                <p>For very complex ASCII art with thousands of characters, consider using <code>&lt;canvas&gt;</code> instead of DOM elements. Each DOM element has overhead. Canvas renders as a single image, then you update pixels directly.</p>
+            </div>
+        </section>
+
+        <!-- Section 14: Learnings & Gotchas -->
+        <section id="gotchas">
+            <div class="section-header">
+                <span class="section-number">Section 14</span>
+                <h2 class="section-title">Learnings & Gotchas</h2>
+            </div>
+
+            <p>Real-world development is full of surprises. Here are the key learnings from building the Travel Agent frontend.</p>
+
+            <h3>v0.dev Learnings</h3>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">📦</div>
+                    <div class="feature-title">MCP Creates New Repos</div>
+                    <p class="feature-desc">Cannot push to existing repo subfolders. Use ZIP download + manual push for monorepo structures.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📂</div>
+                    <div class="feature-title">ZIP Extraction</div>
+                    <p class="feature-desc">Files may extract directly without parent folder. Always check with `ls` before moving.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔄</div>
+                    <div class="feature-title">Iteration is Key</div>
+                    <p class="feature-desc">Multiple small prompts get better results than one massive prompt. Build up incrementally.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">👁️</div>
+                    <div class="feature-title">Preview Before Export</div>
+                    <p class="feature-desc">Test responsiveness and interactions in v0's preview. Catching issues early saves time.</p>
+                </div>
+            </div>
+
+            <h3>Next.js Learnings</h3>
+
+            <h4>Hydration Errors</h4>
+            <p>The most common Next.js pitfall. Happens when server HTML doesn't match client HTML.</p>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Cause</th>
+                            <th>Fix</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Using <code>window</code> or <code>document</code> in render</td>
+                            <td>Move to <code>useEffect</code> hook</td>
+                        </tr>
+                        <tr>
+                            <td>Using <code>Math.random()</code> for keys/content</td>
+                            <td>Generate values in <code>useEffect</code> or use deterministic IDs</td>
+                        </tr>
+                        <tr>
+                            <td>Date/time differences between server and client</td>
+                            <td>Format dates client-side in <code>useEffect</code></td>
+                        </tr>
+                        <tr>
+                            <td>Third-party libraries that access DOM on import</td>
+                            <td>Use dynamic imports with <code>{ ssr: false }</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h4>App Router Patterns</h4>
+            <div class="diagram-box">
+                <div class="diagram-title">📊 Route File Mapping</div>
+                <div class="diagram-content">
+app/page.tsx           →  /
+app/about/page.tsx     →  /about
+app/blog/page.tsx      →  /blog
+app/blog/[slug]/page.tsx  →  /blog/hello-world (dynamic)
+app/api/hello/route.ts    →  /api/hello (API route)
+                </div>
+            </div>
+
+            <h3>Git Learnings</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Topic</th>
+                            <th>Lesson</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Personal Access Token</strong></td>
+                            <td>Required for HTTPS authentication. Password auth is deprecated. Generate in GitHub Settings → Developer settings → Personal access tokens.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Symlinks in Git</strong></td>
+                            <td>Git tracks the symlink file, not the contents it points to. The linked content remains in its original repo.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Large Exports</strong></td>
+                            <td>v0 exports include all shadcn components (80+ files). This is intentional — you own them.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>CLI Learnings</h3>
+            <div class="comparison-box">
+                <div class="comparison-side bad">
+                    <div class="comparison-header">❌ Common Mistakes</div>
+                    <ul>
+                        <li><code>cd..</code> — Wrong! No space</li>
+                        <li><code># inside quotes</code> — Not a comment!</li>
+                        <li><code>mv file1 file2 dir/</code> — Moves both, not rename</li>
+                        <li><code>rm -r symlink</code> — Deletes through the link!</li>
+                    </ul>
+                </div>
+                <div class="comparison-side good">
+                    <div class="comparison-header">✅ Correct Syntax</div>
+                    <ul>
+                        <li><code>cd ..</code> — Space required</li>
+                        <li><code># comment</code> — Outside quotes only</li>
+                        <li><code>mv file1 file2</code> — One move at a time</li>
+                        <li><code>rm symlink</code> — Just rm, no -r</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="callout callout-warning">
+                <div class="callout-title">⚠️ Critical: Never rm -r a Symlink</div>
+                <p>Running <code>rm -r symlink</code> will follow the symlink and delete the original files! Always use <code>rm symlink</code> (no -r) to safely remove just the link.</p>
+            </div>
+        </section>
+
+        <!-- Section 15: Resources -->
+        <section id="resources">
+            <div class="section-header">
+                <span class="section-number">Section 15</span>
+                <h2 class="section-title">Resources & Next Steps</h2>
+            </div>
+
+            <h3>Documentation Links</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Resource</th>
+                            <th>URL</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>v0.dev</strong></td>
+                            <td>https://v0.dev</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Next.js Docs</strong></td>
+                            <td>https://nextjs.org/docs</td>
+                        </tr>
+                        <tr>
+                            <td><strong>shadcn/ui</strong></td>
+                            <td>https://ui.shadcn.com</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Tailwind CSS</strong></td>
+                            <td>https://tailwindcss.com/docs</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Framer Motion</strong></td>
+                            <td>https://www.framer.com/motion</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Lucide Icons</strong></td>
+                            <td>https://lucide.dev</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Mobbin</strong></td>
+                            <td>https://mobbin.com</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>SOPs Created</h3>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">📋</div>
+                    <div class="feature-title">SOP-005-frontend-design.md</div>
+                    <p class="feature-desc">Complete 6-phase frontend design workflow with Claude prompts and testing checklist.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔍</div>
+                    <div class="feature-title">DISCOVERY_TEMPLATE.md</div>
+                    <p class="feature-desc">Fillable template for JTBD, personas, user journeys, and screen prioritization.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎨</div>
+                    <div class="feature-title">DESIGN_TOKENS_TEMPLATE.md</div>
+                    <p class="feature-desc">Design system documentation: colors, typography, spacing, components.</p>
+                </div>
+            </div>
+
+            <h3>Next Steps for Travel Agent</h3>
+            <div class="workflow-steps">
+                <div class="workflow-step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h4>Fix Hydration Error</h4>
+                        <p>Minor issue with ASCII animation using random characters in render. Move to useEffect.</p>
+                    </div>
+                </div>
+                <div class="workflow-step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h4>Create Backend API</h4>
+                        <p>Wrap existing Agno agent in FastAPI endpoints. Add CORS for frontend communication.</p>
+                    </div>
+                </div>
+                <div class="workflow-step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h4>Wire Frontend to Backend</h4>
+                        <p>Create services/api.ts, connect form submission, display real itinerary data.</p>
+                    </div>
+                </div>
+                <div class="workflow-step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h4>Add Observability</h4>
+                        <p>Integrate Phoenix tracing for agent calls, add Helicone for cost tracking.</p>
+                    </div>
+                </div>
+                <div class="workflow-step">
+                    <div class="step-number">5</div>
+                    <div class="step-content">
+                        <h4>Polish & Deploy</h4>
+                        <p>Run through testing checklist, optimize performance, deploy to Vercel.</p>
+                    </div>
+                </div>
+            </div>
+
+            <h3>Summary: What We Accomplished</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Frontend Design SOP (6 phases)</td>
+                            <td><span class="topic-badge green">✅ Created</span></td>
+                        </tr>
+                        <tr>
+                            <td>Discovery Template</td>
+                            <td><span class="topic-badge green">✅ Created</span></td>
+                        </tr>
+                        <tr>
+                            <td>Design Tokens Template</td>
+                            <td><span class="topic-badge green">✅ Created</span></td>
+                        </tr>
+                        <tr>
+                            <td>g-v0-lab Repository</td>
+                            <td><span class="topic-badge green">✅ Created</span></td>
+                        </tr>
+                        <tr>
+                            <td>Travel Agent Frontend</td>
+                            <td><span class="topic-badge green">✅ Built</span></td>
+                        </tr>
+                        <tr>
+                            <td>GitHub Integration</td>
+                            <td><span class="topic-badge green">✅ Pushed</span></td>
+                        </tr>
+                        <tr>
+                            <td>Local Development</td>
+                            <td><span class="topic-badge green">✅ Running</span></td>
+                        </tr>
+                        <tr>
+                            <td>Symlink to g-ai-lab</td>
+                            <td><span class="topic-badge green">✅ Connected</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>Key Workflow Established</h3>
+            <div class="diagram-box">
+                <div class="diagram-title">📊 The Golden Path</div>
+                <div class="diagram-content">
+         ┌──────────┐         ┌──────────┐         ┌──────────┐         ┌────────────┐
+         │  Claude  │   ──▶   │  v0.dev  │   ──▶   │  GitHub  │   ──▶   │Antigravity │
+         │ (Design) │         │ (Build)  │         │ (Store)  │         │   (Run)    │
+         └──────────┘         └──────────┘         └──────────┘         └────────────┘
+                </div>
+            </div>
+
+            <div class="callout callout-important">
+                <div class="callout-title">🎯 Key Takeaway</div>
+                <p>Frontend development for AI applications follows a clear, repeatable process. By separating discovery, design, build, and integration phases — and using the right tool for each phase — you can create production-ready frontends faster while maintaining quality.</p>
+                <p>The workflow established today (Claude → v0.dev → GitHub → Antigravity) will serve as the foundation for all future AI application frontends.</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <nav class="footer-nav">
+            <a href="index.html" class="footer-link">← Back to Timeline</a>
+            <a href="daily-summary-20251228.html" class="footer-link">📄 Daily Summary</a>
+        </nav>
+        <div class="footer-brand">Daily Tutes</div>
+        <p class="footer-text">Deep Dive: Frontend Design & Development • December 28, 2025</p>
+    </footer>
+</body>
+</html>

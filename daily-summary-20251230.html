@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Day 7: RAG Retrieval - Reranking & CRAG | Daily Tutes</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Fraunces:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-tertiary: #1a1a25;
+            --bg-card: #16161f;
+            --text-primary: #f0f0f5;
+            --text-secondary: #a0a0b0;
+            --text-muted: #606070;
+            --accent-orange: #ff6b35;
+            --accent-blue: #4ecdc4;
+            --accent-purple: #a855f7;
+            --accent-pink: #ec4899;
+            --accent-green: #22c55e;
+            --accent-yellow: #fbbf24;
+            --border-color: #2a2a35;
+            --code-bg: #1e1e2e;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.7;
+        }
+
+        /* Navigation */
+        .nav {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-content {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-back {
+            color: var(--text-secondary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: color 0.3s ease;
+        }
+
+        .nav-back:hover {
+            color: var(--accent-orange);
+        }
+
+        /* Header */
+        .header {
+            background: radial-gradient(ellipse at top, #1a1a2e 0%, var(--bg-primary) 70%);
+            padding: 3rem 2rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 30% 40%, rgba(255, 107, 53, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 70% 60%, rgba(78, 205, 196, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .day-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: linear-gradient(135deg, var(--accent-green) 0%, #38ef7d 100%);
+            color: #000;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .header-title {
+            font-family: 'Fraunces', serif;
+            font-size: clamp(1.8rem, 4vw, 2.5rem);
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            background: linear-gradient(135deg, #fff 0%, #a0a0b0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-meta {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-top: 1rem;
+        }
+
+        .header-meta span {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Container */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Topics Section */
+        .topics-section {
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-family: 'Fraunces', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .topics-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .topic-badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+
+        .topic-badge.highlight {
+            background: rgba(255, 107, 53, 0.1);
+            border-color: rgba(255, 107, 53, 0.3);
+            color: var(--accent-orange);
+        }
+
+        /* Content Cards */
+        .content-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .content-card h3 {
+            font-family: 'Fraunces', serif;
+            font-size: 1.3rem;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .content-card h4 {
+            font-size: 1.1rem;
+            color: var(--accent-blue);
+            margin: 1.5rem 0 0.75rem;
+        }
+
+        .content-card p {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .content-card ul {
+            margin: 1rem 0;
+            padding-left: 1.5rem;
+            color: var(--text-secondary);
+        }
+
+        .content-card li {
+            margin-bottom: 0.5rem;
+        }
+
+        .content-card li strong {
+            color: var(--text-primary);
+        }
+
+        /* Callouts */
+        .callout {
+            background: var(--bg-tertiary);
+            border-left: 4px solid var(--accent-purple);
+            border-radius: 0 12px 12px 0;
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+        }
+
+        .callout-title {
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .callout p {
+            margin-bottom: 0;
+            font-size: 0.95rem;
+        }
+
+        /* Tables */
+        .table-container {
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--bg-card);
+        }
+
+        th, td {
+            padding: 0.875rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background: var(--bg-tertiary);
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.85rem;
+        }
+
+        td {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Formula Box */
+        .formula-box {
+            background: linear-gradient(135deg, rgba(78, 205, 196, 0.1) 0%, var(--bg-card) 100%);
+            border: 1px solid rgba(78, 205, 196, 0.3);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            text-align: center;
+        }
+
+        .formula {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.2rem;
+            color: var(--text-primary);
+            padding: 0.75rem;
+            background: var(--code-bg);
+            border-radius: 8px;
+            display: inline-block;
+        }
+
+        /* Diagram Box */
+        .diagram-box {
+            background: var(--code-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+        }
+
+        .diagram-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--accent-blue);
+            margin-bottom: 0.75rem;
+        }
+
+        .diagram-content {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            line-height: 1.4;
+            color: var(--text-secondary);
+            white-space: pre;
+        }
+
+        /* Deep Dive Link */
+        .deepdive-card {
+            background: linear-gradient(135deg, rgba(236, 72, 153, 0.1) 0%, rgba(255, 107, 53, 0.1) 100%);
+            border: 1px solid rgba(236, 72, 153, 0.3);
+            border-radius: 16px;
+            padding: 2rem;
+            margin: 2rem 0;
+            text-align: center;
+        }
+
+        .deepdive-card h3 {
+            font-family: 'Fraunces', serif;
+            color: var(--text-primary);
+            margin-bottom: 0.75rem;
+            justify-content: center;
+        }
+
+        .deepdive-card p {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        .deepdive-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.875rem 2rem;
+            background: linear-gradient(135deg, var(--accent-pink) 0%, var(--accent-orange) 100%);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .deepdive-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(236, 72, 153, 0.4);
+        }
+
+        /* Resources */
+        .resources-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+
+        .resources-card ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .resources-card li {
+            padding: 0.5rem 0;
+            color: var(--text-secondary);
+        }
+
+        .resources-card a {
+            color: var(--accent-orange);
+            text-decoration: none;
+        }
+
+        .resources-card a:hover {
+            text-decoration: underline;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            border-top: 1px solid var(--border-color);
+            margin-top: 3rem;
+        }
+
+        .footer-nav {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .footer-link:hover {
+            border-color: var(--accent-orange);
+            color: var(--accent-orange);
+        }
+
+        .footer-text {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header {
+                padding: 2rem 1rem;
+            }
+
+            .container {
+                padding: 1.5rem 1rem;
+            }
+
+            .header-meta {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .content-card {
+                padding: 1.5rem;
+            }
+
+            .diagram-content {
+                font-size: 0.55rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-content">
+            <a href="index.html" class="nav-back">← Back to Timeline</a>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="day-badge">✨ Day 7</div>
+            <h1 class="header-title">RAG Retrieval: Reranking & Corrective RAG</h1>
+            <div class="header-meta">
+                <span>📅 December 30, 2025</span>
+                <span>⏱️ ~4 hours</span>
+                <span>🎯 12 Topics</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container">
+        <!-- Topics Section -->
+        <section class="topics-section">
+            <h2 class="section-title">📚 Topics Covered</h2>
+            <div class="topics-grid">
+                <span class="topic-badge highlight">RAG Reranking</span>
+                <span class="topic-badge highlight">RAG-Fusion</span>
+                <span class="topic-badge highlight">Reciprocal Rank Fusion (RRF)</span>
+                <span class="topic-badge highlight">Cohere Re-Rank</span>
+                <span class="topic-badge">Cross-Encoder</span>
+                <span class="topic-badge">Bi-Encoder</span>
+                <span class="topic-badge highlight">Two-Stage Retrieval</span>
+                <span class="topic-badge highlight">CRAG</span>
+                <span class="topic-badge">Document Grading</span>
+                <span class="topic-badge">Query Transformation</span>
+                <span class="topic-badge">Web Search Fallback</span>
+                <span class="topic-badge">Tavily API</span>
+            </div>
+        </section>
+
+        <!-- Part 15: Reranking -->
+        <div class="content-card">
+            <h3>🔄 Part 15: Reranking</h3>
+            <p>Basic vector search has a fundamental limitation: <strong>semantic similarity ≠ relevance</strong>. Just because documents are "similar" doesn't mean they actually answer the question. Reranking solves this by re-ordering results based on true relevance.</p>
+
+            <h4>Two Approaches to Reranking</h4>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Approach</th>
+                            <th>How It Works</th>
+                            <th>Best For</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>RAG-Fusion + RRF</strong></td>
+                            <td>Generate multiple query variations, retrieve for each, fuse rankings algorithmically</td>
+                            <td>Vocabulary diversity (users use different words than docs)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Cohere Re-Rank</strong></td>
+                            <td>Use cross-encoder neural model to deeply score query-document relevance</td>
+                            <td>Precision-critical applications (legal, medical)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h4>RAG-Fusion: Multi-Query Generation</h4>
+            <ul>
+                <li><strong>Step 1:</strong> LLM generates 4-5 variations of the original query</li>
+                <li><strong>Step 2:</strong> Retrieve documents for each query variation (parallel)</li>
+                <li><strong>Step 3:</strong> Fuse results using Reciprocal Rank Fusion (RRF)</li>
+            </ul>
+
+            <div class="formula-box">
+                <div class="formula">RRF(d) = Σ 1/(k + rank(d))  where k=60</div>
+            </div>
+
+            <div class="callout">
+                <div class="callout-title">📚 Analogy: Hiring Committee</div>
+                <p>Like having 5 interviewers evaluate candidates differently. A candidate who ranks highly across multiple interviewers (query variations) is more likely to be truly relevant than one who aced just one interview.</p>
+            </div>
+
+            <h4>Cohere Re-Rank: Cross-Encoder Power</h4>
+            <ul>
+                <li><strong>Bi-Encoder (Vector Search):</strong> Embeds query and document separately → fast but shallow</li>
+                <li><strong>Cross-Encoder (Cohere):</strong> Processes query+document together → slow but deep understanding</li>
+            </ul>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Aspect</th>
+                            <th>Bi-Encoder</th>
+                            <th>Cross-Encoder</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Speed</td>
+                            <td>~1ms per query</td>
+                            <td>~50-100ms per doc pair</td>
+                        </tr>
+                        <tr>
+                            <td>Accuracy</td>
+                            <td>Good (85-90%)</td>
+                            <td>Excellent (95%+)</td>
+                        </tr>
+                        <tr>
+                            <td>Understanding</td>
+                            <td>Query tokens can't see document tokens</td>
+                            <td>Full cross-attention between all tokens</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Two-Stage Architecture -->
+        <div class="content-card">
+            <h3>⚡ Two-Stage Retrieval Architecture</h3>
+            <p>Since cross-encoders are slow, you can't run them on your entire database. The solution is a <strong>two-stage architecture</strong>:</p>
+
+            <div class="diagram-box">
+                <div class="diagram-title">📊 Two-Stage Pipeline</div>
+                <div class="diagram-content">
+User Query
+    │
+    ▼
+┌────────────────────────────────────────┐
+│  STAGE 1: BROAD RETRIEVAL (Vector)     │
+│  • Fast vector search                  │
+│  • Cast wide net (20-100 candidates)   │
+│  • Goal: HIGH RECALL                   │
+│  • Cost: FREE, Latency: ~50ms          │
+└────────────────────────────────────────┘
+    │
+    ▼
+┌────────────────────────────────────────┐
+│  STAGE 2: PRECISION RERANKING (Cohere) │
+│  • Cross-encoder scoring               │
+│  • Score each candidate deeply         │
+│  • Goal: HIGH PRECISION                │
+│  • Cost: ~$0.005, Latency: ~500ms      │
+└────────────────────────────────────────┘
+    │
+    ▼
+Top 3-5 Most Relevant Documents
+                </div>
+            </div>
+
+            <div class="callout">
+                <div class="callout-title">💡 Key Insight</div>
+                <p>Vector search is FAST but APPROXIMATE. Cohere is SLOW but PRECISE. Combine them: vector narrows the field, Cohere picks the winners. You get the best of both worlds.</p>
+            </div>
+        </div>
+
+        <!-- Part 16: CRAG -->
+        <div class="content-card">
+            <h3>🔍 Part 16: CRAG (Corrective RAG)</h3>
+            <p>Reranking fixes wrong order, but what if documents are <strong>wrong, outdated, or missing</strong>? CRAG grades documents and finds alternatives when needed.</p>
+
+            <h4>The CRAG Process</h4>
+            <ol>
+                <li><strong>Retrieve:</strong> Standard vector search retrieval</li>
+                <li><strong>Grade:</strong> LLM evaluates each document for relevance (yes/no)</li>
+                <li><strong>Decide:</strong> Based on grades, choose action:
+                    <ul>
+                        <li>All relevant → Generate directly</li>
+                        <li>Some relevant → Keep good ones + web search</li>
+                        <li>All irrelevant → Web search only</li>
+                    </ul>
+                </li>
+                <li><strong>Transform:</strong> Optimize query for web search if needed</li>
+                <li><strong>Generate:</strong> Answer using verified context</li>
+            </ol>
+
+            <div class="diagram-box">
+                <div class="diagram-title">📊 CRAG Decision Flow</div>
+                <div class="diagram-content">
+         Grade All Documents
+                │
+    ┌───────────┼───────────┐
+    │           │           │
+    ▼           ▼           ▼
+ALL RELEVANT  MIXED    ALL IRRELEVANT
+    │           │           │
+    ▼           ▼           ▼
+ Generate    Keep good    Web search
+ directly    + Web search  only
+    │           │           │
+    └───────────┴───────────┘
+                │
+                ▼
+         Generate Answer
+                </div>
+            </div>
+
+            <div class="callout">
+                <div class="callout-title">📚 Analogy: Smart Research Assistant</div>
+                <p>A basic assistant hands you whatever they found. A CRAG-like assistant first evaluates what they found ("Is this relevant? Up to date?"), and if lacking, proactively searches elsewhere to fill the gaps.</p>
+            </div>
+        </div>
+
+        <!-- Decision Guide -->
+        <div class="content-card">
+            <h3>🎯 When to Use What</h3>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Technique</th>
+                            <th>Use When</th>
+                            <th>Example Use Case</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>RAG-Fusion</strong></td>
+                            <td>Vocabulary diversity problem</td>
+                            <td>E-commerce search, consumer apps</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Cohere Re-Rank</strong></td>
+                            <td>Precision is critical</td>
+                            <td>Legal contracts, medical queries</td>
+                        </tr>
+                        <tr>
+                            <td><strong>CRAG</strong></td>
+                            <td>KB might be incomplete/stale</td>
+                            <td>Support bots, financial research</td>
+                        </tr>
+                        <tr>
+                            <td><strong>All Combined</strong></td>
+                            <td>High stakes + varied terminology</td>
+                            <td>Healthcare clinical decision support</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Deep Dive Link -->
+        <div class="deepdive-card">
+            <h3>📖 Want the Full Deep Dive?</h3>
+            <p>Comprehensive 45-minute read covering architectures, real-world use cases, code examples, and decision frameworks for all techniques.</p>
+            <a href="daily-tutes-deepdive-rag-retrieval-20251230.html" class="deepdive-link">📖 Read Full Deep Dive</a>
+        </div>
+
+        <!-- Resources -->
+        <div class="resources-card">
+            <h3 class="section-title">📚 Resources Studied</h3>
+            <ul>
+                <li>📹 <strong>RAG From Scratch Part 15</strong> — Re-ranking (RAG-Fusion + Cohere)</li>
+                <li>📹 <strong>RAG From Scratch Part 16</strong> — CRAG (Corrective RAG)</li>
+                <li>📄 <strong>RAG-Fusion Paper</strong> — Multi-query generation and RRF</li>
+                <li>📄 <strong>CRAG Paper</strong> — Corrective Retrieval Augmented Generation</li>
+                <li>🔗 <a href="https://cohere.com/rerank">Cohere Re-Rank API</a></li>
+                <li>🔗 <a href="https://tavily.com">Tavily Search API</a></li>
+            </ul>
+        </div>
+
+        <!-- Related -->
+        <div class="resources-card">
+            <h3 class="section-title">🔗 Related Deep Dives</h3>
+            <ul>
+                <li><a href="daily-tutes-deepdive-rag-comprehensive-20251227.html">RAG Fundamentals (Parts 1-11)</a> — Foundation concepts</li>
+                <li><a href="daily-tutes-deepdive-rag-indexing-20251228.html">RAG Indexing (Parts 12-14)</a> — Advanced indexing strategies</li>
+            </ul>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-nav">
+            <a href="index.html" class="footer-link">← Timeline</a>
+            <a href="daily-summary-20251228.html" class="footer-link">← Previous Day</a>
+            <a href="daily-tutes-deepdive-rag-retrieval-20251230.html" class="footer-link">Deep Dive →</a>
+        </div>
+        <p class="footer-text">Daily Tutes — December 30, 2025</p>
+    </footer>
+</body>
+</html>

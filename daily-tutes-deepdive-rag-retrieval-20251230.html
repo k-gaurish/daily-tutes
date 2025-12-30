@@ -1,0 +1,2001 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deep Dive: RAG Retrieval - Reranking & Corrective RAG | Daily Tutes</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Fraunces:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-tertiary: #1a1a25;
+            --bg-card: #16161f;
+            --text-primary: #f0f0f5;
+            --text-secondary: #a0a0b0;
+            --text-muted: #606070;
+            --accent-orange: #ff6b35;
+            --accent-blue: #4ecdc4;
+            --accent-purple: #a855f7;
+            --accent-pink: #ec4899;
+            --accent-green: #22c55e;
+            --accent-yellow: #fbbf24;
+            --border-color: #2a2a35;
+            --code-bg: #1e1e2e;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.7;
+        }
+
+        /* Navigation */
+        .nav {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-back {
+            color: var(--text-secondary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: color 0.3s ease;
+        }
+
+        .nav-back:hover {
+            color: var(--accent-orange);
+        }
+
+        .nav-title {
+            font-family: 'Fraunces', serif;
+            font-size: 1.2rem;
+            color: var(--text-primary);
+        }
+
+        /* Hero Section */
+        .hero {
+            background: radial-gradient(ellipse at top, #1a1a2e 0%, var(--bg-primary) 70%);
+            padding: 4rem 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(236, 72, 153, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(255, 107, 53, 0.15) 0%, transparent 40%);
+            pointer-events: none;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: linear-gradient(135deg, rgba(236, 72, 153, 0.2) 0%, rgba(255, 107, 53, 0.2) 100%);
+            border: 1px solid rgba(236, 72, 153, 0.4);
+            border-radius: 50px;
+            font-size: 0.85rem;
+            color: var(--accent-pink);
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+        }
+
+        .hero-title {
+            font-family: 'Fraunces', serif;
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #fff 0%, #a0a0b0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: 1.3rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        .hero-meta {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .hero-meta span {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Container */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        /* Table of Contents */
+        .toc {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .toc-title {
+            font-family: 'Fraunces', serif;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .toc-list {
+            list-style: none;
+        }
+
+        .toc-list li {
+            margin-bottom: 0.75rem;
+        }
+
+        .toc-list a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 0;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .toc-list a:hover {
+            color: var(--accent-orange);
+            padding-left: 1rem;
+        }
+
+        .toc-number {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--accent-orange);
+            min-width: 30px;
+        }
+
+        /* Sections */
+        .section {
+            margin-bottom: 4rem;
+        }
+
+        .section-title {
+            font-family: 'Fraunces', serif;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .section-title .number {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1rem;
+            color: var(--accent-orange);
+            background: rgba(255, 107, 53, 0.1);
+            padding: 0.3rem 0.6rem;
+            border-radius: 6px;
+        }
+
+        h3 {
+            font-family: 'Fraunces', serif;
+            font-size: 1.4rem;
+            color: var(--text-primary);
+            margin: 2rem 0 1rem;
+        }
+
+        h4 {
+            font-size: 1.1rem;
+            color: var(--accent-blue);
+            margin: 1.5rem 0 0.75rem;
+        }
+
+        p {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        strong {
+            color: var(--text-primary);
+        }
+
+        /* Callouts */
+        .callout {
+            background: var(--bg-card);
+            border-left: 4px solid var(--accent-orange);
+            border-radius: 0 12px 12px 0;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .callout-analogy {
+            border-left-color: var(--accent-purple);
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.05) 0%, var(--bg-card) 100%);
+        }
+
+        .callout-tip {
+            border-left-color: var(--accent-green);
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.05) 0%, var(--bg-card) 100%);
+        }
+
+        .callout-warning {
+            border-left-color: var(--accent-yellow);
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.05) 0%, var(--bg-card) 100%);
+        }
+
+        .callout-title {
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .callout p {
+            margin-bottom: 0;
+        }
+
+        /* Diagram Box */
+        .diagram-box {
+            background: var(--code-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+        }
+
+        .diagram-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--accent-blue);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .diagram-content {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            line-height: 1.4;
+            color: var(--text-secondary);
+            white-space: pre;
+        }
+
+        /* Code Block */
+        .code-block {
+            background: var(--code-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            margin: 1.5rem 0;
+            overflow: hidden;
+        }
+
+        .code-header {
+            background: var(--bg-tertiary);
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .code-lang {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--accent-orange);
+        }
+
+        .code-content {
+            padding: 1.5rem;
+            overflow-x: auto;
+        }
+
+        .code-content pre {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+
+        .code-content .keyword { color: var(--accent-pink); }
+        .code-content .function { color: var(--accent-blue); }
+        .code-content .string { color: var(--accent-green); }
+        .code-content .comment { color: var(--text-muted); font-style: italic; }
+        .code-content .number { color: var(--accent-yellow); }
+
+        /* Tables */
+        .table-container {
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--bg-card);
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background: var(--bg-tertiary);
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+
+        td {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: var(--bg-tertiary);
+        }
+
+        /* Lists */
+        ul, ol {
+            margin: 1rem 0;
+            padding-left: 1.5rem;
+            color: var(--text-secondary);
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        li strong {
+            color: var(--text-primary);
+        }
+
+        /* Topic Badges */
+        .topic-badge {
+            display: inline-block;
+            padding: 0.35rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+            margin: 0.25rem;
+        }
+
+        .topic-badge.highlight {
+            background: rgba(255, 107, 53, 0.1);
+            border-color: rgba(255, 107, 53, 0.3);
+            color: var(--accent-orange);
+        }
+
+        /* Formula Box */
+        .formula-box {
+            background: linear-gradient(135deg, rgba(78, 205, 196, 0.1) 0%, var(--bg-card) 100%);
+            border: 1px solid rgba(78, 205, 196, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            text-align: center;
+        }
+
+        .formula-title {
+            font-family: 'Fraunces', serif;
+            font-size: 1.1rem;
+            color: var(--accent-blue);
+            margin-bottom: 1rem;
+        }
+
+        .formula {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.3rem;
+            color: var(--text-primary);
+            padding: 1rem;
+            background: var(--code-bg);
+            border-radius: 8px;
+            display: inline-block;
+        }
+
+        .formula-explanation {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        /* Key Insight Box */
+        .insight-box {
+            background: linear-gradient(135deg, rgba(255, 107, 53, 0.1) 0%, var(--bg-card) 100%);
+            border: 1px solid rgba(255, 107, 53, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .insight-title {
+            font-family: 'Fraunces', serif;
+            font-size: 1.1rem;
+            color: var(--accent-orange);
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 3rem 2rem;
+            border-top: 1px solid var(--border-color);
+            margin-top: 4rem;
+        }
+
+        .footer-nav {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .footer-link:hover {
+            border-color: var(--accent-orange);
+            color: var(--accent-orange);
+        }
+
+        .footer-text {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero {
+                padding: 2rem 1rem;
+            }
+
+            .container {
+                padding: 2rem 1rem;
+            }
+
+            .hero-meta {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .diagram-content {
+                font-size: 0.6rem;
+            }
+
+            .code-content pre {
+                font-size: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-content">
+            <a href="index.html" class="nav-back">← Back to Timeline</a>
+            <span class="nav-title">Deep Dive Document</span>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-badge">📚 Deep Dive Document</div>
+            <h1 class="hero-title">RAG Retrieval: Reranking & Corrective RAG</h1>
+            <p class="hero-subtitle">Parts 15-16: Making RAG Smarter with Reranking and Self-Correcting Retrieval</p>
+            <div class="hero-meta">
+                <span>📅 December 30, 2025</span>
+                <span>⏱️ ~45 min read</span>
+                <span>📖 10 Sections</span>
+                <span>🎯 RAG From Scratch Series</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="container">
+        <!-- Table of Contents -->
+        <div class="toc">
+            <h2 class="toc-title">📑 Table of Contents</h2>
+            <ol class="toc-list">
+                <li>
+                    <a href="#problem" onclick="event.preventDefault(); document.getElementById('problem').scrollIntoView({behavior: 'smooth'});">
+                        <span class="toc-number">01</span> The Retrieval Quality Problem
+                    </a>
+                </li>
+                <li>
+                    <a href="#rag-fusion" onclick="event.preventDefault(); document.getElementById('rag-fusion').scrollIntoView({behavior: 'smooth'});">
+                        <span class="toc-number">02</span> RAG-Fusion & Reciprocal Rank Fusion
+                    </a>
+                </li>
+                <li>
+                    <a href="#cohere-rerank" onclick="event.preventDefault(); document.getElementById('cohere-rerank').scrollIntoView({behavior: 'smooth'});">
+                        <span class="toc-number">03</span> Cohere Re-Rank: Cross-Encoder Power
+                    </a>
+                </li>
+                <li>
+                    <a href="#two-stage" onclick="event.preventDefault(); document.getElementById('two-stage').scrollIntoView({behavior: 'smooth'});">
+                        <span class="toc-number">04</span> Two-Stage Retrieval Architecture
+                    </a>
+                </li>
+                <li>
+                    <a href="#rerank-comparison" onclick="event.preventDefault(); document.getElementById('rerank-comparison').scrollIntoView({behavior: 'smooth'});">
+                        <span class="toc-number">05</span> RAG-Fusion vs Cohere: Decision Framework
+                    </a>
+                </li>
+                <li>
+                    <a href="#crag-intro" onclick="event.preventDefault(); document.getElementById('crag-intro').scrollIntoView({behavior: 'smooth'});">
+                        <span class="toc-number">06</span> CRAG: Corrective RAG Introduction
+                    </a>
+                </li>
+                <li>
+                    <a href="#crag-components" onclick="event.preventDefault(); document.getElementById('crag-components').scrollIntoView({behavior: 'smooth'});">
+                        <span class="toc-number">07</span> CRAG Components Deep Dive
+                    </a>
+                </li>
+                <li>
+                    <a href="#use-cases" onclick="event.preventDefault(); document.getElementById('use-cases').scrollIntoView({behavior: 'smooth'});">
+                        <span class="toc-number">08</span> Real-World Use Cases & Architectures
+                    </a>
+                </li>
+                <li>
+                    <a href="#decision-guide" onclick="event.preventDefault(); document.getElementById('decision-guide').scrollIntoView({behavior: 'smooth'});">
+                        <span class="toc-number">09</span> When to Use What: Decision Guide
+                    </a>
+                </li>
+                <li>
+                    <a href="#resources" onclick="event.preventDefault(); document.getElementById('resources').scrollIntoView({behavior: 'smooth'});">
+                        <span class="toc-number">10</span> Resources & Further Reading
+                    </a>
+                </li>
+            </ol>
+        </div>
+
+        <!-- Section 1: The Problem -->
+        <section id="problem" class="section">
+            <h2 class="section-title"><span class="number">01</span> The Retrieval Quality Problem</h2>
+            
+            <p>Basic RAG retrieval has a fundamental limitation: <strong>semantic similarity doesn't always mean relevance</strong>. Just because two pieces of text are "similar" in vector space doesn't mean one actually answers the other's question.</p>
+
+            <div class="callout callout-analogy">
+                <div class="callout-title">📚 Analogy: The Library Catalog Problem</div>
+                <p>Imagine you're looking for a book about "Apple's business strategy." A basic library catalog might return books about fruit cultivation, apple pie recipes, and the company Apple Inc. — all contain the word "apple" and might even discuss "strategy" (growing strategies, cooking strategies). But only one is what you actually need. <strong>Similarity ≠ Relevance.</strong></p>
+            </div>
+
+            <h3>The Two Core Problems</h3>
+
+            <div class="diagram-box">
+                <div class="diagram-title">📊 Why Basic Retrieval Falls Short</div>
+                <div class="diagram-content">
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                      PROBLEM 1: VOCABULARY MISMATCH                             │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                 │
+│  User Query: "comfortable shoes for standing all day"                           │
+│                                                                                 │
+│  What user means:                What might be in documents:                    │
+│  ├─ Cushioned footwear           ├─ "Anti-fatigue work shoes"                   │
+│  ├─ Support for long hours       ├─ "Orthopedic nursing clogs"                  │
+│  └─ Reduces foot pain            └─ "Memory foam occupational footwear"         │
+│                                                                                 │
+│  Vector search finds documents about "standing desks" and "comfortable chairs"  │
+│  because those words appear in similar contexts! ❌                             │
+│                                                                                 │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                      PROBLEM 2: SHALLOW MATCHING                                │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                 │
+│  Query: "What remedies do we have if the vendor fails SLA?"                     │
+│                                                                                 │
+│  Document A: "Vendor shall maintain 99.9% uptime as per SLA..."                 │
+│              → High similarity (contains "vendor", "SLA") ✓                     │
+│              → Actually relevant? NO - describes SLA, not remedies ❌           │
+│                                                                                 │
+│  Document B: "In case of service level breach, Customer may..."                 │
+│              → Lower similarity (different words)                               │
+│              → Actually relevant? YES - describes what happens on breach ✓     │
+│                                                                                 │
+│  Basic vector search ranks A higher than B! Wrong answer.                       │
+│                                                                                 │
+└─────────────────────────────────────────────────────────────────────────────────┘
+                </div>
+            </div>
+
+            <h3>Enter Reranking & Corrective RAG</h3>
+
+            <p>This deep dive covers two complementary solutions:</p>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Solution</th>
+                            <th>What It Does</th>
+                            <th>When to Use</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Reranking (Part 15)</strong></td>
+                            <td>Re-orders retrieved documents by true relevance</td>
+                            <td>Documents are good, but ranking is wrong</td>
+                        </tr>
+                        <tr>
+                            <td><strong>CRAG (Part 16)</strong></td>
+                            <td>Grades documents & fetches alternatives if needed</td>
+                            <td>Documents might be irrelevant, outdated, or missing</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Section 2: RAG-Fusion -->
+        <section id="rag-fusion" class="section">
+            <h2 class="section-title"><span class="number">02</span> RAG-Fusion & Reciprocal Rank Fusion</h2>
+
+            <p>RAG-Fusion addresses the vocabulary mismatch problem by <strong>generating multiple query variations</strong> and then <strong>fusing the results</strong> using Reciprocal Rank Fusion (RRF).</p>
+
+            <div class="callout callout-analogy">
+                <div class="callout-title">📚 Analogy: The Hiring Committee</div>
+                <p>Imagine you're hiring a software engineer. Instead of having just one interviewer, you have five interviewers who each evaluate candidates differently — one focuses on coding, one on system design, one on culture fit, etc. A candidate who ranks highly across multiple interviewers is more likely to be a great hire than someone who aced just one interview. <strong>RAG-Fusion uses this same "wisdom of crowds" approach.</strong></p>
+            </div>
+
+            <h3>How RAG-Fusion Works</h3>
+
+            <div class="diagram-box">
+                <div class="diagram-title">📊 RAG-Fusion Pipeline</div>
+                <div class="diagram-content">
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                           RAG-FUSION WORKFLOW                                   │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                 │
+│  Original Query: "best restaurants for a date night"                            │
+│                           │                                                     │
+│                           ▼                                                     │
+│  ┌─────────────────────────────────────────────────────────────┐                │
+│  │              STEP 1: MULTI-QUERY GENERATION                  │                │
+│  │                        (LLM)                                 │                │
+│  │                                                              │                │
+│  │  Prompt: "Generate 4 different versions of this query        │                │
+│  │           to help find relevant documents"                   │                │
+│  │                                                              │                │
+│  │  Output:                                                     │                │
+│  │  ├─ Q1: "romantic dinner spots couples"                      │                │
+│  │  ├─ Q2: "upscale restaurants intimate atmosphere"            │                │
+│  │  ├─ Q3: "best places anniversary dinner celebration"         │                │
+│  │  └─ Q4: "fine dining date recommendations"                   │                │
+│  └─────────────────────────────────────────────────────────────┘                │
+│                           │                                                     │
+│         ┌─────────────────┼─────────────────┐                                   │
+│         │                 │                 │                                   │
+│         ▼                 ▼                 ▼                                   │
+│  ┌─────────────┐   ┌─────────────┐   ┌─────────────┐                            │
+│  │  Query 1    │   │  Query 2    │   │  Query 3    │   ... (parallel)           │
+│  │  Retrieval  │   │  Retrieval  │   │  Retrieval  │                            │
+│  │             │   │             │   │             │                            │
+│  │  Results:   │   │  Results:   │   │  Results:   │                            │
+│  │  1. Doc A   │   │  1. Doc C   │   │  1. Doc A   │                            │
+│  │  2. Doc B   │   │  2. Doc A   │   │  2. Doc D   │                            │
+│  │  3. Doc C   │   │  3. Doc E   │   │  3. Doc B   │                            │
+│  └──────┬──────┘   └──────┬──────┘   └──────┬──────┘                            │
+│         │                 │                 │                                   │
+│         └─────────────────┼─────────────────┘                                   │
+│                           │                                                     │
+│                           ▼                                                     │
+│  ┌─────────────────────────────────────────────────────────────┐                │
+│  │           STEP 2: RECIPROCAL RANK FUSION (RRF)               │                │
+│  │                                                              │                │
+│  │  For each document, calculate:                               │                │
+│  │  Score = Σ (1 / (rank + k)) across all query results         │                │
+│  │                                                              │                │
+│  │  Doc A: appeared at rank 1, 2, 1 in three queries            │                │
+│  │         Score = 1/(1+60) + 1/(2+60) + 1/(1+60) = 0.049       │                │
+│  │                                                              │                │
+│  │  Doc E: appeared at rank 3 in one query only                 │                │
+│  │         Score = 1/(3+60) = 0.016                             │                │
+│  │                                                              │                │
+│  │  Result: Doc A ranks HIGHER (consistent across queries)      │                │
+│  └─────────────────────────────────────────────────────────────┘                │
+│                           │                                                     │
+│                           ▼                                                     │
+│                    Final Ranked Results                                         │
+│                    1. Doc A (0.049)                                              │
+│                    2. Doc C (0.033)                                              │
+│                    3. Doc B (0.031)                                              │
+│                                                                                 │
+└─────────────────────────────────────────────────────────────────────────────────┘
+                </div>
+            </div>
+
+            <h3>The RRF Formula Explained</h3>
+
+            <div class="formula-box">
+                <div class="formula-title">Reciprocal Rank Fusion Formula</div>
+                <div class="formula">RRF(d) = Σ 1/(k + rank(d))</div>
+                <div class="formula-explanation">
+                    <strong>k</strong> = constant (typically 60) — prevents high ranks from dominating<br>
+                    <strong>rank(d)</strong> = position of document d in each query's results<br>
+                    <strong>Σ</strong> = sum across all queries where document appears
+                </div>
+            </div>
+
+            <h4>Why k = 60?</h4>
+
+            <p>The constant k=60 is empirically chosen to balance contributions:</p>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Score (k=60)</th>
+                            <th>Score (k=1)</th>
+                            <th>Effect</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>0.0164</td>
+                            <td>0.500</td>
+                            <td>With k=60, rank 1 isn't overwhelmingly dominant</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>0.0161</td>
+                            <td>0.333</td>
+                            <td>Close scores allow lower ranks to contribute</td>
+                        </tr>
+                        <tr>
+                            <td>10</td>
+                            <td>0.0143</td>
+                            <td>0.091</td>
+                            <td>Rank 10 still has meaningful contribution</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="callout callout-tip">
+                <div class="callout-title">💡 Key Insight</div>
+                <p>RRF rewards <strong>consistency over dominance</strong>. A document that appears in the top 5 of ALL queries will outscore one that's #1 in one query but absent from others. This naturally filters out "false positive" matches.</p>
+            </div>
+
+            <h3>RRF Calculation Walkthrough</h3>
+
+            <div class="diagram-box">
+                <div class="diagram-title">📊 RRF Calculation Example</div>
+                <div class="diagram-content">
+SCENARIO: 3 queries, 5 documents, k=60
+
+Query 1 Results:    Query 2 Results:    Query 3 Results:
+1. Doc A            1. Doc C            1. Doc A
+2. Doc B            2. Doc A            2. Doc D
+3. Doc C            3. Doc B            3. Doc C
+4. Doc D            4. Doc E            4. Doc B
+5. Doc E            5. Doc D            5. Doc E
+
+RRF CALCULATIONS:
+
+Doc A: 1/(1+60) + 1/(2+60) + 1/(1+60) = 0.0164 + 0.0161 + 0.0164 = 0.0489 ✓ HIGHEST
+       Query 1      Query 2      Query 3
+       Rank 1       Rank 2       Rank 1
+
+Doc B: 1/(2+60) + 1/(3+60) + 1/(4+60) = 0.0161 + 0.0159 + 0.0156 = 0.0476
+       Query 1      Query 2      Query 3
+       Rank 2       Rank 3       Rank 4
+
+Doc C: 1/(3+60) + 1/(1+60) + 1/(3+60) = 0.0159 + 0.0164 + 0.0159 = 0.0482
+       Query 1      Query 2      Query 3
+       Rank 3       Rank 1       Rank 3
+
+Doc D: 1/(4+60) + 1/(5+60) + 1/(2+60) = 0.0156 + 0.0154 + 0.0161 = 0.0471
+       Query 1      Query 2      Query 3
+       Rank 4       Rank 5       Rank 2
+
+Doc E: 1/(5+60) + 1/(4+60) + 1/(5+60) = 0.0154 + 0.0156 + 0.0154 = 0.0464
+       Query 1      Query 2      Query 3
+       Rank 5       Rank 4       Rank 5
+
+FINAL RANKING:
+1. Doc A: 0.0489 ← Consistent top performer
+2. Doc C: 0.0482
+3. Doc B: 0.0476
+4. Doc D: 0.0471
+5. Doc E: 0.0464
+                </div>
+            </div>
+
+            <div class="insight-box">
+                <div class="insight-title">🎯 When RAG-Fusion Shines</div>
+                <p>RAG-Fusion works best when your problem is <strong>vocabulary diversity</strong> — users describe things differently than your documents do. By generating multiple query perspectives, you cast a wider net and catch relevant documents that use different terminology.</p>
+            </div>
+        </section>
+
+        <!-- Section 3: Cohere Re-Rank -->
+        <section id="cohere-rerank" class="section">
+            <h2 class="section-title"><span class="number">03</span> Cohere Re-Rank: Cross-Encoder Power</h2>
+
+            <p>While RAG-Fusion is algorithmic, Cohere Re-Rank uses a <strong>neural model (cross-encoder)</strong> to deeply understand the relationship between query and document.</p>
+
+            <div class="callout callout-analogy">
+                <div class="callout-title">📚 Analogy: ATS vs Human Recruiter</div>
+                <p>Think of basic vector search like an Applicant Tracking System (ATS) that keyword-matches resumes. It's fast but shallow — it might reject a perfect candidate because they used "Software Developer" instead of "Software Engineer." Cohere Re-Rank is like a human recruiter who actually <strong>reads and understands</strong> both the job description and the resume together, catching nuanced matches the ATS missed.</p>
+            </div>
+
+            <h3>Cross-Encoder vs Bi-Encoder</h3>
+
+            <div class="diagram-box">
+                <div class="diagram-title">📊 Architectural Difference</div>
+                <div class="diagram-content">
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                    BI-ENCODER (Vector Search)                                   │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                 │
+│    Query                              Document                                  │
+│      │                                   │                                      │
+│      ▼                                   ▼                                      │
+│  ┌────────────┐                    ┌────────────┐                               │
+│  │  Encoder   │                    │  Encoder   │  (Same or different model)    │
+│  └─────┬──────┘                    └─────┬──────┘                               │
+│        │                                 │                                      │
+│        ▼                                 ▼                                      │
+│   [0.2, -0.5, ...]               [0.3, -0.4, ...]   ← Separate embeddings       │
+│        │                                 │                                      │
+│        └──────────┬──────────────────────┘                                      │
+│                   │                                                             │
+│                   ▼                                                             │
+│            Cosine Similarity = 0.85                                             │
+│                                                                                 │
+│  ✅ FAST: Embeddings computed once, stored in vector DB                         │
+│  ❌ SHALLOW: No cross-attention between query and document                      │
+│                                                                                 │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                    CROSS-ENCODER (Cohere Re-Rank)                               │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                 │
+│    Query + Document (concatenated)                                              │
+│    ┌─────────────────────────────────────────┐                                  │
+│    │ [CLS] What are SLA remedies? [SEP]      │                                  │
+│    │ In case of breach, Customer may...      │                                  │
+│    └────────────────────┬────────────────────┘                                  │
+│                         │                                                       │
+│                         ▼                                                       │
+│              ┌──────────────────┐                                               │
+│              │  Cross-Encoder   │  ← Full attention between ALL tokens          │
+│              │   (Transformer)  │                                               │
+│              └────────┬─────────┘                                               │
+│                       │                                                         │
+│                       ▼                                                         │
+│                Relevance Score = 0.92                                           │
+│                                                                                 │
+│  ✅ DEEP: Query tokens can attend to document tokens directly                   │
+│  ❌ SLOW: Must run model for every query-document pair                          │
+│                                                                                 │
+└─────────────────────────────────────────────────────────────────────────────────┘
+                </div>
+            </div>
+
+            <h3>Why Cross-Encoders Are More Accurate</h3>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Aspect</th>
+                            <th>Bi-Encoder</th>
+                            <th>Cross-Encoder</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Attention</strong></td>
+                            <td>Query attends only to itself; Doc attends only to itself</td>
+                            <td>Query tokens can attend to document tokens and vice versa</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Context</strong></td>
+                            <td>Fixed embedding regardless of query</td>
+                            <td>Understanding changes based on specific query</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Example</strong></td>
+                            <td>"Bank" gets same embedding for river bank or financial bank</td>
+                            <td>Cross-encoder can see "SLA" in query and understand "breach" relates to it</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Speed</strong></td>
+                            <td>~1ms per query (pre-computed embeddings)</td>
+                            <td>~50-100ms per document pair</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Accuracy</strong></td>
+                            <td>Good (85-90% typical)</td>
+                            <td>Excellent (95%+ typical)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="callout callout-tip">
+                <div class="callout-title">💡 The Deep Understanding Difference</div>
+                <p>Consider the query "What happens if the vendor fails to meet SLA?" and a document saying "In the event of service level breach, Customer may terminate." A bi-encoder might miss this because "fails to meet SLA" and "service level breach" are different phrases. A cross-encoder sees them together and understands they mean the same thing in context.</p>
+            </div>
+        </section>
+
+        <!-- Section 4: Two-Stage Architecture -->
+        <section id="two-stage" class="section">
+            <h2 class="section-title"><span class="number">04</span> Two-Stage Retrieval Architecture</h2>
+
+            <p>Since cross-encoders are slow, you can't run them on your entire database. The solution is a <strong>two-stage architecture</strong> that combines the speed of bi-encoders with the accuracy of cross-encoders.</p>
+
+            <div class="diagram-box">
+                <div class="diagram-title">📊 Two-Stage Retrieval Pipeline</div>
+                <div class="diagram-content">
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                      TWO-STAGE RETRIEVAL ARCHITECTURE                           │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                 │
+│  User Query: "What are the payment terms for enterprise contracts?"             │
+│                           │                                                     │
+│                           ▼                                                     │
+│  ┌─────────────────────────────────────────────────────────────┐                │
+│  │           STAGE 1: BROAD RETRIEVAL (Bi-Encoder)              │                │
+│  │                                                              │                │
+│  │  • Use vector search for SPEED                               │                │
+│  │  • Cast wide net (retrieve 20-100 candidates)                │                │
+│  │  • Goal: HIGH RECALL (don't miss relevant docs)              │                │
+│  │  • Cost: FREE (just vector similarity)                       │                │
+│  │  • Time: ~50ms                                               │                │
+│  │                                                              │                │
+│  │  Output: 50 potentially relevant documents                   │                │
+│  └─────────────────────────────────────────────────────────────┘                │
+│                           │                                                     │
+│                           ▼                                                     │
+│  ┌─────────────────────────────────────────────────────────────┐                │
+│  │          STAGE 2: PRECISION RERANKING (Cross-Encoder)        │                │
+│  │                                                              │                │
+│  │  • Use Cohere Re-Rank for ACCURACY                           │                │
+│  │  • Score each of 50 candidates against query                 │                │
+│  │  • Goal: HIGH PRECISION (rank best docs first)               │                │
+│  │  • Cost: ~$0.005 (50 documents × $0.0001/doc)                │                │
+│  │  • Time: ~500ms                                              │                │
+│  │                                                              │                │
+│  │  Output: Top 5 most relevant documents                       │                │
+│  └─────────────────────────────────────────────────────────────┘                │
+│                           │                                                     │
+│                           ▼                                                     │
+│                    LLM Generation with Top 5 Docs                               │
+│                                                                                 │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                      WHY NOT JUST COHERE ON EVERYTHING?                         │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                 │
+│  Your database: 100,000 documents                                               │
+│                                                                                 │
+│  OPTION A: Cohere on ALL documents                                              │
+│  • 100,000 API calls per search                                                 │
+│  • Cost: ~$10 per search                                                        │
+│  • Latency: 30+ seconds                                                         │
+│  • Result: ❌ Impractical                                                       │
+│                                                                                 │
+│  OPTION B: Two-Stage (Vector + Cohere)                                          │
+│  • Stage 1: Vector search returns 50 candidates (FREE, ~50ms)                   │
+│  • Stage 2: Cohere on 50 documents (~$0.005, ~500ms)                            │
+│  • Result: ✅ Fast, affordable, accurate                                        │
+│                                                                                 │
+└─────────────────────────────────────────────────────────────────────────────────┘
+                </div>
+            </div>
+
+            <div class="callout callout-analogy">
+                <div class="callout-title">📚 Analogy: Job Application Funnel</div>
+                <p>Think of hiring for a job. Stage 1 is the ATS that quickly filters 1000 applications down to 50 based on keywords (fast, cheap, imperfect). Stage 2 is human recruiters carefully reading those 50 resumes (slow, expensive, accurate). You wouldn't have humans read all 1000, but you also wouldn't hire based only on ATS scores.</p>
+            </div>
+
+            <h3>Tuning the Two Stages</h3>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Stage 1 (Vector)</th>
+                            <th>Stage 2 (Rerank)</th>
+                            <th>Trade-off</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Documents</strong></td>
+                            <td>20-100</td>
+                            <td>Top 3-5 final</td>
+                            <td>More Stage 1 = better recall, higher Stage 2 cost</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Threshold</strong></td>
+                            <td>Low (0.5 similarity)</td>
+                            <td>High (0.7+ relevance)</td>
+                            <td>Lower Stage 1 threshold catches edge cases</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Latency Budget</strong></td>
+                            <td>~50-100ms</td>
+                            <td>~300-800ms</td>
+                            <td>Most latency should be in Stage 2 (accuracy)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Section 5: Comparison -->
+        <section id="rerank-comparison" class="section">
+            <h2 class="section-title"><span class="number">05</span> RAG-Fusion vs Cohere: Decision Framework</h2>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Aspect</th>
+                            <th>RAG-Fusion + RRF</th>
+                            <th>Cohere Re-Rank</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Approach</strong></td>
+                            <td>Algorithmic (query expansion + voting)</td>
+                            <td>Neural (cross-encoder model)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>External API</strong></td>
+                            <td>Only for LLM query generation</td>
+                            <td>Yes (Cohere API required)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Cost per query</strong></td>
+                            <td>~$0.001 (just query generation)</td>
+                            <td>~$0.005-0.01 (per document scored)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Latency</strong></td>
+                            <td>~200ms (parallel retrievals)</td>
+                            <td>~500ms (sequential scoring)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Quality</strong></td>
+                            <td>Good (handles vocabulary diversity)</td>
+                            <td>Excellent (deep semantic understanding)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Offline capable</strong></td>
+                            <td>Yes (with local LLM)</td>
+                            <td>No (requires API)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Best for</strong></td>
+                            <td>Vocabulary mismatch, diverse queries</td>
+                            <td>Nuanced relevance, precision-critical</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>Decision Framework</h3>
+
+            <div class="diagram-box">
+                <div class="diagram-title">📊 Choosing Your Reranking Strategy</div>
+                <div class="diagram-content">
+                     START
+                       │
+                       ▼
+        ┌──────────────────────────────┐
+        │ Is vocabulary diversity      │
+        │ your main problem?           │
+        │ (Users use different terms   │
+        │  than your documents)        │
+        └──────────────┬───────────────┘
+                       │
+              ┌────────┴────────┐
+              │                 │
+             YES               NO
+              │                 │
+              ▼                 ▼
+    ┌─────────────────┐   ┌──────────────────────────┐
+    │  Use RAG-Fusion │   │ Is precision critical?   │
+    │  + RRF          │   │ (Legal, medical, finance)│
+    └─────────────────┘   └────────────┬─────────────┘
+                                       │
+                              ┌────────┴────────┐
+                              │                 │
+                             YES               NO
+                              │                 │
+                              ▼                 ▼
+                   ┌──────────────────┐   ┌─────────────────┐
+                   │ Use Cohere       │   │ Start with basic│
+                   │ Re-Rank          │   │ vector search   │
+                   └──────────────────┘   └─────────────────┘
+
+              ┌─────────────────────────────────────────┐
+              │     WANT MAXIMUM QUALITY?               │
+              │                                         │
+              │  Use BOTH: RAG-Fusion → RRF → Cohere    │
+              │                                         │
+              │  RAG-Fusion catches diverse terminology │
+              │  Cohere adds precision on top           │
+              └─────────────────────────────────────────┘
+                </div>
+            </div>
+
+            <div class="insight-box">
+                <div class="insight-title">🎯 Combining Both for Maximum Quality</div>
+                <p>For high-stakes applications (healthcare, legal, finance), use <strong>both</strong> approaches in sequence: RAG-Fusion expands your query to catch documents using different terminology, RRF fuses the results, then Cohere Re-Rank adds precision by deeply understanding which results actually answer the question.</p>
+            </div>
+        </section>
+
+        <!-- Section 6: CRAG Introduction -->
+        <section id="crag-intro" class="section">
+            <h2 class="section-title"><span class="number">06</span> CRAG: Corrective RAG Introduction</h2>
+
+            <p>Reranking solves the "wrong order" problem, but what if your documents are simply <strong>wrong, outdated, or missing</strong>? That's where <strong>Corrective RAG (CRAG)</strong> comes in — it doesn't just reorder documents, it <strong>grades them and finds alternatives</strong> if needed.</p>
+
+            <div class="callout callout-analogy">
+                <div class="callout-title">📚 Analogy: The Smart Research Assistant</div>
+                <p>Imagine asking a research assistant to find information on a topic. A basic assistant just hands you whatever they found in the filing cabinet. A CRAG-like assistant first <strong>evaluates</strong> what they found ("Is this actually relevant? Is it up to date?"), and if the documents are lacking, <strong>proactively searches elsewhere</strong> (the internet, other databases) to fill the gaps.</p>
+            </div>
+
+            <h3>The Problem CRAG Solves</h3>
+
+            <div class="diagram-box">
+                <div class="diagram-title">📊 When Retrieval Isn't Enough</div>
+                <div class="diagram-content">
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                   SCENARIOS WHERE BASIC RAG FAILS                               │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                 │
+│  SCENARIO 1: IRRELEVANT DOCUMENTS                                               │
+│  ─────────────────────────────────────────────────────────────────────────────  │
+│  Query: "How do I integrate with Salesforce?"                                   │
+│  Retrieved: HubSpot integration guide (wrong platform!)                         │
+│  Basic RAG: Generates answer based on wrong document ❌                         │
+│  CRAG: Grades as IRRELEVANT, searches web for correct info ✅                  │
+│                                                                                 │
+│  SCENARIO 2: OUTDATED DOCUMENTS                                                 │
+│  ─────────────────────────────────────────────────────────────────────────────  │
+│  Query: "What's NVIDIA's stock outlook?"                                        │
+│  Retrieved: Analysis from March 2023 (20 months old!)                           │
+│  Basic RAG: Generates outdated prediction ❌                                    │
+│  CRAG: Grades as STALE, supplements with recent web data ✅                    │
+│                                                                                 │
+│  SCENARIO 3: KNOWLEDGE GAP                                                      │
+│  ─────────────────────────────────────────────────────────────────────────────  │
+│  Query: "What's your return policy for international orders?"                   │
+│  Retrieved: Domestic return policy only (gap in knowledge base)                 │
+│  Basic RAG: Gives wrong answer or hallucinates ❌                               │
+│  CRAG: Grades as PARTIAL, searches for international policy ✅                 │
+│                                                                                 │
+│  SCENARIO 4: AMBIGUOUS RELEVANCE                                                │
+│  ─────────────────────────────────────────────────────────────────────────────  │
+│  Query: "Python best practices"                                                 │
+│  Retrieved: Mix of coding standards, snake care, Monty Python quotes            │
+│  Basic RAG: Confused answer mixing topics ❌                                    │
+│  CRAG: Grades each doc, keeps only programming-related ✅                      │
+│                                                                                 │
+└─────────────────────────────────────────────────────────────────────────────────┘
+                </div>
+            </div>
+
+            <h3>CRAG's Core Insight</h3>
+
+            <div class="insight-box">
+                <div class="insight-title">🎯 The "C" in CRAG: Corrective</div>
+                <p>CRAG's key innovation is adding a <strong>grading step</strong> between retrieval and generation. Instead of blindly trusting whatever the vector search returns, CRAG asks: "Are these documents actually useful for answering this question?" If not, it takes <strong>corrective action</strong> — either filtering out bad documents or fetching alternatives from the web.</p>
+            </div>
+        </section>
+
+        <!-- Section 7: CRAG Components -->
+        <section id="crag-components" class="section">
+            <h2 class="section-title"><span class="number">07</span> CRAG Components Deep Dive</h2>
+
+            <h3>Component 1: Document Grading</h3>
+
+            <p>The grading component uses an LLM to evaluate each retrieved document for relevance to the query.</p>
+
+            <div class="diagram-box">
+                <div class="diagram-title">📊 Document Grading Flow</div>
+                <div class="diagram-content">
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                         DOCUMENT GRADING                                        │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                 │
+│  For EACH retrieved document:                                                   │
+│                                                                                 │
+│  ┌─────────────────────────────────────────────────────────────┐                │
+│  │                        LLM GRADER                            │                │
+│  │                                                              │                │
+│  │  Input:                                                      │                │
+│  │  • User Question: "How do I reset my password?"              │                │
+│  │  • Document: "To change your email preferences, go to..."    │                │
+│  │                                                              │                │
+│  │  Prompt:                                                     │                │
+│  │  "You are a grader assessing relevance of a retrieved        │                │
+│  │   document to a user question.                               │                │
+│  │                                                              │                │
+│  │   Does the document contain information that could help      │                │
+│  │   answer the question?                                       │                │
+│  │                                                              │                │
+│  │   Give a binary score: 'yes' or 'no'"                        │                │
+│  │                                                              │                │
+│  │  Output: "no" → Grade: IRRELEVANT ❌                         │                │
+│  └─────────────────────────────────────────────────────────────┘                │
+│                                                                                 │
+│  GRADING CRITERIA:                                                              │
+│  ┌────────────────┬─────────────────────────────────────────────┐               │
+│  │ RELEVANT ✅    │ Document contains information that directly │               │
+│  │                │ or indirectly helps answer the question     │               │
+│  ├────────────────┼─────────────────────────────────────────────┤               │
+│  │ IRRELEVANT ❌  │ Document is off-topic, wrong context, or    │               │
+│  │                │ doesn't contribute to answering the query   │               │
+│  └────────────────┴─────────────────────────────────────────────┘               │
+│                                                                                 │
+└─────────────────────────────────────────────────────────────────────────────────┘
+                </div>
+            </div>
+
+            <h3>Component 2: Decision Router</h3>
+
+            <p>Based on grading results, CRAG decides what action to take:</p>
+
+            <div class="diagram-box">
+                <div class="diagram-title">📊 CRAG Decision Tree</div>
+                <div class="diagram-content">
+                        Grade All Retrieved Documents
+                                    │
+                    ┌───────────────┼───────────────┐
+                    │               │               │
+                    ▼               ▼               ▼
+              ALL RELEVANT    SOME RELEVANT    ALL IRRELEVANT
+                    │               │               │
+                    ▼               ▼               ▼
+              ┌─────────┐    ┌──────────────┐  ┌──────────────┐
+              │Generate │    │Keep relevant │  │Discard all   │
+              │answer   │    │+ Web search  │  │+ Web search  │
+              │directly │    │for gaps      │  │only          │
+              └─────────┘    └──────────────┘  └──────────────┘
+                    │               │               │
+                    └───────────────┴───────────────┘
+                                    │
+                                    ▼
+                              Generate Answer
+
+  DECISION LOGIC:
+
+  ┌─────────────────────────────────────────────────────────────────┐
+  │ IF all documents RELEVANT:                                      │
+  │    → Use them directly for generation (no web search)           │
+  │                                                                 │
+  │ IF some documents RELEVANT, some IRRELEVANT:                    │
+  │    → Keep relevant documents                                    │
+  │    → Discard irrelevant documents                               │
+  │    → SUPPLEMENT with web search (fill potential gaps)           │
+  │                                                                 │
+  │ IF all documents IRRELEVANT:                                    │
+  │    → Discard all retrieved documents                            │
+  │    → RELY ENTIRELY on web search                                │
+  └─────────────────────────────────────────────────────────────────┘
+                </div>
+            </div>
+
+            <h3>Component 3: Query Transformation</h3>
+
+            <p>When web search is needed, CRAG transforms the query to be more effective for web search:</p>
+
+            <div class="callout callout-tip">
+                <div class="callout-title">💡 Why Transform Queries?</div>
+                <p>Internal knowledge base queries are often different from web search queries. "How do I integrate your API with Salesforce?" becomes "[Company Name] API Salesforce integration guide 2024" — adding company name (your KB doesn't need it), year (for recency), and web-friendly keywords.</p>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Original Query (KB)</th>
+                            <th>Transformed Query (Web)</th>
+                            <th>Why Transform?</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>"password reset"</td>
+                            <td>"[App Name] password reset guide 2024"</td>
+                            <td>Add app name, recency</td>
+                        </tr>
+                        <tr>
+                            <td>"pricing"</td>
+                            <td>"[Company] pricing plans enterprise cost"</td>
+                            <td>Add company, specificity</td>
+                        </tr>
+                        <tr>
+                            <td>"API rate limits"</td>
+                            <td>"[API Name] rate limits documentation current"</td>
+                            <td>Add API name, freshness</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>Component 4: Web Search Integration</h3>
+
+            <p>CRAG uses web search (typically via Tavily API) to supplement or replace retrieved documents:</p>
+
+            <div class="diagram-box">
+                <div class="diagram-title">📊 Web Search Integration</div>
+                <div class="diagram-content">
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                         WEB SEARCH COMPONENT                                    │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                 │
+│  Transformed Query                                                              │
+│         │                                                                       │
+│         ▼                                                                       │
+│  ┌─────────────────────────────────────────────────────────────┐                │
+│  │                    TAVILY SEARCH API                         │                │
+│  │                                                              │                │
+│  │  • Optimized for RAG use cases                               │                │
+│  │  • Returns structured results with:                          │                │
+│  │    - Page content (cleaned)                                  │                │
+│  │    - Source URL                                              │                │
+│  │    - Relevance score                                         │                │
+│  │  • Filters out low-quality sources                           │                │
+│  └─────────────────────────────────────────────────────────────┘                │
+│         │                                                                       │
+│         ▼                                                                       │
+│  ┌─────────────────────────────────────────────────────────────┐                │
+│  │                   RESULT PROCESSING                          │                │
+│  │                                                              │                │
+│  │  • Extract relevant snippets                                 │                │
+│  │  • Verify source credibility                                 │                │
+│  │  • Check content freshness                                   │                │
+│  │  • Combine with KB documents (if any relevant)               │                │
+│  └─────────────────────────────────────────────────────────────┘                │
+│         │                                                                       │
+│         ▼                                                                       │
+│  Combined Context for Generation                                                │
+│  ├─ Relevant KB docs (if any)                                                   │
+│  └─ Web search results                                                          │
+│                                                                                 │
+└─────────────────────────────────────────────────────────────────────────────────┘
+                </div>
+            </div>
+
+            <h3>Complete CRAG Flow</h3>
+
+            <div class="diagram-box">
+                <div class="diagram-title">📊 End-to-End CRAG Pipeline</div>
+                <div class="diagram-content">
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                      COMPLETE CRAG ARCHITECTURE                                 │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                 │
+│  User Query: "What's your refund policy for international orders?"              │
+│                           │                                                     │
+│                           ▼                                                     │
+│  ┌─────────────────────────────────────────────────────────────┐                │
+│  │                 1. DOCUMENT RETRIEVAL                        │                │
+│  │                    (Vector Search)                           │                │
+│  │                                                              │                │
+│  │  Retrieved:                                                  │                │
+│  │  • Doc 1: "Domestic refund policy..." (partial match)        │                │
+│  │  • Doc 2: "Shipping to international..." (partial match)     │                │
+│  │  • Doc 3: "General terms and conditions..." (generic)        │                │
+│  └─────────────────────────────────────────────────────────────┘                │
+│                           │                                                     │
+│                           ▼                                                     │
+│  ┌─────────────────────────────────────────────────────────────┐                │
+│  │                 2. DOCUMENT GRADING                          │                │
+│  │                    (LLM Evaluator)                           │                │
+│  │                                                              │                │
+│  │  Doc 1: "Domestic refund policy"                             │                │
+│  │         → IRRELEVANT ❌ (domestic, not international)        │                │
+│  │                                                              │                │
+│  │  Doc 2: "Shipping to international"                          │                │
+│  │         → RELEVANT ✅ (mentions international)               │                │
+│  │                                                              │                │
+│  │  Doc 3: "General terms and conditions"                       │                │
+│  │         → IRRELEVANT ❌ (too generic)                        │                │
+│  │                                                              │                │
+│  │  Result: 1 relevant, 2 irrelevant → MIXED                    │                │
+│  └─────────────────────────────────────────────────────────────┘                │
+│                           │                                                     │
+│                           ▼                                                     │
+│  ┌─────────────────────────────────────────────────────────────┐                │
+│  │                 3. DECISION: SUPPLEMENT                      │                │
+│  │                                                              │                │
+│  │  Keep: Doc 2 (relevant)                                      │                │
+│  │  Discard: Doc 1, Doc 3 (irrelevant)                          │                │
+│  │  Action: Search web for more info on international refunds   │                │
+│  └─────────────────────────────────────────────────────────────┘                │
+│                           │                                                     │
+│                           ▼                                                     │
+│  ┌─────────────────────────────────────────────────────────────┐                │
+│  │                 4. QUERY TRANSFORMATION                      │                │
+│  │                                                              │                │
+│  │  Original: "refund policy international orders"              │                │
+│  │  Transformed: "[Company] international order refund policy   │                │
+│  │               return shipping 2024"                          │                │
+│  └─────────────────────────────────────────────────────────────┘                │
+│                           │                                                     │
+│                           ▼                                                     │
+│  ┌─────────────────────────────────────────────────────────────┐                │
+│  │                 5. WEB SEARCH                                │                │
+│  │                    (Tavily API)                              │                │
+│  │                                                              │                │
+│  │  Found:                                                      │                │
+│  │  • Company FAQ page with international policy                │                │
+│  │  • Help center article on global returns                     │                │
+│  └─────────────────────────────────────────────────────────────┘                │
+│                           │                                                     │
+│                           ▼                                                     │
+│  ┌─────────────────────────────────────────────────────────────┐                │
+│  │                 6. CONTEXT ASSEMBLY                          │                │
+│  │                                                              │                │
+│  │  Final Context:                                              │                │
+│  │  ├─ Doc 2 (from KB) - shipping info                          │                │
+│  │  ├─ Web Result 1 - international refund policy               │                │
+│  │  └─ Web Result 2 - global returns process                    │                │
+│  └─────────────────────────────────────────────────────────────┘                │
+│                           │                                                     │
+│                           ▼                                                     │
+│  ┌─────────────────────────────────────────────────────────────┐                │
+│  │                 7. GENERATE RESPONSE                         │                │
+│  │                                                              │                │
+│  │  "For international orders, our refund policy allows..."     │                │
+│  │                                                              │                │
+│  │  Sources cited:                                              │                │
+│  │  • Internal KB: 1 document                                   │                │
+│  │  • Web: 2 sources                                            │                │
+│  └─────────────────────────────────────────────────────────────┘                │
+│                                                                                 │
+└─────────────────────────────────────────────────────────────────────────────────┘
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 8: Use Cases -->
+        <section id="use-cases" class="section">
+            <h2 class="section-title"><span class="number">08</span> Real-World Use Cases & Architectures</h2>
+
+            <h3>Use Case 1: E-Commerce Product Search (RAG-Fusion)</h3>
+
+            <div class="diagram-box">
+                <div class="diagram-title">📊 E-Commerce Search Architecture</div>
+                <div class="diagram-content">
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                    E-COMMERCE SEARCH ARCHITECTURE                               │
+│                         (RAG-Fusion + RRF)                                      │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                 │
+│  BUSINESS PROBLEM:                                                              │
+│  Customers use varied terminology ("sneakers" vs "running shoes" vs "trainers") │
+│  Basic search misses relevant products using different words                    │
+│                                                                                 │
+│  ─────────────────────────────────────────────────────────────────────────────  │
+│                                                                                 │
+│  Customer: "comfortable shoes for standing all day"                             │
+│                           │                                                     │
+│                           ▼                                                     │
+│  ┌─────────────────────────────────────────────────────────────┐                │
+│  │              QUERY EXPANSION SERVICE (LLM)                   │                │
+│  │                                                              │                │
+│  │  Generates 5 query variations:                               │                │
+│  │  ├─ "cushioned footwear long hours"                          │                │
+│  │  ├─ "anti-fatigue work shoes"                                │                │
+│  │  ├─ "nursing shoes comfortable"                              │                │
+│  │  ├─ "retail worker standing shoes"                           │                │
+│  │  └─ "orthopedic support sneakers"                            │                │
+│  └─────────────────────────────────────────────────────────────┘                │
+│                           │                                                     │
+│         ┌─────────────────┴─────────────────┐                                   │
+│         ▼                                   ▼                                   │
+│  ┌─────────────┐                     ┌─────────────┐                            │
+│  │  PARALLEL   │  ───────────────►   │   PRODUCT   │                            │
+│  │  RETRIEVAL  │   5 queries × 15    │  VECTOR DB  │                            │
+│  │             │   products each     │  (500K SKUs)│                            │
+│  └─────────────┘                     └─────────────┘                            │
+│                           │                                                     │
+│                           ▼                                                     │
+│  ┌─────────────────────────────────────────────────────────────┐                │
+│  │                    RRF FUSION                                │                │
+│  │                                                              │                │
+│  │  Products in MULTIPLE query results score higher             │                │
+│  │  "Memory Foam Work Sneakers" → 4/5 queries = HIGH score      │                │
+│  │  "Red Running Shoes" → 1/5 queries = LOW score               │                │
+│  └─────────────────────────────────────────────────────────────┘                │
+│                           │                                                     │
+│                           ▼                                                     │
+│               Top 10 Results (sorted by RRF score)                              │
+│                                                                                 │
+│  ─────────────────────────────────────────────────────────────────────────────  │
+│                                                                                 │
+│  WHY IT WORKS:                                                                  │
+│  • Query "nursing shoes" catches medical footwear descriptions                  │
+│  • Query "retail worker" catches service industry products                      │
+│  • Products matching MULTIPLE perspectives are truly relevant                   │
+│                                                                                 │
+│  LATENCY: ~200ms total (100ms LLM + 50ms parallel search + 10ms RRF)            │
+│                                                                                 │
+└─────────────────────────────────────────────────────────────────────────────────┘
+                </div>
+            </div>
+
+            <h3>Use Case 2: Legal Contract Search (Cohere Re-Rank)</h3>
+
+            <div class="diagram-box">
+                <div class="diagram-title">📊 Legal Search Architecture</div>
+                <div class="diagram-content">
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                    LEGAL SEARCH ARCHITECTURE                                    │
+│                      (Two-Stage with Cohere Re-Rank)                            │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                 │
+│  BUSINESS PROBLEM:                                                              │
+│  Finding specific clauses requires deep semantic understanding                  │
+│  "termination" might mean employment termination OR contract termination        │
+│                                                                                 │
+│  ─────────────────────────────────────────────────────────────────────────────  │
+│                                                                                 │
+│  Lawyer: "What remedies do we have if vendor fails to meet SLA?"                │
+│                           │                                                     │
+│                           ▼                                                     │
+│  ┌─────────────────────────────────────────────────────────────┐                │
+│  │           STAGE 1: BROAD RETRIEVAL (Vector)                  │                │
+│  │                                                              │                │
+│  │  • Query: semantic embedding of question                     │                │
+│  │  • Filter: contract_type = "SaaS" or "Vendor"                │                │
+│  │  • Retrieve: TOP 50 clause candidates                        │                │
+│  │  • Goal: Don't miss any potentially relevant clauses         │                │
+│  └─────────────────────────────────────────────────────────────┘                │
+│                           │                                                     │
+│                           ▼                                                     │
+│  ┌─────────────────────────────────────────────────────────────┐                │
+│  │          STAGE 2: PRECISION RERANKING (Cohere)               │                │
+│  │                                                              │                │
+│  │  Cross-encoder analyzes each clause against query:           │                │
+│  │                                                              │                │
+│  │  Clause: "In the event Provider fails to meet uptime..."     │                │
+│  │  Query:  "...vendor fails to meet SLA..."                    │                │
+│  │                                                              │                │
+│  │  Cross-encoder understands:                                  │                │
+│  │  • "Provider" ≈ "vendor" in this context                     │                │
+│  │  • "uptime commitment" = SLA metric                          │                │
+│  │  • This clause DOES describe remedies                        │                │
+│  │                                                              │                │
+│  │  Score: 0.94 (highly relevant) ✓                             │                │
+│  └─────────────────────────────────────────────────────────────┘                │
+│                           │                                                     │
+│                           ▼                                                     │
+│              Top 5 Clauses with Relevance Scores                                │
+│                                                                                 │
+│  ─────────────────────────────────────────────────────────────────────────────  │
+│                                                                                 │
+│  WHY IT WORKS:                                                                  │
+│  • Cross-encoder sees query + document TOGETHER                                 │
+│  • Understands legal context and synonyms                                       │
+│  • Distinguishes "mentions SLA" from "describes SLA remedies"                   │
+│                                                                                 │
+│  LATENCY: ~600ms total (50ms vector + 500ms rerank)                             │
+│  COST: ~$0.005 per search (50 docs × $0.0001)                                   │
+│                                                                                 │
+└─────────────────────────────────────────────────────────────────────────────────┘
+                </div>
+            </div>
+
+            <h3>Use Case 3: Enterprise Support Bot (CRAG)</h3>
+
+            <div class="diagram-box">
+                <div class="diagram-title">📊 Enterprise Support Architecture</div>
+                <div class="diagram-content">
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│               ENTERPRISE SUPPORT BOT ARCHITECTURE (CRAG)                        │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                 │
+│  BUSINESS PROBLEM:                                                              │
+│  • Knowledge base may not cover edge cases                                      │
+│  • Some docs are outdated                                                       │
+│  • Bot confidently gives wrong answers (hallucination)                          │
+│                                                                                 │
+│  ─────────────────────────────────────────────────────────────────────────────  │
+│                                                                                 │
+│  Customer: "How do I integrate your API with Salesforce?"                       │
+│                           │                                                     │
+│                           ▼                                                     │
+│  ┌─────────────────────────────────────────────────────────────┐                │
+│  │                    KB RETRIEVAL                              │                │
+│  │                                                              │                │
+│  │  Retrieved:                                                  │                │
+│  │  • Doc 1: "API Authentication Guide"                         │                │
+│  │  • Doc 2: "Salesforce Integration (v2.1)"                    │                │
+│  │  • Doc 3: "HubSpot Integration Guide" ← WRONG PLATFORM       │                │
+│  │  • Doc 4: "API Rate Limits" (2019) ← OUTDATED                │                │
+│  └─────────────────────────────────────────────────────────────┘                │
+│                           │                                                     │
+│                           ▼                                                     │
+│  ┌─────────────────────────────────────────────────────────────┐                │
+│  │                  DOCUMENT GRADING                            │                │
+│  │                                                              │                │
+│  │  Doc 1: API Auth Guide → RELEVANT ✅ (needed for setup)      │                │
+│  │  Doc 2: Salesforce v2.1 → RELEVANT ✅ (direct answer)        │                │
+│  │  Doc 3: HubSpot Guide → IRRELEVANT ❌ (wrong platform)       │                │
+│  │  Doc 4: Rate Limits 2019 → IRRELEVANT ❌ (outdated)          │                │
+│  │                                                              │                │
+│  │  Decision: MIXED → Keep 2, supplement with web               │                │
+│  └─────────────────────────────────────────────────────────────┘                │
+│                           │                                                     │
+│                           ▼                                                     │
+│  ┌─────────────────────────────────────────────────────────────┐                │
+│  │                    WEB SEARCH                                │                │
+│  │                                                              │                │
+│  │  Query: "[Company] API Salesforce integration guide 2024"    │                │
+│  │                                                              │                │
+│  │  Found: Updated AppExchange listing with latest steps        │                │
+│  └─────────────────────────────────────────────────────────────┘                │
+│                           │                                                     │
+│                           ▼                                                     │
+│  ┌─────────────────────────────────────────────────────────────┐                │
+│  │              GENERATE WITH VERIFIED CONTEXT                  │                │
+│  │                                                              │                │
+│  │  Context:                                                    │                │
+│  │  ├─ Doc 1: API Authentication (KB) ✅                        │                │
+│  │  ├─ Doc 2: Salesforce Integration (KB) ✅                    │                │
+│  │  └─ Web: AppExchange listing ✅                              │                │
+│  │                                                              │                │
+│  │  "To integrate our API with Salesforce:                      │                │
+│  │   1. Install our app from AppExchange...                     │                │
+│  │   2. Configure API authentication...                         │                │
+│  │                                                              │                │
+│  │   📚 Sources: Internal (2), Web (1)"                         │                │
+│  └─────────────────────────────────────────────────────────────┘                │
+│                                                                                 │
+│  ─────────────────────────────────────────────────────────────────────────────  │
+│                                                                                 │
+│  WHY IT WORKS:                                                                  │
+│  • Filtered out irrelevant HubSpot guide (wrong platform)                       │
+│  • Filtered out outdated 2019 rate limits                                       │
+│  • Supplemented with fresh web data                                             │
+│  • User gets accurate, up-to-date answer                                        │
+│                                                                                 │
+└─────────────────────────────────────────────────────────────────────────────────┘
+                </div>
+            </div>
+
+            <h3>Use Case 4: Healthcare Clinical Decision Support (Both!)</h3>
+
+            <div class="diagram-box">
+                <div class="diagram-title">📊 Healthcare Architecture (Maximum Quality)</div>
+                <div class="diagram-content">
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                 CLINICAL DECISION SUPPORT ARCHITECTURE                          │
+│                   (RAG-Fusion + Cohere + CRAG)                                   │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                 │
+│  BUSINESS PROBLEM:                                                              │
+│  • Medical terminology varies widely (heart attack = MI = STEMI)                │
+│  • Wrong information could be dangerous                                         │
+│  • Guidelines update frequently                                                 │
+│                                                                                 │
+│  ─────────────────────────────────────────────────────────────────────────────  │
+│                                                                                 │
+│  Doctor: "treatment protocol for elderly patient with heart attack              │
+│           and diabetes"                                                         │
+│                           │                                                     │
+│                           ▼                                                     │
+│  ┌─────────────────────────────────────────────────────────────┐                │
+│  │         STAGE 1: RAG-FUSION (Vocabulary Coverage)            │                │
+│  │                                                              │                │
+│  │  Medical query expansion:                                    │                │
+│  │  ├─ "STEMI management geriatric diabetic patient"            │                │
+│  │  ├─ "acute myocardial infarction treatment DM2 over 65"      │                │
+│  │  ├─ "MI protocol contraindications diabetes elderly"         │                │
+│  │  └─ "coronary intervention guidelines diabetic seniors"      │                │
+│  │                                                              │                │
+│  │  → Catches documents using any medical terminology           │                │
+│  └─────────────────────────────────────────────────────────────┘                │
+│                           │                                                     │
+│                           ▼                                                     │
+│  ┌─────────────────────────────────────────────────────────────┐                │
+│  │           STAGE 2: RRF FUSION                                │                │
+│  │                                                              │                │
+│  │  Documents found by MULTIPLE terminology variations          │                │
+│  │  score higher → Top 30 candidates                            │                │
+│  └─────────────────────────────────────────────────────────────┘                │
+│                           │                                                     │
+│                           ▼                                                     │
+│  ┌─────────────────────────────────────────────────────────────┐                │
+│  │          STAGE 3: COHERE RE-RANK (Precision)                 │                │
+│  │                                                              │                │
+│  │  Cross-encoder scores 30 candidates against ORIGINAL query   │                │
+│  │  (Doctor's exact words capture specific clinical scenario)   │                │
+│  │  → Top 10 most relevant                                      │                │
+│  └─────────────────────────────────────────────────────────────┘                │
+│                           │                                                     │
+│                           ▼                                                     │
+│  ┌─────────────────────────────────────────────────────────────┐                │
+│  │          STAGE 4: CRAG GRADING (Freshness Check)             │                │
+│  │                                                              │                │
+│  │  Grade each document for:                                    │                │
+│  │  • Relevance to specific scenario                            │                │
+│  │  • Freshness (medical guidelines change!)                    │                │
+│  │                                                              │                │
+│  │  Doc from 2019 → STALE ⚠️ → Supplement with web              │                │
+│  └─────────────────────────────────────────────────────────────┘                │
+│                           │                                                     │
+│                           ▼                                                     │
+│  ┌─────────────────────────────────────────────────────────────┐                │
+│  │              FINAL RESPONSE WITH SAFETY LAYER                │                │
+│  │                                                              │                │
+│  │  "Based on AHA 2023 guidelines and current evidence:         │                │
+│  │                                                              │                │
+│  │   For elderly diabetic patients with STEMI:                  │                │
+│  │   1. Primary PCI preferred if available...                   │                │
+│  │   2. Note: Metformin considerations before contrast...       │                │
+│  │                                                              │                │
+│  │   ⚠️ Analysis excludes outdated 2019 guidelines              │                │
+│  │   📊 Evidence Level: A                                       │                │
+│  │   📚 Sources: Internal (3), PubMed (2)"                      │                │
+│  └─────────────────────────────────────────────────────────────┘                │
+│                                                                                 │
+│  ─────────────────────────────────────────────────────────────────────────────  │
+│                                                                                 │
+│  WHY USE ALL THREE:                                                             │
+│  • RAG-Fusion: Medical terminology varies widely                                │
+│  • Cohere: Precision is critical (wrong advice = dangerous)                     │
+│  • CRAG: Guidelines update frequently, need freshness check                     │
+│                                                                                 │
+└─────────────────────────────────────────────────────────────────────────────────┘
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 9: Decision Guide -->
+        <section id="decision-guide" class="section">
+            <h2 class="section-title"><span class="number">09</span> When to Use What: Decision Guide</h2>
+
+            <div class="diagram-box">
+                <div class="diagram-title">📊 Complete Decision Framework</div>
+                <div class="diagram-content">
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                    RETRIEVAL ENHANCEMENT DECISION GUIDE                         │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                 │
+│  STEP 1: IDENTIFY YOUR PROBLEM                                                  │
+│  ═══════════════════════════════════════════════════════════════════════════    │
+│                                                                                 │
+│  ┌─────────────────────────────────────────────────────────────────────────┐    │
+│  │ "My documents are good, but ranking is wrong"                           │    │
+│  │                                                                         │    │
+│  │  → Use RERANKING (Part 15)                                              │    │
+│  │    • RAG-Fusion if vocabulary diversity is the issue                    │    │
+│  │    • Cohere if precision/nuance is the issue                            │    │
+│  │    • Both for maximum quality                                           │    │
+│  └─────────────────────────────────────────────────────────────────────────┘    │
+│                                                                                 │
+│  ┌─────────────────────────────────────────────────────────────────────────┐    │
+│  │ "My documents might be wrong, outdated, or missing"                     │    │
+│  │                                                                         │    │
+│  │  → Use CRAG (Part 16)                                                   │    │
+│  │    • Grades documents for relevance                                     │    │
+│  │    • Falls back to web search when needed                               │    │
+│  │    • Prevents hallucination from bad context                            │    │
+│  └─────────────────────────────────────────────────────────────────────────┘    │
+│                                                                                 │
+│  ┌─────────────────────────────────────────────────────────────────────────┐    │
+│  │ "Both problems + stakes are high"                                       │    │
+│  │                                                                         │    │
+│  │  → Use BOTH: Reranking → CRAG                                           │    │
+│  │    • RAG-Fusion catches terminology variations                          │    │
+│  │    • Cohere adds precision                                              │    │
+│  │    • CRAG verifies and supplements                                      │    │
+│  └─────────────────────────────────────────────────────────────────────────┘    │
+│                                                                                 │
+│  ─────────────────────────────────────────────────────────────────────────────  │
+│                                                                                 │
+│  STEP 2: MATCH TO USE CASE                                                      │
+│  ═══════════════════════════════════════════════════════════════════════════    │
+│                                                                                 │
+│  USE CASE                    │ RECOMMENDED APPROACH                             │
+│  ────────────────────────────┼──────────────────────────────────────────────    │
+│  E-commerce search           │ RAG-Fusion (vocabulary diversity)                │
+│  Legal document analysis     │ Cohere Re-Rank (precision critical)              │
+│  Customer support bot        │ CRAG (KB might be incomplete)                    │
+│  Financial research          │ CRAG (data freshness critical)                   │
+│  Healthcare/Clinical         │ ALL THREE (maximum safety)                       │
+│  Code search                 │ RAG-Fusion (many ways to implement same thing)   │
+│  Academic research           │ Cohere + CRAG (precision + freshness)            │
+│  Internal wiki search        │ RAG-Fusion (employees use varied terms)          │
+│                                                                                 │
+│  ─────────────────────────────────────────────────────────────────────────────  │
+│                                                                                 │
+│  STEP 3: CONSIDER CONSTRAINTS                                                   │
+│  ═══════════════════════════════════════════════════════════════════════════    │
+│                                                                                 │
+│  ┌──────────────────┬────────────────┬────────────────┬────────────────┐        │
+│  │ Constraint       │ RAG-Fusion     │ Cohere         │ CRAG           │        │
+│  ├──────────────────┼────────────────┼────────────────┼────────────────┤        │
+│  │ Budget tight     │ ✅ Low cost    │ ⚠️ Per-doc cost │ ⚠️ Web API cost │        │
+│  │ Latency critical │ ✅ ~200ms      │ ⚠️ ~500ms      │ ⚠️ Variable     │        │
+│  │ Offline required │ ✅ Local LLM   │ ❌ Needs API   │ ❌ Needs web    │        │
+│  │ Precision first  │ ⚠️ Good       │ ✅ Excellent   │ ✅ Verified     │        │
+│  │ Coverage first   │ ✅ Excellent   │ ⚠️ Good       │ ✅ Web fallback │        │
+│  └──────────────────┴────────────────┴────────────────┴────────────────┘        │
+│                                                                                 │
+└─────────────────────────────────────────────────────────────────────────────────┘
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Technique</th>
+                            <th>Best For</th>
+                            <th>Avoid When</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>RAG-Fusion + RRF</strong></td>
+                            <td>Vocabulary diversity, consumer-facing search, varied user queries</td>
+                            <td>Already have normalized terminology, simple queries</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Cohere Re-Rank</strong></td>
+                            <td>Precision-critical, nuanced relevance, professional domains</td>
+                            <td>Tight latency budget, offline deployment, high volume</td>
+                        </tr>
+                        <tr>
+                            <td><strong>CRAG</strong></td>
+                            <td>Dynamic domains, incomplete KB, freshness matters</td>
+                            <td>Closed-domain with complete KB, no web access allowed</td>
+                        </tr>
+                        <tr>
+                            <td><strong>All Combined</strong></td>
+                            <td>Healthcare, legal, finance — high stakes + varied terminology</td>
+                            <td>Simple use cases, tight budget, low latency requirements</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Section 10: Resources -->
+        <section id="resources" class="section">
+            <h2 class="section-title"><span class="number">10</span> Resources & Further Reading</h2>
+
+            <h3>Primary Sources</h3>
+            <ul>
+                <li><strong>RAG From Scratch Video Series</strong> — Lance Martin (LangChain)</li>
+                <li><strong>Part 15: Re-ranking</strong> — RAG-Fusion with RRF + Cohere Re-Rank</li>
+                <li><strong>Part 16: CRAG</strong> — Corrective RAG with Document Grading</li>
+            </ul>
+
+            <h3>Papers</h3>
+            <ul>
+                <li><strong>RAG-Fusion Paper</strong> — Multi-query generation and Reciprocal Rank Fusion</li>
+                <li><strong>CRAG Paper</strong> — Corrective Retrieval Augmented Generation</li>
+                <li><strong>Cross-Encoder Research</strong> — Deep semantic relevance scoring</li>
+            </ul>
+
+            <h3>Tools & APIs</h3>
+            <ul>
+                <li><strong>Cohere Re-Rank API</strong> — Production-ready cross-encoder reranking</li>
+                <li><strong>Tavily Search API</strong> — RAG-optimized web search</li>
+                <li><strong>LangChain/LangGraph</strong> — Framework implementations of these techniques</li>
+            </ul>
+
+            <h3>Related Deep Dives</h3>
+            <ul>
+                <li><a href="daily-tutes-deepdive-rag-comprehensive-20251227.html" style="color: var(--accent-orange);">RAG Fundamentals (Parts 1-11)</a> — Foundation concepts</li>
+                <li><a href="daily-tutes-deepdive-rag-indexing-20251228.html" style="color: var(--accent-orange);">RAG Indexing (Parts 12-14)</a> — Advanced indexing strategies</li>
+            </ul>
+
+            <div class="callout callout-tip">
+                <div class="callout-title">💡 What's Next?</div>
+                <p>Parts 17-18 cover <strong>Self-RAG</strong> (the LLM grades its own generations) and <strong>Long Context</strong> (is RAG even necessary with 100K+ token windows?). These build on the concepts covered here.</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-nav">
+            <a href="index.html" class="footer-link">← Back to Timeline</a>
+            <a href="daily-summary-20251230.html" class="footer-link">📄 Today's Summary</a>
+        </div>
+        <p class="footer-text">Daily Tutes — December 30, 2025</p>
+    </footer>
+</body>
+</html>
